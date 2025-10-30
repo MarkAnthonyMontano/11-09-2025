@@ -35,10 +35,70 @@ import HowToRegIcon from "@mui/icons-material/HowToReg";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import FactCheckIcon from '@mui/icons-material/FactCheck';
+import Unauthorized from "../components/Unauthorized";
+import LoadingOverlay from "../components/LoadingOverlay";
 
 const socket = io("http://localhost:5000");
 
 const StudentNumbering = () => {
+
+
+    // Also put it at the very top
+    const [userID, setUserID] = useState("");
+    const [user, setUser] = useState("");
+    const [userRole, setUserRole] = useState("");
+
+    const [hasAccess, setHasAccess] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+
+    const pageId = 67;
+
+    //Put this After putting the code of the past code
+    useEffect(() => {
+
+        const storedUser = localStorage.getItem("email");
+        const storedRole = localStorage.getItem("role");
+        const storedID = localStorage.getItem("person_id");
+
+        if (storedUser && storedRole && storedID) {
+            setUser(storedUser);
+            setUserRole(storedRole);
+            setUserID(storedID);
+
+            if (storedRole === "registrar") {
+                checkAccess(storedID);
+            } else {
+                window.location.href = "/login";
+            }
+        } else {
+            window.location.href = "/login";
+        }
+    }, []);
+
+    const checkAccess = async (userID) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+            if (response.data && response.data.page_privilege === 1) {
+                setHasAccess(true);
+            } else {
+                setHasAccess(false);
+            }
+        } catch (error) {
+            console.error('Error checking access:', error);
+            setHasAccess(false);
+            if (error.response && error.response.data.message) {
+                console.log(error.response.data.message);
+            } else {
+                console.log("An unexpected error occurred.");
+            }
+            setLoading(false);
+        }
+    };
+
+
+
+
 
     const tabs = [
         { label: "Applicant List", to: "/applicant_list", icon: <ListAltIcon /> },
@@ -193,45 +253,45 @@ const StudentNumbering = () => {
 
     const [allCurriculums, setAllCurriculums] = useState([]);
 
-const filteredPersons = persons.filter((personData) => {
-    const query = searchQuery.toLowerCase();
-    const fullName = `${personData.first_name ?? ""} ${personData.middle_name ?? ""} ${personData.last_name ?? ""}`.toLowerCase();
+    const filteredPersons = persons.filter((personData) => {
+        const query = searchQuery.toLowerCase();
+        const fullName = `${personData.first_name ?? ""} ${personData.middle_name ?? ""} ${personData.last_name ?? ""}`.toLowerCase();
 
-    const matchesApplicantID = personData.applicant_number?.toString().toLowerCase().includes(query);
-    const matchesName = fullName.includes(query);
-    const matchesEmail = personData.emailAddress?.toLowerCase().includes(query);
+        const matchesApplicantID = personData.applicant_number?.toString().toLowerCase().includes(query);
+        const matchesName = fullName.includes(query);
+        const matchesEmail = personData.emailAddress?.toLowerCase().includes(query);
 
-    const programInfo = allCurriculums.find(
-        (opt) => opt.curriculum_id?.toString() === personData.program?.toString()
-    );
+        const programInfo = allCurriculums.find(
+            (opt) => opt.curriculum_id?.toString() === personData.program?.toString()
+        );
 
-    const matchesDepartment =
-        !selectedDepartmentFilter || programInfo?.dprtmnt_name === selectedDepartmentFilter;
+        const matchesDepartment =
+            !selectedDepartmentFilter || programInfo?.dprtmnt_name === selectedDepartmentFilter;
 
-    const matchesProgramFilter =
-        !selectedProgramFilter || programInfo?.program_code === selectedProgramFilter;
+        const matchesProgramFilter =
+            !selectedProgramFilter || programInfo?.program_code === selectedProgramFilter;
 
-    const applicantAppliedYear = new Date(personData.created_at).getFullYear();
-    const schoolYear = schoolYears.find((sy) => sy.year_id === selectedSchoolYear);
+        const applicantAppliedYear = new Date(personData.created_at).getFullYear();
+        const schoolYear = schoolYears.find((sy) => sy.year_id === selectedSchoolYear);
 
-    const matchesSchoolYear =
-        !selectedSchoolYear ||
-        !schoolYear ||
-        String(applicantAppliedYear) === String(schoolYear.current_year);
+        const matchesSchoolYear =
+            !selectedSchoolYear ||
+            !schoolYear ||
+            String(applicantAppliedYear) === String(schoolYear.current_year);
 
-    const matchesSemester =
-        !selectedSchoolSemester ||
-        !personData.middle_code ||
-        String(personData.middle_code) === String(selectedSchoolSemester);
+        const matchesSemester =
+            !selectedSchoolSemester ||
+            !personData.middle_code ||
+            String(personData.middle_code) === String(selectedSchoolSemester);
 
-    return (
-        (matchesApplicantID || matchesName || matchesEmail) &&
-        matchesDepartment &&
-        matchesProgramFilter &&
-        matchesSchoolYear &&
-        matchesSemester
-    );
-});
+        return (
+            (matchesApplicantID || matchesName || matchesEmail) &&
+            matchesDepartment &&
+            matchesProgramFilter &&
+            matchesSchoolYear &&
+            matchesSemester
+        );
+    });
 
     const sortedPersons = [...filteredPersons].sort((a, b) => {
         if (sortBy === "name") {
@@ -388,6 +448,18 @@ const filteredPersons = persons.filter((personData) => {
         }
     });
 
+
+
+    // Put this at the very bottom before the return 
+    if (loading || hasAccess === null) {
+        return <LoadingOverlay open={loading} message="Check Access" />;
+    }
+
+    if (!hasAccess) {
+        return (
+            <Unauthorized />
+        );
+    }
 
 
     if (!authPassed) {

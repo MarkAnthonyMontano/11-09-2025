@@ -28,7 +28,8 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import PsychologyIcon from "@mui/icons-material/Psychology";
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-
+import Unauthorized from "../components/Unauthorized";
+import LoadingOverlay from "../components/LoadingOverlay";
 import SearchIcon from "@mui/icons-material/Search";
 
 const PhysicalNeuroExam = () => {
@@ -46,6 +47,53 @@ const PhysicalNeuroExam = () => {
     const [explicitSelection, setExplicitSelection] = useState(false);
 
 
+    const [hasAccess, setHasAccess] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+
+    const pageId = 40;
+
+    //Put this After putting the code of the past code
+    useEffect(() => {
+
+        const storedUser = localStorage.getItem("email");
+        const storedRole = localStorage.getItem("role");
+        const storedID = localStorage.getItem("person_id");
+
+        if (storedUser && storedRole && storedID) {
+            setUser(storedUser);
+            setUserRole(storedRole);
+            setUserID(storedID);
+
+            if (storedRole === "registrar") {
+                checkAccess(storedID);
+            } else {
+                window.location.href = "/login";
+            }
+        } else {
+            window.location.href = "/login";
+        }
+    }, []);
+
+    const checkAccess = async (userID) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+            if (response.data && response.data.page_privilege === 1) {
+                setHasAccess(true);
+            } else {
+                setHasAccess(false);
+            }
+        } catch (error) {
+            console.error('Error checking access:', error);
+            setHasAccess(false);
+            if (error.response && error.response.data.message) {
+                console.log(error.response.data.message);
+            } else {
+                console.log("An unexpected error occurred.");
+            }
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         const storedUser = localStorage.getItem("email");
@@ -382,31 +430,73 @@ const PhysicalNeuroExam = () => {
     };
 
 
+    // 🔍 Auto search when studentNumber changes
+    useEffect(() => {
+        const delayDebounce = setTimeout(async () => {
+            if (!studentNumber.trim()) {
+                setPerson(null);
+                return;
+            }
+
+            try {
+                console.log("🔍 Auto-searching:", studentNumber);
+                const res = await axios.get("http://localhost:5000/api/search-person-student", {
+                    params: { query: studentNumber },
+                });
+
+                if (res.data && res.data.student_number) {
+                    setPerson(res.data);
+                    fetchMedicalData(res.data.student_number);
+                    console.log("✅ Auto-search success:", res.data);
+                } else {
+                    console.warn("⚠️ No student found.");
+                    setPerson(null);
+                }
+            } catch (err) {
+                console.error("❌ Auto-search failed:", err);
+                setPerson(null);
+            }
+        }, 500); // ⏱️ 0.5 second debounce
+
+        return () => clearTimeout(delayDebounce);
+    }, [studentNumber]);
+
+
+
+
+    // Put this at the very bottom before the return 
+    if (loading || hasAccess === null) {
+        return <LoadingOverlay open={loading} message="Check Access" />;
+    }
+
+    if (!hasAccess) {
+        return (
+            <Unauthorized />
+        );
+    }
 
     return (
-        <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", p: 2 }}>
+        <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", }}>
 
 
-            {/* 🟥 HEADER SECTION */}
             <Box
                 sx={{
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
                     mb: 1,
-                    p: 1,
+                 
                 }}
             >
                 {/* 🦷 Left side: Title */}
                 <Typography
-
+                    variant="h4"
                     fontWeight="bold"
                     sx={{
-                        fontSize: "32px",
-                        marginTop: "-15px",
                         color: "#6D2323",
-                        fontFamily: "Arial Black",
 
+                        letterSpacing: 1,
+                        marginTop: "-10px",
                     }}
                 >
                     PHYSICAL AND NEUROLOGICAL EXAMINATION
@@ -423,13 +513,12 @@ const PhysicalNeuroExam = () => {
                 >
                     <TextField
                         variant="outlined"
-                        placeholder="Search Student Number..."
+                        placeholder="Search Student Name / Email / Applicant ID "
                         size="small"
                         value={studentNumber}
                         onChange={(e) => setStudentNumber(e.target.value)}
-                        onKeyDown={handleSearch}
                         sx={{
-                            width: 350,
+                            width: 450,
                             backgroundColor: "#fff",
                             borderRadius: 1,
                             "& .MuiOutlinedInput-root": {
@@ -441,25 +530,8 @@ const PhysicalNeuroExam = () => {
                         }}
                     />
 
-                    <Button
-                        variant="contained"
-                        startIcon={<SearchIcon />}
-                        sx={{
-                            bgcolor: "#6D2323",
-                            px: 3,
-                            py: 0.8,
-                            borderRadius: "10px",
-                            fontWeight: "bold",
-                            textTransform: "none",
-                            fontFamily: "Arial",
-                            "&:hover": {
-                                bgcolor: "#8B2C2C",
-                            },
-                        }}
-                        onClick={handleSearchClick}
-                    >
-                        Search
-                    </Button>
+
+
                 </Box>
             </Box>
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />

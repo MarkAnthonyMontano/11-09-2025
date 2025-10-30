@@ -5,8 +5,11 @@ import EaristLogo from "../assets/EaristLogo.png";
 import { InsertPageBreak, Search } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
+import Unauthorized from "../components/Unauthorized";
+import LoadingOverlay from "../components/LoadingOverlay";
 
 const TOR = () => {
+
     const settings = useContext(SettingsContext);
     const [fetchedLogo, setFetchedLogo] = useState(null);
     const [companyName, setCompanyName] = useState("");
@@ -139,25 +142,59 @@ const TOR = () => {
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
 
-    // useEffect(() => {
-    //     const storedUser = localStorage.getItem("email");
-    //     const storedRole = localStorage.getItem("role");
-    //     const storedID = localStorage.getItem("person_id");
 
-    //     if (storedUser && storedRole && storedID) {
-    //         setUser(storedUser);
-    //         setUserRole(storedRole);
-    //         setUserID(storedID);
 
-    //         if (storedRole !== "faculty") {
-    //             window.location.href = "/login";
-    //         } else {
-    //             console.log("Hello")
-    //         }
-    //     } else {
-    //         window.location.href = "/login";
-    //     }
-    // }, []);
+    const [hasAccess, setHasAccess] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+
+    const pageId = 70;
+
+    //Put this After putting the code of the past code
+    useEffect(() => {
+
+        const storedUser = localStorage.getItem("email");
+        const storedRole = localStorage.getItem("role");
+        const storedID = localStorage.getItem("person_id");
+
+        if (storedUser && storedRole && storedID) {
+            setUser(storedUser);
+            setUserRole(storedRole);
+            setUserID(storedID);
+
+            if (storedRole === "registrar") {
+                checkAccess(storedID);
+            } else {
+                window.location.href = "/login";
+            }
+        } else {
+            window.location.href = "/login";
+        }
+    }, []);
+
+    const checkAccess = async (userID) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+            if (response.data && response.data.page_privilege === 1) {
+                setHasAccess(true);
+            } else {
+                setHasAccess(false);
+            }
+        } catch (error) {
+            console.error('Error checking access:', error);
+            setHasAccess(false);
+            if (error.response && error.response.data.message) {
+                console.log(error.response.data.message);
+            } else {
+                console.log("An unexpected error occurred.");
+            }
+            setLoading(false);
+        }
+    };
+
+
+
+
 
     useEffect(() => {
         if (!searchQuery || searchQuery.length < 9) {
@@ -284,9 +321,20 @@ const TOR = () => {
     };
 
 
+    // Put this at the very bottom before the return 
+    if (loading || hasAccess === null) {
+        return <LoadingOverlay open={loading} message="Check Access" />;
+    }
+
+    if (!hasAccess) {
+        return (
+            <Unauthorized />
+        );
+    }
+
 
     return (
-        <Box className="body" sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', overflowX: 'hidden', pr: 1, p: 2 }}>
+        <Box className="body" sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', overflowX: 'hidden', pr: 1, }}>
             <Box
                 className="navbars"
                 sx={{

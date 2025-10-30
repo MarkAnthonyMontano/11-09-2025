@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
   Box,
-  Button,
   CircularProgress,
   Typography,
   Table,
@@ -16,25 +15,36 @@ import {
   Snackbar,
   Alert,
   TextField,
+  InputAdornment,
 } from "@mui/material";
-import { IoMdSearch } from "react-icons/io";
-import { FaRegMoon, FaMoon } from "react-icons/fa";
+import { Search } from "@mui/icons-material";
 
 const UserPageAccess = () => {
   const [userFound, setUserFound] = useState(null);
   const [pages, setPages] = useState([]);
   const [pageAccess, setPageAccess] = useState({});
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState("light");
   const [userID, setUserID] = useState("");
   const [snackbar, setSnackbar] = useState({ open: false, message: "", type: "success" });
 
   const mainColor = "#7E0000";
 
- 
-  // 🔍 Search for user access
-  const handleSearchUser = async (e) => {
-    e.preventDefault();
+  // 🔍 Automatically search when typing user ID (debounced)
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (userID.trim() !== "") {
+        handleSearchUser();
+      } else {
+        setUserFound(null);
+        setPages([]);
+      }
+    }, 600); // Delay search after typing stops
+
+    return () => clearTimeout(delayDebounce);
+  }, [userID]);
+
+  // 🔍 Fetch user page access
+  const handleSearchUser = async () => {
     if (!userID) return;
 
     setLoading(true);
@@ -58,9 +68,11 @@ const UserPageAccess = () => {
     } catch (error) {
       console.error("Error searching user:", error);
       setUserFound(null);
+      setPages([]);
       setSnackbar({ open: true, message: "User not found or error loading data", type: "error" });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   // 🔄 Refresh pages and access
@@ -106,22 +118,6 @@ const UserPageAccess = () => {
     }
   };
 
-  // Prevent inspect shortcut
-  useEffect(() => {
-    document.addEventListener("contextmenu", (e) => e.preventDefault());
-    document.addEventListener("keydown", (e) => {
-      const blocked =
-        e.key === "F12" ||
-        e.key === "F11" ||
-        (e.ctrlKey && e.shiftKey && ["i", "j"].includes(e.key.toLowerCase())) ||
-        (e.ctrlKey && ["u", "p"].includes(e.key.toLowerCase()));
-      if (blocked) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    });
-  }, []);
-
   return (
     <Box
       sx={{
@@ -131,16 +127,14 @@ const UserPageAccess = () => {
         backgroundColor: "transparent",
       }}
     >
-      {/* Header */}
+      {/* 🧾 Top Header: Title + Search (aligned) */}
       <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           flexWrap: "wrap",
-          mt: 2,
           mb: 2,
-          px: 2,
         }}
       >
         <Typography
@@ -154,58 +148,40 @@ const UserPageAccess = () => {
           USER PAGE ACCESS
         </Typography>
 
-        
+        {/* 🔎 Right Side Search */}
+        <Box display="flex" alignItems="center" gap={2}>
+          <TextField
+            size="small"
+            placeholder="Search by Person ID"
+            value={userID}
+            onChange={(e) => setUserID(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search sx={{ color: "gray" }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              width: { xs: "100%", sm: "350px" },
+              backgroundColor: "white",
+              borderRadius: "5px",
+            }}
+          />
+        </Box>
       </Box>
 
       <hr style={{ border: "1px solid #ccc", width: "100%" }} />
       <br />
 
-      {/* Search User Form */}
-      <Box
-        component="form"
-        onSubmit={handleSearchUser}
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 2,
-          mb: 4,
-          px: 2,
-        }}
-      >
-        <TextField
-          label="Enter User ID"
-          variant="outlined"
-          value={userID}
-          onChange={(e) => setUserID(e.target.value)}
-          required
-          sx={{ width: "250px" }}
-        />
-        <Button
-          type="submit"
-          variant="contained"
-          startIcon={<IoMdSearch size={20} />}
-          sx={{
-            bgcolor: mainColor,
-            "&:hover": { bgcolor: `${mainColor}CC` },
-            borderRadius: "10px",
-            textTransform: "none",
-            px: 3,
-            py: 1,
-            fontSize: "16px",
-          }}
-        >
-          Search User
-        </Button>
-      </Box>
-
-      {/* Loading Indicator */}
+      {/* ⏳ Loading Indicator */}
       {loading && (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
           <CircularProgress />
         </Box>
       )}
 
-      {/* Access Table */}
+      {/* 📋 Access Table */}
       {userFound && (
         <Paper
           elevation={4}
@@ -219,17 +195,10 @@ const UserPageAccess = () => {
             <Table>
               <TableHead sx={{ bgcolor: mainColor }}>
                 <TableRow>
-                  <TableCell sx={{ color: "white", fontWeight: "bold", border: `2px solid ${mainColor}` }}>#</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold", border: `2px solid ${mainColor}` }}>
-                    Page Description
-                  </TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold", border: `2px solid ${mainColor}` }}>
-                    Page Group
-                  </TableCell>
-                  <TableCell
-                    align="center"
-                    sx={{ color: "white", fontWeight: "bold", border: `2px solid ${mainColor}` }}
-                  >
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>#</TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Page Description</TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Page Group</TableCell>
+                  <TableCell align="center" sx={{ color: "white", fontWeight: "bold" }}>
                     Access
                   </TableCell>
                 </TableRow>
@@ -241,13 +210,10 @@ const UserPageAccess = () => {
                     const hasAccess = !!pageAccess[page.id];
                     return (
                       <TableRow key={page.id} hover>
-                        <TableCell style={{ border: `2px solid ${mainColor}` }}>{index + 1}</TableCell>
-                        <TableCell style={{ border: `2px solid ${mainColor}` }}>{page.page_description}</TableCell>
-                        <TableCell style={{ border: `2px solid ${mainColor}` }}>{page.page_group}</TableCell>
-                        <TableCell
-                          align="center"
-                          style={{ border: `2px solid ${mainColor}` }}
-                        >
+                        <TableCell>{index + 1}</TableCell>
+                        <TableCell>{page.page_description}</TableCell>
+                        <TableCell>{page.page_group}</TableCell>
+                        <TableCell align="center">
                           <Switch
                             checked={hasAccess}
                             onChange={() => handleToggleChange(page.id, hasAccess)}
@@ -270,7 +236,7 @@ const UserPageAccess = () => {
         </Paper>
       )}
 
-      {/* Snackbar */}
+      {/* 🔔 Snackbar Notifications */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}

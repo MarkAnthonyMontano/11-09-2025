@@ -28,6 +28,8 @@ import ScheduleIcon from "@mui/icons-material/Schedule";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
 import PeopleIcon from "@mui/icons-material/People";
 import FactCheckIcon from "@mui/icons-material/FactCheck";
+import Unauthorized from "../components/Unauthorized";
+import LoadingOverlay from "../components/LoadingOverlay";
 
 const ExaminationProfile = ({ personId }) => {
     const settings = useContext(SettingsContext);
@@ -102,6 +104,59 @@ const ExaminationProfile = ({ personId }) => {
             setCampusAddress(settings.address);
         }
     }, [settings]);
+
+
+    const [hasAccess, setHasAccess] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+
+    const pageId = 55;
+
+    //Put this After putting the code of the past code
+    useEffect(() => {
+
+        const storedUser = localStorage.getItem("email");
+        const storedRole = localStorage.getItem("role");
+        const storedID = localStorage.getItem("person_id");
+
+        if (storedUser && storedRole && storedID) {
+            setUser(storedUser);
+            setUserRole(storedRole);
+            setUserID(storedID);
+
+            if (storedRole === "registrar") {
+                checkAccess(storedID);
+            } else {
+                window.location.href = "/login";
+            }
+        } else {
+            window.location.href = "/login";
+        }
+    }, []);
+
+    const checkAccess = async (userID) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+            if (response.data && response.data.page_privilege === 1) {
+                setHasAccess(true);
+            } else {
+                setHasAccess(false);
+            }
+        } catch (error) {
+            console.error('Error checking access:', error);
+            setHasAccess(false);
+            if (error.response && error.response.data.message) {
+                console.log(error.response.data.message);
+            } else {
+                console.log("An unexpected error occurred.");
+            }
+            setLoading(false);
+        }
+    };
+
+
+
+
 
 
     const [curriculumOptions, setCurriculumOptions] = useState([]);
@@ -206,18 +261,32 @@ const ExaminationProfile = ({ personId }) => {
         fetchCurriculums();
     }, []);
 
-    // ✅ Fetch exam schedule when applicant is selected
+    const [isVerified, setIsVerified] = useState(false);
+
     useEffect(() => {
         if (selectedPerson?.applicant_number) {
             axios
                 .get(`http://localhost:5000/api/exam-schedule/${selectedPerson.applicant_number}`)
-                .then((res) => setExamSchedule(res.data))
+                .then((res) => {
+                    setExamSchedule(res.data);
+
+                    // ✅ If schedule exists and not empty, mark as verified
+                    if (res.data && Object.keys(res.data).length > 0) {
+                        setIsVerified(true);
+                    } else {
+                        setIsVerified(false);
+                    }
+                })
                 .catch((err) => {
                     console.error("Error fetching exam schedule:", err);
                     setExamSchedule(null);
+                    setIsVerified(false);
                 });
+        } else {
+            setIsVerified(false);
         }
     }, [selectedPerson]);
+
 
     // ✅ Fetch registrar name (Scheduled By)
     useEffect(() => {
@@ -266,6 +335,19 @@ const ExaminationProfile = ({ personId }) => {
         }, 200);
     };
 
+
+
+    // Put this at the very bottom before the return 
+    if (loading || hasAccess === null) {
+        return <LoadingOverlay open={loading} message="Check Access" />;
+    }
+
+    if (!hasAccess) {
+        return (
+            <Unauthorized />
+        );
+    }
+
     return (
         <Box sx={{ height: 'calc(100vh - 120px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
 
@@ -280,9 +362,9 @@ const ExaminationProfile = ({ personId }) => {
                         justifyContent: 'space-between',
                         alignItems: 'center',
                         flexWrap: 'wrap',
-                        mt: 2,
+
                         mb: 2,
-                        px: 2,
+
                     }}
                 >
                     <Typography
@@ -416,41 +498,33 @@ const ExaminationProfile = ({ personId }) => {
 
                 {selectedPerson && (
                     <div ref={divToPrintRef} style={{ position: "relative" }}>
-                        {/* ✅ Watermark */}
+                        {/* ✅ VERIFIED Watermark */}
                         <div
                             style={{
                                 position: "absolute",
-                                top: "25%",
+                                top: "30%",
                                 left: "50%",
-                                transform: "translate(-50%, -50%)",
-                                opacity: 0.1, // light watermark
-                                textAlign: "center",
-                                zIndex: 0, // behind everything
+                                transform: "translate(-50%, -50%) rotate(-30deg)",
+                                fontSize: "6.30rem",
+                                fontWeight: "900",
+                                color: isVerified ? "rgba(0, 128, 0, 0.15)" : "rgba(255, 0, 0, 0.15)", // green if verified, red if not
+                                textTransform: "uppercase",
+                                whiteSpace: "nowrap",
                                 pointerEvents: "none",
+                                userSelect: "none",
+                                zIndex: 0,
+                                fontFamily: "'Arial Black', sans-serif",
+                                letterSpacing: "0.3rem",
                             }}
                         >
-                            <img
-                                src={EaristLogoBW}
-                                alt="Earist Watermark"
-                                style={{ width: "350px", height: "350px", marginBottom: "10px" }}
-                            />
-                            <div
-                                style={{
-                                    fontSize: "36px",
-                                    fontWeight: "bold",
-                                    color: "black",
-                                    letterSpacing: "2px",
-                                }}
-                            >
-                                VERIFIED
-                            </div>
+                            {isVerified ? "VERIFIED" : "NOT VERIFIED"}
                         </div>
-                        <div className="section">
 
+
+                        <div className="section">
                             <table
                                 className="student-table"
                                 style={{
-
                                     borderCollapse: "collapse",
                                     fontFamily: "Arial, Helvetica, sans-serif",
                                     width: "8in",
@@ -460,34 +534,37 @@ const ExaminationProfile = ({ personId }) => {
                                 }}
                             >
                                 <style>{`
-  .certificate-wrapper {
-    position: relative;
-  }
+          .certificate-wrapper {
+            position: relative;
+          }
 
-  .certificate-watermark {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(-30deg);
-    font-size: 9rem;
-    font-weight: 800;
-    letter-spacing: 0.25rem;
-    color: rgba(0, 0, 0, 0.06);
-    pointer-events: none;
-    z-index: 9999;
-    white-space: nowrap;
-    text-transform: uppercase;
-  }
+          .certificate-watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 8rem;
+            font-weight: 900;
+            color: rgba(0, 128, 0, 0.15); /* light green tint */
+            text-transform: uppercase;
+            white-space: nowrap;
+            pointer-events: none;
+            user-select: none;
+            z-index: 9999;
+            font-family: 'Arial Black', sans-serif;
+            letter-spacing: 0.3rem;
+          }
 
-  @media print {
-    .certificate-watermark {
-      color: rgba(0, 0, 0, 0.12);
-    }
-    button {
-      display: none;
-    }
-  }
-`}</style>
+          @media print {
+            .certificate-watermark {
+              color: rgba(0, 128, 0, 0.25); /* darker green for printing */
+            }
+            button {
+              display: none;
+            }
+          }
+        `}</style>
+
 
 
                                 <tbody>

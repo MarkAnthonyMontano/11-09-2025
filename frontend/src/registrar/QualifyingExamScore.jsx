@@ -31,7 +31,6 @@ import EaristLogo from "../assets/EaristLogo.png";
 import { FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx";
 import { io } from "socket.io-client";
-import LoadingOverlay from '../components/LoadingOverlay';
 import SchoolIcon from '@mui/icons-material/School';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
@@ -40,6 +39,8 @@ import PeopleIcon from '@mui/icons-material/People';
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+import Unauthorized from "../components/Unauthorized";
+import LoadingOverlay from "../components/LoadingOverlay";
 
 
 const socket = io("http://localhost:5000");
@@ -143,6 +144,58 @@ const QualifyingExamScore = () => {
 
         window.location.href = "/login";
     }, [queryPersonId]);
+
+
+
+
+    const [hasAccess, setHasAccess] = useState(null);
+
+
+    const pageId = 44;
+
+    //Put this After putting the code of the past code
+    useEffect(() => {
+
+        const storedUser = localStorage.getItem("email");
+        const storedRole = localStorage.getItem("role");
+        const storedID = localStorage.getItem("person_id");
+
+        if (storedUser && storedRole && storedID) {
+            setUser(storedUser);
+            setUserRole(storedRole);
+            setUserID(storedID);
+
+            if (storedRole === "registrar") {
+                checkAccess(storedID);
+            } else {
+                window.location.href = "/login";
+            }
+        } else {
+            window.location.href = "/login";
+        }
+    }, []);
+
+    const checkAccess = async (userID) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+            if (response.data && response.data.page_privilege === 1) {
+                setHasAccess(true);
+            } else {
+                setHasAccess(false);
+            }
+        } catch (error) {
+            console.error('Error checking access:', error);
+            setHasAccess(false);
+            if (error.response && error.response.data.message) {
+                console.log(error.response.data.message);
+            } else {
+                console.log("An unexpected error occurred.");
+            }
+            setLoading(false);
+        }
+    };
+
+
 
     const [error, setError] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
@@ -1107,20 +1160,20 @@ th, td {
     const [emailMessage, setEmailMessage] = useState("");
 
     const handleOpenDialog = (applicant = null) => {
-  const today = new Date();
-  const validUntil = new Date(today);
-  validUntil.setDate(today.getDate() + 7);
+        const today = new Date();
+        const validUntil = new Date(today);
+        validUntil.setDate(today.getDate() + 7);
 
-  const formattedValidUntil = validUntil.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
+        const formattedValidUntil = validUntil.toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+        });
 
-  // ✅ Use dynamic company name from settings
-  const companyName = settings?.company_name || "Your Institution";
+        // ✅ Use dynamic company name from settings
+        const companyName = settings?.company_name || "Your Institution";
 
-  const defaultMessage = `
+        const defaultMessage = `
 Dear ${applicant?.first_name || "Applicant"} ${applicant?.last_name || ""},
 
 Congratulations on passing the Interview/Qualifying Exam!  
@@ -1138,10 +1191,10 @@ Thank you,
 ${companyName} Registrar's Office
 `.trim();
 
-  setSelectedApplicant(applicant?.applicant_number || null);
-  setEmailMessage(defaultMessage);
-  setConfirmOpen(true);
-};
+        setSelectedApplicant(applicant?.applicant_number || null);
+        setEmailMessage(defaultMessage);
+        setConfirmOpen(true);
+    };
 
     const confirmSendEmails = async () => {
         setLoading(true)
@@ -1320,6 +1373,18 @@ ${companyName} Registrar's Office
         }
     };
 
+
+
+    // Put this at the very bottom before the return 
+    if (loading || hasAccess === null) {
+        return <LoadingOverlay open={loading} message="Check Access" />;
+    }
+
+    if (!hasAccess) {
+        return (
+            <Unauthorized />
+        );
+    }
 
     return (
         <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1, p: 2 }}>

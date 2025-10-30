@@ -14,6 +14,9 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from "framer-motion";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import ExamPermit from "../applicant/ExamPermit";
+import Unauthorized from "../components/Unauthorized";
+import LoadingOverlay from "../components/LoadingOverlay";
+
 
 
 const SuperAdminStudentDashboard3 = () => {
@@ -38,6 +41,57 @@ const SuperAdminStudentDashboard3 = () => {
         yearGraduated1: "",
         strand: "",
     });
+
+
+const [hasAccess, setHasAccess] = useState(null);
+const [loading, setLoading] = useState(false);
+
+
+const pageId = 92;
+
+//Put this After putting the code of the past code
+useEffect(() => {
+    
+    const storedUser = localStorage.getItem("email");
+    const storedRole = localStorage.getItem("role");
+    const storedID = localStorage.getItem("person_id");
+
+    if (storedUser && storedRole && storedID) {
+      setUser(storedUser);
+      setUserRole(storedRole);
+      setUserID(storedID);
+
+      if (storedRole === "registrar") {
+        checkAccess(storedID);
+      } else {
+        window.location.href = "/login";
+      }
+    } else {
+      window.location.href = "/login";
+    }
+  }, []);
+
+const checkAccess = async (userID) => {
+    try {
+        const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+        if (response.data && response.data.page_privilege === 1) {
+          setHasAccess(true);
+        } else {
+          setHasAccess(false);
+        }
+    } catch (error) {
+        console.error('Error checking access:', error);
+        setHasAccess(false);
+        if (error.response && error.response.data.message) {
+          console.log(error.response.data.message);
+        } else {
+          console.log("An unexpected error occurred.");
+        }
+        setLoading(false);
+    }
+  };
+
+
 
     // do not alter
     const location = useLocation();
@@ -265,7 +319,7 @@ const SuperAdminStudentDashboard3 = () => {
         { to: `/admin_personal_data_form`, label: "Personal Data Form" },
         { to: `/admin_office_of_the_registrar`, label: "Application For EARIST College Admission" },
         { to: `/admission_services`, label: "Application/Student Satisfactory Survey" },
-        { label: "Examination Permit", onClick: handleExamPermitClick }, // ✅
+        
     ];
 
     const [canPrintPermit, setCanPrintPermit] = useState(false);
@@ -296,6 +350,21 @@ const SuperAdminStudentDashboard3 = () => {
         }
     }, []);
 
+    
+// Put this at the very bottom before the return 
+if (loading || hasAccess === null) {
+   return <LoadingOverlay open={loading} message="Check Access"/>;
+}
+
+  if (!hasAccess) {
+    return (
+      <Unauthorized />
+    );
+  }
+
+
+
+
     return (
         <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
             {showPrintView && (
@@ -311,9 +380,9 @@ const SuperAdminStudentDashboard3 = () => {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     flexWrap: 'wrap',
-                    mt: 2,
+                   
                     mb: 2,
-                    px: 2,
+                  
                 }}
             >
                 <Typography

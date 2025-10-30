@@ -4,6 +4,8 @@ import { SettingsContext } from "../App";
 import EaristLogo from "../assets/EaristLogo.png";
 import { Search } from "@mui/icons-material";
 import axios from 'axios';
+import Unauthorized from "../components/Unauthorized";
+import LoadingOverlay from "../components/LoadingOverlay";
 
 const ReportOfGrade = () => {
     const settings = useContext(SettingsContext);
@@ -54,6 +56,61 @@ const ReportOfGrade = () => {
     const [selectedSchoolYear, setSelectedSchoolYear] = useState('');
     const [selectedSchoolSemester, setSelectedSchoolSemester] = useState('');
     const [selectedActiveSchoolYear, setSelectedActiveSchoolYear] = useState('');
+
+
+
+
+    const [hasAccess, setHasAccess] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+
+    const pageId = 58;
+
+    //Put this After putting the code of the past code
+    useEffect(() => {
+
+        const storedUser = localStorage.getItem("email");
+        const storedRole = localStorage.getItem("role");
+        const storedID = localStorage.getItem("person_id");
+
+        if (storedUser && storedRole && storedID) {
+            setUser(storedUser);
+            setUserRole(storedRole);
+            setUserID(storedID);
+
+            if (storedRole === "registrar") {
+                checkAccess(storedID);
+            } else {
+                window.location.href = "/login";
+            }
+        } else {
+            window.location.href = "/login";
+        }
+    }, []);
+
+    const checkAccess = async (userID) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+            if (response.data && response.data.page_privilege === 1) {
+                setHasAccess(true);
+            } else {
+                setHasAccess(false);
+            }
+        } catch (error) {
+            console.error('Error checking access:', error);
+            setHasAccess(false);
+            if (error.response && error.response.data.message) {
+                console.log(error.response.data.message);
+            } else {
+                console.log("An unexpected error occurred.");
+            }
+            setLoading(false);
+        }
+    };
+
+
+
+
 
     useEffect(() => {
         const storedUser = localStorage.getItem("email");
@@ -212,6 +269,19 @@ const ReportOfGrade = () => {
     const printDiv = () => {
         window.print();
     };
+
+
+
+    // Put this at the very bottom before the return 
+    if (loading || hasAccess === null) {
+        return <LoadingOverlay open={loading} message="Check Access" />;
+    }
+
+    if (!hasAccess) {
+        return (
+            <Unauthorized />
+        );
+    }
 
     return (
         <Box className="body" sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', overflowX: 'hidden', pr: 1, p: 2 }}>
@@ -468,7 +538,7 @@ const ReportOfGrade = () => {
                                                         textAlign: "center",
                                                         fontSize: "12px",
                                                         letterSpacing: "1px",
-                                                        
+
                                                     }}
                                                 >
                                                     {campusAddress}

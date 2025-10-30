@@ -17,10 +17,71 @@ import {
   FormControlLabel,
   Switch,
 } from "@mui/material";
+import Unauthorized from "../components/Unauthorized";
+import LoadingOverlay from "../components/LoadingOverlay";
 
 const API = "http://localhost:5000/api/email-templates";
 
+
 export default function EmailTemplateManager() {
+
+  // Also put it at the very top
+  const [userID, setUserID] = useState("");
+  const [user, setUser] = useState("");
+  const [userRole, setUserRole] = useState("");
+
+  const [hasAccess, setHasAccess] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+
+  const pageId = 75;
+
+  //Put this After putting the code of the past code
+  useEffect(() => {
+
+    const storedUser = localStorage.getItem("email");
+    const storedRole = localStorage.getItem("role");
+    const storedID = localStorage.getItem("person_id");
+
+    if (storedUser && storedRole && storedID) {
+      setUser(storedUser);
+      setUserRole(storedRole);
+      setUserID(storedID);
+
+      if (storedRole === "registrar") {
+        checkAccess(storedID);
+      } else {
+        window.location.href = "/login";
+      }
+    } else {
+      window.location.href = "/login";
+    }
+  }, []);
+
+  const checkAccess = async (userID) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+      if (response.data && response.data.page_privilege === 1) {
+        setHasAccess(true);
+      } else {
+        setHasAccess(false);
+      }
+    } catch (error) {
+      console.error('Error checking access:', error);
+      setHasAccess(false);
+      if (error.response && error.response.data.message) {
+        console.log(error.response.data.message);
+      } else {
+        console.log("An unexpected error occurred.");
+      }
+      setLoading(false);
+    }
+  };
+
+
+
+
+
   const [rows, setRows] = useState([]);
   const [form, setForm] = useState({ sender_name: "", is_active: true });
   const [editing, setEditing] = useState(null);
@@ -125,6 +186,29 @@ export default function EmailTemplateManager() {
     }
   });
 
+
+
+
+
+
+
+  // Put this at the very bottom before the return 
+  if (loading || hasAccess === null) {
+    return <LoadingOverlay open={loading} message="Check Access" />;
+  }
+
+  if (!hasAccess) {
+    return (
+      <Unauthorized />
+    );
+  }
+
+
+
+
+
+
+
   return (
     <Box
       sx={{
@@ -141,9 +225,9 @@ export default function EmailTemplateManager() {
           justifyContent: "space-between",
           alignItems: "center",
           flexWrap: "wrap",
-       
+
           mb: 2,
-     
+
         }}
       >
         <Typography

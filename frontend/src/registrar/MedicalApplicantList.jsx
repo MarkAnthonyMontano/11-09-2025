@@ -755,7 +755,7 @@ const MedicalApplicantList = () => {
 
 
     return (
-        <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1, p: 2 }}>
+        <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1, }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="h4" fontWeight="bold" color="maroon">
                     MEDICAL RECORDS

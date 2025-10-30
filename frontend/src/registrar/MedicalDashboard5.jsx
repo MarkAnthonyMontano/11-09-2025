@@ -17,19 +17,21 @@ import ListAltIcon from "@mui/icons-material/ListAlt";
 import DescriptionIcon from "@mui/icons-material/Description";
 import PsychologyIcon from "@mui/icons-material/Psychology";
 import HowToRegIcon from '@mui/icons-material/HowToReg';
-import UploadFileIcon from '@mui/icons-material/UploadFile'; 
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 import ExamPermit from "../applicant/ExamPermit";
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+import Unauthorized from "../components/Unauthorized";
+import LoadingOverlay from "../components/LoadingOverlay";
 
 
-const RegistrarDashboard5 = () => {
+const MedicalDashboard5 = () => {
     const stepsData = [
-       { label: "Medical Applicant List", to: "/medical_applicant_list", icon: <ListAltIcon /> },
-         { label: "Applicant Form", to: "/medical_dashboard1", icon: <HowToRegIcon /> },
-         { label: "Submitted Documents", to: "/medical_requirements", icon: <UploadFileIcon /> }, // updated icon
-         { label: "Medical History", to: "/medical_requirements_form", icon: <PersonIcon /> },
-         { label: "Dental Assessment", to: "/dental_assessment", icon: <DescriptionIcon /> },
-         { label: "Physical and Neurological Examination", to: "/physical_neuro_exam", icon: <SchoolIcon /> },
+        { label: "Medical Applicant List", to: "/medical_applicant_list", icon: <ListAltIcon /> },
+        { label: "Applicant Form", to: "/medical_dashboard1", icon: <HowToRegIcon /> },
+        { label: "Submitted Documents", to: "/medical_requirements", icon: <UploadFileIcon /> }, // updated icon
+        { label: "Medical History", to: "/medical_requirements_form", icon: <PersonIcon /> },
+        { label: "Dental Assessment", to: "/dental_assessment", icon: <DescriptionIcon /> },
+        { label: "Physical and Neurological Examination", to: "/physical_neuro_exam", icon: <SchoolIcon /> },
     ];
     const [currentStep, setCurrentStep] = useState(4);
     const [visitedSteps, setVisitedSteps] = useState(Array(stepsData.length).fill(false));
@@ -65,6 +67,60 @@ const RegistrarDashboard5 = () => {
     const [user, setUser] = useState("");
     const [userRole, setUserRole] = useState("");
     const [selectedPerson, setSelectedPerson] = useState(null);
+
+    // Also put it at the very top
+   
+    const [hasAccess, setHasAccess] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+
+    const pageId = 36;
+
+    //Put this After putting the code of the past code
+    useEffect(() => {
+
+        const storedUser = localStorage.getItem("email");
+        const storedRole = localStorage.getItem("role");
+        const storedID = localStorage.getItem("person_id");
+
+        if (storedUser && storedRole && storedID) {
+            setUser(storedUser);
+            setUserRole(storedRole);
+            setUserID(storedID);
+
+            if (storedRole === "registrar") {
+                checkAccess(storedID);
+            } else {
+                window.location.href = "/login";
+            }
+        } else {
+            window.location.href = "/login";
+        }
+    }, []);
+
+    const checkAccess = async (userID) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+            if (response.data && response.data.page_privilege === 1) {
+                setHasAccess(true);
+            } else {
+                setHasAccess(false);
+            }
+        } catch (error) {
+            console.error('Error checking access:', error);
+            setHasAccess(false);
+            if (error.response && error.response.data.message) {
+                console.log(error.response.data.message);
+            } else {
+                console.log("An unexpected error occurred.");
+            }
+            setLoading(false);
+        }
+    };
+
+
+
+
 
     const [person, setPerson] = useState({
         termsOfAgreement: "",
@@ -143,16 +199,16 @@ const RegistrarDashboard5 = () => {
 
 
 
-       const steps = person.person_id
-           ? [
-               { label: "Personal Information", icon: <PersonIcon />, path: `/medical_dashboard1?person_id=${userID}` },
-               { label: "Family Background", icon: <FamilyRestroomIcon />, path: `/medical_dashboard2?person_id=${userID}` },
-               { label: "Educational Attainment", icon: <SchoolIcon />, path: `/medical_dashboard3?person_id=${userID}` },
-               { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: `/medical_dashboard4?person_id=${userID}` },
-               { label: "Other Information", icon: <InfoIcon />, path: `/medical_dashboard5?person_id=${userID}` },
-           ]
-           : [];
-   
+    const steps = person.person_id
+        ? [
+            { label: "Personal Information", icon: <PersonIcon />, path: `/medical_dashboard1?person_id=${userID}` },
+            { label: "Family Background", icon: <FamilyRestroomIcon />, path: `/medical_dashboard2?person_id=${userID}` },
+            { label: "Educational Attainment", icon: <SchoolIcon />, path: `/medical_dashboard3?person_id=${userID}` },
+            { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: `/medical_dashboard4?person_id=${userID}` },
+            { label: "Other Information", icon: <InfoIcon />, path: `/medical_dashboard5?person_id=${userID}` },
+        ]
+        : [];
+
 
 
     const [activeStep, setActiveStep] = useState(4);
@@ -319,6 +375,20 @@ const RegistrarDashboard5 = () => {
     }, [userID]);
 
 
+
+
+    // Put this at the very bottom before the return 
+    if (loading || hasAccess === null) {
+        return <LoadingOverlay open={loading} message="Check Access" />;
+    }
+
+    if (!hasAccess) {
+        return (
+            <Unauthorized />
+        );
+    }
+
+
     // dot not alter
     return (
         <Box sx={{ height: 'calc(100vh - 140px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
@@ -336,9 +406,9 @@ const RegistrarDashboard5 = () => {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     flexWrap: 'wrap',
-                    mt: 3,
+                  
                     mb: 2,
-                    px: 2,
+                    
                 }}
             >
                 <Typography
@@ -349,7 +419,7 @@ const RegistrarDashboard5 = () => {
                         fontSize: '36px',
                     }}
                 >
-                   APPLICANT FORM - OTHER INFORMATION
+                   MEDICAL - OTHER INFORMATION
                 </Typography>
             </Box>
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
@@ -846,4 +916,4 @@ const RegistrarDashboard5 = () => {
 };
 
 
-export default RegistrarDashboard5;
+export default MedicalDashboard5;

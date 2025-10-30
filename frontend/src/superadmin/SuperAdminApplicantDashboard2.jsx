@@ -14,6 +14,9 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from "framer-motion";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import ExamPermit from "../applicant/ExamPermit";
+import Unauthorized from "../components/Unauthorized";
+import LoadingOverlay from "../components/LoadingOverlay";
+
 
 
 const SuperAdminApplicantDashboard2 = () => {
@@ -28,6 +31,56 @@ const SuperAdminApplicantDashboard2 = () => {
         mother_year_graduated: "", mother_school_address: "", mother_contact: "", mother_occupation: "", mother_employer: "", mother_income: "", mother_email: "", guardian: "", guardian_family_name: "", guardian_given_name: "",
         guardian_middle_name: "", guardian_ext: "", guardian_nickname: "", guardian_address: "", guardian_contact: "", guardian_email: "", annual_income: "",
     });
+
+
+    const [hasAccess, setHasAccess] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+
+    const pageId = 82;
+
+    //Put this After putting the code of the past code
+    useEffect(() => {
+
+        const storedUser = localStorage.getItem("email");
+        const storedRole = localStorage.getItem("role");
+        const storedID = localStorage.getItem("person_id");
+
+        if (storedUser && storedRole && storedID) {
+            setUser(storedUser);
+            setUserRole(storedRole);
+            setUserID(storedID);
+
+            if (storedRole === "registrar") {
+                checkAccess(storedID);
+            } else {
+                window.location.href = "/login";
+            }
+        } else {
+            window.location.href = "/login";
+        }
+    }, []);
+
+    const checkAccess = async (userID) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+            if (response.data && response.data.page_privilege === 1) {
+                setHasAccess(true);
+            } else {
+                setHasAccess(false);
+            }
+        } catch (error) {
+            console.error('Error checking access:', error);
+            setHasAccess(false);
+            if (error.response && error.response.data.message) {
+                console.log(error.response.data.message);
+            } else {
+                console.log("An unexpected error occurred.");
+            }
+            setLoading(false);
+        }
+    };
+
 
     // do not alter
 
@@ -121,7 +174,7 @@ const SuperAdminApplicantDashboard2 = () => {
     const [activeStep, setActiveStep] = useState(1);
     const [clickedSteps, setClickedSteps] = useState([]);
 
-      const steps = [
+    const steps = [
         { label: "Personal Information", icon: <PersonIcon />, path: "/super_admin_applicant_dashboard1" },
         { label: "Family Background", icon: <FamilyRestroomIcon />, path: "/super_admin_applicant_dashboard2" },
         { label: "Educational Attainment", icon: <SchoolIcon />, path: "/super_admin_applicant_dashboard3" },
@@ -334,6 +387,19 @@ const SuperAdminApplicantDashboard2 = () => {
 
 
 
+    // Put this at the very bottom before the return 
+    if (loading || hasAccess === null) {
+        return <LoadingOverlay open={loading} message="Check Access" />;
+    }
+
+    if (!hasAccess) {
+        return (
+            <Unauthorized />
+        );
+    }
+
+
+
 
     // dot not alter
     return (
@@ -351,9 +417,9 @@ const SuperAdminApplicantDashboard2 = () => {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     flexWrap: 'wrap',
-                    mt: 2,
+                 
                     mb: 2,
-                    px: 2,
+               
                 }}
             >
                 <Typography
@@ -462,83 +528,83 @@ const SuperAdminApplicantDashboard2 = () => {
                 </Box>
             </Box>
 
-          {/* Cards Section */}
-               <Box
-                 sx={{
-                   display: "flex",
-                   flexWrap: "wrap",
-                   gap: 2,
-                   mt: 2,
-                   pb: 1,
-                   justifyContent: "center", // Centers all cards horizontally
-                 }}
-               >
-                 {links.map((lnk, i) => (
-                   <motion.div
-                     key={i}
-                     style={{ flex: "0 0 calc(30% - 16px)" }}
-                     initial={{ opacity: 0, y: 20 }}
-                     animate={{ opacity: 1, y: 0 }}
-                     transition={{ delay: i * 0.1, duration: 0.4 }}
-                   >
-                     <Card
-                       sx={{
-                         minHeight: 60,
-                         borderRadius: 2,
-                         border: "2px solid #6D2323",
-                         backgroundColor: "#fff",
-                         display: "flex",
-                         flexDirection: "row",
-                         alignItems: "center",
-                         justifyContent: "center",
-                         textAlign: "center",
-                         p: 1.5,
-                         cursor: "pointer",
-                         transition: "all 0.3s ease-in-out",
-                         "&:hover": {
-                           transform: "scale(1.05)",
-                           backgroundColor: "#6D2323", // ✅ background becomes maroon
-                           "& .card-text": {
-                             color: "#fff", // ✅ text becomes white
-                           },
-                           "& .card-icon": {
-                             color: "#fff", // ✅ icon becomes white
-                           },
-                         },
-                       }}
-                       onClick={() => {
-                         if (lnk.onClick) {
-                           lnk.onClick(); // run handler
-                         } else if (lnk.to) {
-                           navigate(lnk.to); // navigate if it has a `to`
-                         }
-                       }}
-                     >
-                       {/* Icon */}
-                       <PictureAsPdfIcon
-                         className="card-icon"
-                         sx={{ fontSize: 35, color: "#6D2323", mr: 1.5 }}
-                       />
-         
-                       {/* Label */}
-                       <Typography
-                         className="card-text"
-                         sx={{
-                           color: "#6D2323",
-                           fontFamily: "Arial",
-                           fontWeight: "bold",
-                           fontSize: "0.85rem",
-                         }}
-                       >
-                         {lnk.label}
-                       </Typography>
-                     </Card>
-                   </motion.div>
-                 ))}
-               </Box>
-         
-         
-         
+            {/* Cards Section */}
+            <Box
+                sx={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 2,
+                    mt: 2,
+                    pb: 1,
+                    justifyContent: "center", // Centers all cards horizontally
+                }}
+            >
+                {links.map((lnk, i) => (
+                    <motion.div
+                        key={i}
+                        style={{ flex: "0 0 calc(30% - 16px)" }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1, duration: 0.4 }}
+                    >
+                        <Card
+                            sx={{
+                                minHeight: 60,
+                                borderRadius: 2,
+                                border: "2px solid #6D2323",
+                                backgroundColor: "#fff",
+                                display: "flex",
+                                flexDirection: "row",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                textAlign: "center",
+                                p: 1.5,
+                                cursor: "pointer",
+                                transition: "all 0.3s ease-in-out",
+                                "&:hover": {
+                                    transform: "scale(1.05)",
+                                    backgroundColor: "#6D2323", // ✅ background becomes maroon
+                                    "& .card-text": {
+                                        color: "#fff", // ✅ text becomes white
+                                    },
+                                    "& .card-icon": {
+                                        color: "#fff", // ✅ icon becomes white
+                                    },
+                                },
+                            }}
+                            onClick={() => {
+                                if (lnk.onClick) {
+                                    lnk.onClick(); // run handler
+                                } else if (lnk.to) {
+                                    navigate(lnk.to); // navigate if it has a `to`
+                                }
+                            }}
+                        >
+                            {/* Icon */}
+                            <PictureAsPdfIcon
+                                className="card-icon"
+                                sx={{ fontSize: 35, color: "#6D2323", mr: 1.5 }}
+                            />
+
+                            {/* Label */}
+                            <Typography
+                                className="card-text"
+                                sx={{
+                                    color: "#6D2323",
+                                    fontFamily: "Arial",
+                                    fontWeight: "bold",
+                                    fontSize: "0.85rem",
+                                }}
+                            >
+                                {lnk.label}
+                            </Typography>
+                        </Card>
+                    </motion.div>
+                ))}
+            </Box>
+
+
+
             <Container>
 
 
@@ -1682,4 +1748,4 @@ const SuperAdminApplicantDashboard2 = () => {
 };
 
 
-export default  SuperAdminApplicantDashboard2;
+export default SuperAdminApplicantDashboard2;

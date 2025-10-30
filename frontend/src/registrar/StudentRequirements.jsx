@@ -34,7 +34,8 @@ import ScheduleIcon from "@mui/icons-material/Schedule";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
 import PeopleIcon from "@mui/icons-material/People";
 import FactCheckIcon from "@mui/icons-material/FactCheck";
-
+import Unauthorized from "../components/Unauthorized";
+import LoadingOverlay from "../components/LoadingOverlay";
 
 
 const socket = io("http://localhost:5000");
@@ -235,6 +236,59 @@ const StudentRequirements = () => {
   const [editingRemarkId, setEditingRemarkId] = useState(null);
   const [newRemarkMode, setNewRemarkMode] = useState({}); // { [upload_id]: true|false }
   const [documentStatus, setDocumentStatus] = useState("");
+
+
+
+
+  const [hasAccess, setHasAccess] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+
+  const pageId = 69;
+
+  //Put this After putting the code of the past code
+  useEffect(() => {
+
+    const storedUser = localStorage.getItem("email");
+    const storedRole = localStorage.getItem("role");
+    const storedID = localStorage.getItem("person_id");
+
+    if (storedUser && storedRole && storedID) {
+      setUser(storedUser);
+      setUserRole(storedRole);
+      setUserID(storedID);
+
+      if (storedRole === "registrar") {
+        checkAccess(storedID);
+      } else {
+        window.location.href = "/login";
+      }
+    } else {
+      window.location.href = "/login";
+    }
+  }, []);
+
+  const checkAccess = async (userID) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+      if (response.data && response.data.page_privilege === 1) {
+        setHasAccess(true);
+      } else {
+        setHasAccess(false);
+      }
+    } catch (error) {
+      console.error('Error checking access:', error);
+      setHasAccess(false);
+      if (error.response && error.response.data.message) {
+        console.log(error.response.data.message);
+      } else {
+        console.log("An unexpected error occurred.");
+      }
+      setLoading(false);
+    }
+  };
+
+
 
 
 
@@ -466,30 +520,30 @@ const StudentRequirements = () => {
     }
   };
 
- const handleStatusChange = async (uploadId, remarkValue) => {
-  try {
-    await axios.put(`http://localhost:5000/uploads/status/${uploadId}`, {
-      status: remarkValue,
-      user_id: userID,
-    });
+  const handleStatusChange = async (uploadId, remarkValue) => {
+    try {
+      await axios.put(`http://localhost:5000/uploads/status/${uploadId}`, {
+        status: remarkValue,
+        user_id: userID,
+      });
 
-    // ✅ Optimistic update for UI
-    setUploads((prev) =>
-      prev.map((u) =>
-        u.upload_id === uploadId
-          ? { ...u, status: parseInt(remarkValue, 10) }
-          : u
-      )
-    );
+      // ✅ Optimistic update for UI
+      setUploads((prev) =>
+        prev.map((u) =>
+          u.upload_id === uploadId
+            ? { ...u, status: parseInt(remarkValue, 10) }
+            : u
+        )
+      );
 
-    // ✅ Refresh from backend to ensure sync
-    if (selectedPerson?.applicant_number) {
-      await fetchUploadsByApplicantNumber(selectedPerson.applicant_number);
+      // ✅ Refresh from backend to ensure sync
+      if (selectedPerson?.applicant_number) {
+        await fetchUploadsByApplicantNumber(selectedPerson.applicant_number);
+      }
+    } catch (err) {
+      console.error("Error updating Status:", err);
     }
-  } catch (err) {
-    console.error("Error updating Status:", err);
-  }
-};
+  };
 
   const handleDocumentStatus = async (event) => {
     const newStatus = event.target.value;
@@ -844,6 +898,17 @@ const StudentRequirements = () => {
 
 
 
+  // Put this at the very bottom before the return 
+  if (loading || hasAccess === null) {
+    return <LoadingOverlay open={loading} message="Check Access" />;
+  }
+
+  if (!hasAccess) {
+    return (
+      <Unauthorized />
+    );
+  }
+
 
 
   return (
@@ -858,9 +923,9 @@ const StudentRequirements = () => {
             justifyContent: 'space-between',
             alignItems: 'center',
             flexWrap: 'wrap',
-            mt: 2,
+          
             mb: 2,
-            px: 2,
+       
           }}
         >
           <Typography

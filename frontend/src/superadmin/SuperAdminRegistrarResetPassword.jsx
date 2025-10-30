@@ -10,37 +10,62 @@ import {
     MenuItem,
 } from "@mui/material";
 import { Search } from "@mui/icons-material";
+import Unauthorized from "../components/Unauthorized";
+import LoadingOverlay from "../components/LoadingOverlay";
+
+
 
 const SuperAdminRegistrarResetPassword = () => {
-    //-------------------------------- PAGE ACCESS SCRIPT UPPER PART START --------------------------------//
+    // Also put it at the very top
+    const [userID, setUserID] = useState("");
+    const [user, setUser] = useState("");
+    const [userRole, setUserRole] = useState("");
 
     const [hasAccess, setHasAccess] = useState(null);
 
+    const pageId = 89;
+
+    //Put this After putting the code of the past code
     useEffect(() => {
-        const userId = localStorage.getItem("userId");
-        const pageId = 1;
 
-        if (!userId) {
-            setHasAccess(false);
-            return;
-        }
+        const storedUser = localStorage.getItem("email");
+        const storedRole = localStorage.getItem("role");
+        const storedID = localStorage.getItem("person_id");
 
-        const checkAccess = async () => {
-            try {
-                const response = await axios.get(
-                    `http://localhost:5000/api/page_access/${userId}/${pageId}`
-                );
-                setHasAccess(response.data?.hasAccess || false);
-            } catch (error) {
-                console.error("Error checking access:", error);
-                setHasAccess(false);
+        if (storedUser && storedRole && storedID) {
+            setUser(storedUser);
+            setUserRole(storedRole);
+            setUserID(storedID);
+
+            if (storedRole === "registrar") {
+                checkAccess(storedID);
+            } else {
+                window.location.href = "/login";
             }
-        };
-
-        checkAccess();
+        } else {
+            window.location.href = "/login";
+        }
     }, []);
 
-    //--------------------------------- PAGE ACCESS SCRIPT UPPER PART END ---------------------------------//
+    const checkAccess = async (userID) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+            if (response.data && response.data.page_privilege === 1) {
+                setHasAccess(true);
+            } else {
+                setHasAccess(false);
+            }
+        } catch (error) {
+            console.error('Error checking access:', error);
+            setHasAccess(false);
+            if (error.response && error.response.data.message) {
+                console.log(error.response.data.message);
+            } else {
+                console.log("An unexpected error occurred.");
+            }
+            setLoading(false);
+        }
+    };
 
     const [searchQuery, setSearchQuery] = useState("");
     const [userInfo, setUserInfo] = useState(null);
@@ -108,42 +133,22 @@ const SuperAdminRegistrarResetPassword = () => {
         }
     };
 
-    //-------------------------------- PAGE ACCESS SCRIPT LOWER PART START --------------------------------//
 
-    const containerStyle = {
-        width: "100%",
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        textAlign: "center",
-    };
-
-    // Loading state
-    if (hasAccess === null) {
-        return <div>Loading access information...</div>;
+    // Put this at the very bottom before the return 
+    if (loading || hasAccess === null) {
+        return <LoadingOverlay open={loading} message="Check Access" />;
     }
 
     if (!hasAccess) {
         return (
-            <div style={containerStyle}>
-                <div>
-                    <h1 style={{ color: "#b71c1c", marginBottom: "10px", marginTop: "-120px" }}>
-                        Unauthorized Access
-                    </h1>
-                    <p style={{ fontSize: "16px", color: "#333" }}>
-                        You do not have access to this page. <br />
-                        Please contact the administrator.
-                    </p>
-                </div>
-            </div>
+            <Unauthorized />
         );
     }
 
-    //--------------------------------- PAGE ACCESS SCRIPT LOWER PART END ---------------------------------//
+
 
     return (
-        <Box p={3}>
+        <Box>
             <Box
                 sx={{
                     display: "flex",
@@ -151,14 +156,14 @@ const SuperAdminRegistrarResetPassword = () => {
                     alignItems: "center",
                     flexWrap: "wrap",
                     mb: 2,
-                    px: 2,
+                    
                 }}
             >
                 <Typography
                     variant="h4"
                     sx={{ fontWeight: "bold", color: "maroon", fontSize: "36px" }}
                 >
-                    REGISTRAR PASSWORD RESET
+                    REGISTRAR RESET PASSWORD
                 </Typography>
 
                 <TextField

@@ -11,8 +11,68 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
+import Unauthorized from "../components/Unauthorized";
+import LoadingOverlay from "../components/LoadingOverlay";
 
 const ScheduleChecker = () => {
+
+// Also put it at the very top
+const [userID, setUserID] = useState("");
+const [user, setUser] = useState("");
+const [userRole, setUserRole] = useState("");
+
+const [hasAccess, setHasAccess] = useState(null);
+const [loading, setLoading] = useState(false);
+
+
+const pageId = 61;
+
+//Put this After putting the code of the past code
+useEffect(() => {
+    
+    const storedUser = localStorage.getItem("email");
+    const storedRole = localStorage.getItem("role");
+    const storedID = localStorage.getItem("person_id");
+
+    if (storedUser && storedRole && storedID) {
+      setUser(storedUser);
+      setUserRole(storedRole);
+      setUserID(storedID);
+
+      if (storedRole === "registrar") {
+        checkAccess(storedID);
+      } else {
+        window.location.href = "/login";
+      }
+    } else {
+      window.location.href = "/login";
+    }
+  }, []);
+
+const checkAccess = async (userID) => {
+    try {
+        const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+        if (response.data && response.data.page_privilege === 1) {
+          setHasAccess(true);
+        } else {
+          setHasAccess(false);
+        }
+    } catch (error) {
+        console.error('Error checking access:', error);
+        setHasAccess(false);
+        if (error.response && error.response.data.message) {
+          console.log(error.response.data.message);
+        } else {
+          console.log("An unexpected error occurred.");
+        }
+        setLoading(false);
+    }
+  };
+
+
+
+
+
   const [selectedDay, setSelectedDay] = useState("");
   const [selectedSection, setSelectedSection] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("");
@@ -431,6 +491,19 @@ const ScheduleChecker = () => {
     }
   });
 
+  
+
+// Put this at the very bottom before the return 
+if (loading || hasAccess === null) {
+   return <LoadingOverlay open={loading} message="Check Access"/>;
+}
+
+  if (!hasAccess) {
+    return (
+      <Unauthorized />
+    );
+  }
+
   return (
     <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
 
@@ -440,10 +513,9 @@ const ScheduleChecker = () => {
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-          mt: 2,
-      
+  
           mb: 2,
-          px: 2,
+     
         }}
       >
         <Typography

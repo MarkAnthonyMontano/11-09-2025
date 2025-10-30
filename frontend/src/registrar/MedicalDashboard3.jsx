@@ -17,17 +17,19 @@ import ListAltIcon from "@mui/icons-material/ListAlt";
 import DescriptionIcon from "@mui/icons-material/Description";
 import PsychologyIcon from "@mui/icons-material/Psychology";
 import HowToRegIcon from '@mui/icons-material/HowToReg';
-import UploadFileIcon from '@mui/icons-material/UploadFile'; 
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 import ExamPermit from "../applicant/ExamPermit";
+import Unauthorized from "../components/Unauthorized";
+import LoadingOverlay from "../components/LoadingOverlay";
 
-const RegistrarDashboard3 = () => {
+const MedicalDashboard3 = () => {
     const stepsData = [
         { label: "Medical Applicant List", to: "/medical_applicant_list", icon: <ListAltIcon /> },
-          { label: "Applicant Form", to: "/medical_dashboard1", icon: <HowToRegIcon /> },
-          { label: "Submitted Documents", to: "/medical_requirements", icon: <UploadFileIcon /> }, // updated icon
-          { label: "Medical History", to: "/medical_requirements_form", icon: <PersonIcon /> },
-          { label: "Dental Assessment", to: "/dental_assessment", icon: <DescriptionIcon /> },
-          { label: "Physical and Neurological Examination", to: "/physical_neuro_exam", icon: <SchoolIcon /> },
+        { label: "Applicant Form", to: "/medical_dashboard1", icon: <HowToRegIcon /> },
+        { label: "Submitted Documents", to: "/medical_requirements", icon: <UploadFileIcon /> }, // updated icon
+        { label: "Medical History", to: "/medical_requirements_form", icon: <PersonIcon /> },
+        { label: "Dental Assessment", to: "/dental_assessment", icon: <DescriptionIcon /> },
+        { label: "Physical and Neurological Examination", to: "/physical_neuro_exam", icon: <SchoolIcon /> },
     ];
     const [currentStep, setCurrentStep] = useState(1);
     const [visitedSteps, setVisitedSteps] = useState(Array(stepsData.length).fill(false));
@@ -83,6 +85,56 @@ const RegistrarDashboard3 = () => {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const queryPersonId = queryParams.get("person_id");
+
+
+    const [hasAccess, setHasAccess] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+
+    const pageId = 34;
+
+    //Put this After putting the code of the past code
+    useEffect(() => {
+
+        const storedUser = localStorage.getItem("email");
+        const storedRole = localStorage.getItem("role");
+        const storedID = localStorage.getItem("person_id");
+
+        if (storedUser && storedRole && storedID) {
+            setUser(storedUser);
+            setUserRole(storedRole);
+            setUserID(storedID);
+
+            if (storedRole === "registrar") {
+                checkAccess(storedID);
+            } else {
+                window.location.href = "/login";
+            }
+        } else {
+            window.location.href = "/login";
+        }
+    }, []);
+
+    const checkAccess = async (userID) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+            if (response.data && response.data.page_privilege === 1) {
+                setHasAccess(true);
+            } else {
+                setHasAccess(false);
+            }
+        } catch (error) {
+            console.error('Error checking access:', error);
+            setHasAccess(false);
+            if (error.response && error.response.data.message) {
+                console.log(error.response.data.message);
+            } else {
+                console.log("An unexpected error occurred.");
+            }
+            setLoading(false);
+        }
+    };
+
 
 
     useEffect(() => {
@@ -183,16 +235,16 @@ const RegistrarDashboard3 = () => {
 
 
 
-       const steps = person.person_id
-           ? [
-               { label: "Personal Information", icon: <PersonIcon />, path: `/medical_dashboard1?person_id=${userID}` },
-               { label: "Family Background", icon: <FamilyRestroomIcon />, path: `/medical_dashboard2?person_id=${userID}` },
-               { label: "Educational Attainment", icon: <SchoolIcon />, path: `/medical_dashboard3?person_id=${userID}` },
-               { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: `/medical_dashboard4?person_id=${userID}` },
-               { label: "Other Information", icon: <InfoIcon />, path: `/medical_dashboard5?person_id=${userID}` },
-           ]
-           : [];
-   
+    const steps = person.person_id
+        ? [
+            { label: "Personal Information", icon: <PersonIcon />, path: `/medical_dashboard1?person_id=${userID}` },
+            { label: "Family Background", icon: <FamilyRestroomIcon />, path: `/medical_dashboard2?person_id=${userID}` },
+            { label: "Educational Attainment", icon: <SchoolIcon />, path: `/medical_dashboard3?person_id=${userID}` },
+            { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: `/medical_dashboard4?person_id=${userID}` },
+            { label: "Other Information", icon: <InfoIcon />, path: `/medical_dashboard5?person_id=${userID}` },
+        ]
+        : [];
+
 
 
 
@@ -354,9 +406,9 @@ const RegistrarDashboard3 = () => {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     flexWrap: 'wrap',
-                    mt: 3,
+                   
                     mb: 2,
-                    px: 2,
+                  
                 }}
             >
                 <Typography
@@ -367,7 +419,7 @@ const RegistrarDashboard3 = () => {
                         fontSize: '36px',
                     }}
                 >
-                  APPLICANT FORM -  EDUCATIONAL ATTAINMENT
+                    MEDICAL - EDUCATIONAL ATTAINMENT
                 </Typography>
             </Box>
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
@@ -1207,4 +1259,4 @@ const RegistrarDashboard3 = () => {
 };
 
 
-export default RegistrarDashboard3;
+export default MedicalDashboard3;

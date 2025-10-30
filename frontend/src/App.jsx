@@ -25,15 +25,8 @@ import Login from './components/Login';
 import LoginEnrollment from './components/LoginEnrollment';
 import ApplicantForgotPassword from './components/ApplicantForgotPassword';
 import RegistrarForgotPassword from './components/RegistrarForgotPassword';
-import RegistrarResetPassword from './components/RegistrarResetPassword';
 import SideBar from './components/Sidebar';
 import ProtectedRoute from './components/ProtectedRoute';
-import RegisterProf from './components/RegisterProf';
-import RegisterRegistrar from './components/RegisterRegistrar';
-import RegisterStudent from './components/RegisterStudent';
-import PageCRUD from './components/PageCRUD';
-import UserPageAccess from './components/UserPageAccess';
-import Settings from './components/Settings';
 import ApplicantProfile from './components/ApplicantProfile';
 import ApplicantProfilePermit from './components/ApplicantProfile';
 
@@ -89,7 +82,6 @@ import InterviewerApplicantList from './registrar/InterviewerApplicantList';
 import AssignInterviewExam from './registrar/AssignInterviewExam';
 import AssignScheduleToApplicantsInterviewer from './registrar/AssignScheduleToApplicantsInterviewer';
 import ClassRoster from './registrar/ClassRoster';
-import ProfessorListPerSection from './registrar/ProfessorListPerClass';
 import DepartmentRegistration from './registrar/DprtmntRegistration';
 import DepartmentRoom from './registrar/DprtmntRoom';
 import ProgramTagging from './registrar/ProgramTagging';
@@ -98,7 +90,6 @@ import ProgramPanel from './registrar/ProgramPanel';
 import CurriculumPanel from './registrar/CurriculumPanel';
 import SectionPanel from './registrar/SectionPanel';
 import DepartmentSection from './registrar/DepartmentSection';
-import StudentProfileForm from './registrar/StudentProfile';
 import YearLevelPanel from './registrar/YearLevelPanel';
 import YearPanel from './registrar/YearPanel';
 import YearUpdateForm from './registrar/YearUpdateForm';
@@ -188,6 +179,15 @@ import SuperAdminStudentResetPassword from './superadmin/SuperAdminStudentResetP
 import SuperAdminFacultyResetPassword from './superadmin/SuperAdminFacultyResetPassword';
 import SuperAdminRegistrarPassword from './superadmin/SuperAdminRegistrarResetPassword';
 import Notifications from './superadmin/Notifications';
+import RegistrarResetPassword from './superadmin/RegistrarResetPassword';
+import RegisterProf from './superadmin/RegisterProf';
+import RegisterRegistrar from './superadmin/RegisterRegistrar';
+import RegisterStudent from './superadmin/RegisterStudent';
+import PageCRUD from './superadmin/PageCRUD';
+import UserPageAccess from './superadmin/UserPageAccess';
+import Settings from './superadmin/Settings';
+
+
 
 
 // ✅ Create a Context so all components can access settings
@@ -340,7 +340,7 @@ function App() {
                     <Route path="/curriculum_panel" element={<ProtectedRoute><CurriculumPanel /></ProtectedRoute>} />
                     <Route path="/department_registration" element={<ProtectedRoute><DepartmentRegistration /></ProtectedRoute>} />
                     <Route path="/section_panel" element={<ProtectedRoute><SectionPanel /></ProtectedRoute>} />
-                    <Route path="/student_profile_form" element={<ProtectedRoute><StudentProfileForm /></ProtectedRoute>} />
+               
                     <Route path="/year_level_panel" element={<ProtectedRoute><YearLevelPanel /></ProtectedRoute>} />
                     <Route path="/year_panel" element={<ProtectedRoute><YearPanel /></ProtectedRoute>} />
                     <Route path="/year_update_panel" element={<ProtectedRoute><YearUpdateForm /></ProtectedRoute>} />
@@ -483,7 +483,7 @@ function App() {
 
                     <Route path="/class_roster" element={<ProtectedRoute ><ClassRoster /></ProtectedRoute>} />
                     <Route path="/transcript_of_records" element={<ProtectedRoute ><TranscriptOfRecords /></ProtectedRoute>} />
-                    <Route path="/class_list/ccs/:curriculum_id/:dstID" element={<ProtectedRoute><ProfessorListPerSection /></ProtectedRoute>} />
+                 
                     <Route path="/email_template_manager" element={<ProtectedRoute><EmailTemplateManager /></ProtectedRoute>} />
                     <Route path="/announcement" element={<ProtectedRoute><Announcement /></ProtectedRoute>} />
                     <Route path="/exam-permit/:applicant_number" element={<ExamPermit />} />

@@ -21,7 +21,7 @@ const ExaminationProfile = () => {
     const [userRole, setUserRole] = useState("");
     const [hasAccess, setHasAccess] = useState(null);
     const [loading, setLoading] = useState(false);
-    const pageId = 31;
+    const pageId = 27;
 
     //
     useEffect(() => {

@@ -17,18 +17,20 @@ import ListAltIcon from "@mui/icons-material/ListAlt";
 import DescriptionIcon from "@mui/icons-material/Description";
 import PsychologyIcon from "@mui/icons-material/Psychology";
 import HowToRegIcon from '@mui/icons-material/HowToReg';
-import UploadFileIcon from '@mui/icons-material/UploadFile'; 
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import Unauthorized from "../components/Unauthorized";
+import LoadingOverlay from "../components/LoadingOverlay";
 
 import ExamPermit from "../applicant/ExamPermit";
 
-const RegistrarDashboard2 = () => {
+const MedicalDashboard2 = () => {
     const stepsData = [
-       { label: "Medical Applicant List", to: "/medical_applicant_list", icon: <ListAltIcon /> },
-         { label: "Applicant Form", to: "/medical_dashboard1", icon: <HowToRegIcon /> },
-         { label: "Submitted Documents", to: "/medical_requirements", icon: <UploadFileIcon /> }, // updated icon
-         { label: "Medical History", to: "/medical_requirements_form", icon: <PersonIcon /> },
-         { label: "Dental Assessment", to: "/dental_assessment", icon: <DescriptionIcon /> },
-         { label: "Physical and Neurological Examination", to: "/physical_neuro_exam", icon: <SchoolIcon /> },
+        { label: "Medical Applicant List", to: "/medical_applicant_list", icon: <ListAltIcon /> },
+        { label: "Applicant Form", to: "/medical_dashboard1", icon: <HowToRegIcon /> },
+        { label: "Submitted Documents", to: "/medical_requirements", icon: <UploadFileIcon /> }, // updated icon
+        { label: "Medical History", to: "/medical_requirements_form", icon: <PersonIcon /> },
+        { label: "Dental Assessment", to: "/dental_assessment", icon: <DescriptionIcon /> },
+        { label: "Physical and Neurological Examination", to: "/physical_neuro_exam", icon: <SchoolIcon /> },
     ];
 
     const [currentStep, setCurrentStep] = useState(1);
@@ -72,6 +74,53 @@ const RegistrarDashboard2 = () => {
     });
     const [selectedPerson, setSelectedPerson] = useState(null);
 
+    const [hasAccess, setHasAccess] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+
+    const pageId = 32;
+
+    //Put this After putting the code of the past code
+    useEffect(() => {
+
+        const storedUser = localStorage.getItem("email");
+        const storedRole = localStorage.getItem("role");
+        const storedID = localStorage.getItem("person_id");
+
+        if (storedUser && storedRole && storedID) {
+            setUser(storedUser);
+            setUserRole(storedRole);
+            setUserID(storedID);
+
+            if (storedRole === "registrar") {
+                checkAccess(storedID);
+            } else {
+                window.location.href = "/login";
+            }
+        } else {
+            window.location.href = "/login";
+        }
+    }, []);
+
+    const checkAccess = async (userID) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+            if (response.data && response.data.page_privilege === 1) {
+                setHasAccess(true);
+            } else {
+                setHasAccess(false);
+            }
+        } catch (error) {
+            console.error('Error checking access:', error);
+            setHasAccess(false);
+            if (error.response && error.response.data.message) {
+                console.log(error.response.data.message);
+            } else {
+                console.log("An unexpected error occurred.");
+            }
+            setLoading(false);
+        }
+    };
 
     // do not alter
     const location = useLocation();
@@ -146,7 +195,7 @@ const RegistrarDashboard2 = () => {
 
 
 
-        const steps = person.person_id
+    const steps = person.person_id
         ? [
             { label: "Personal Information", icon: <PersonIcon />, path: `/medical_dashboard1?person_id=${userID}` },
             { label: "Family Background", icon: <FamilyRestroomIcon />, path: `/medical_dashboard2?person_id=${userID}` },
@@ -388,6 +437,20 @@ const RegistrarDashboard2 = () => {
             });
     }, [userID]);
 
+
+
+
+    // Put this at the very bottom before the return 
+    if (loading || hasAccess === null) {
+        return <LoadingOverlay open={loading} message="Check Access" />;
+    }
+
+    if (!hasAccess) {
+        return (
+            <Unauthorized />
+        );
+    }
+
     // dot not alter
     return (
         <Box sx={{ height: "calc(100vh - 140px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
@@ -406,9 +469,9 @@ const RegistrarDashboard2 = () => {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     flexWrap: 'wrap',
-                    mt: 3,
+                   
                     mb: 2,
-                    px: 2,
+                    
                 }}
             >
                 <Typography
@@ -419,7 +482,7 @@ const RegistrarDashboard2 = () => {
                         fontSize: '36px',
                     }}
                 >
-                 APPLICANT FORM -  FAMILY BACKGROUND
+                    MEDICAL - FAMILY BACKGROUND
                 </Typography>
             </Box>
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
@@ -1849,4 +1912,4 @@ const RegistrarDashboard2 = () => {
 };
 
 
-export default RegistrarDashboard2;
+export default MedicalDashboard2;

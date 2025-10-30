@@ -27,224 +27,96 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import { FileUpload } from "@mui/icons-material";
 import EditIcon from "@mui/icons-material/Edit";
+import Unauthorized from "../components/Unauthorized";
+import LoadingOverlay from "../components/LoadingOverlay";
 
-const RegisterStudents = () => {
+
+
+const RegisterRegistrar = () => {
+    
+    // Also put it at the very top
+    const [userID, setUserID] = useState("");
+    const [user, setUser] = useState("");
+    const [userRole, setUserRole] = useState("");
+
+    const [hasAccess, setHasAccess] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+
+    const pageId = 79;
+
+    //Put this After putting the code of the past code
+    useEffect(() => {
+
+        const storedUser = localStorage.getItem("email");
+        const storedRole = localStorage.getItem("role");
+        const storedID = localStorage.getItem("person_id");
+
+        if (storedUser && storedRole && storedID) {
+            setUser(storedUser);
+            setUserRole(storedRole);
+            setUserID(storedID);
+
+            if (storedRole === "registrar") {
+                checkAccess(storedID);
+            } else {
+                window.location.href = "/login";
+            }
+        } else {
+            window.location.href = "/login";
+        }
+    }, []);
+
+    const checkAccess = async (userID) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+            if (response.data && response.data.page_privilege === 1) {
+                setHasAccess(true);
+            } else {
+                setHasAccess(false);
+            }
+        } catch (error) {
+            console.error('Error checking access:', error);
+            setHasAccess(false);
+            if (error.response && error.response.data.message) {
+                console.log(error.response.data.message);
+            } else {
+                console.log("An unexpected error occurred.");
+            }
+            setLoading(false);
+        }
+    };
+
+
     const [department, setDepartment] = useState([]);
-    const [programs, setPrograms] = useState([]);
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
-    const [Students, setStudents] = useState([]);
+    const [registrars, setRegistrars] = useState([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [editData, setEditData] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const [file, setFile] = useState(null);
+
     const [form, setForm] = useState({
-        student_number: "",
+        employee_id: "",
         last_name: "",
         middle_name: "",
         first_name: "",
-        role: "student",
+        role: "registrar",
         email: "",
         password: "",
         status: "",
         dprtmnt_id: "",
-        profile_picture: null, 
-        preview: "",
+        profile_picture: null, // ✅ holds the uploaded file
+        preview: "", // ✅ for preview URL
 
     });
     const [itemsPerPage, setItemsPerPage] = useState(50);
+
+
     const [selectedDepartmentFilter, setSelectedDepartmentFilter] = useState("");
     const [sortOrder, setSortOrder] = useState("");
-
-    useEffect(() => {
-        fetchDepartments();
-        fetchPrograms();
-        fetchStudents();
-    }, []);
-
-    // 📥 Fetch Departments
-    const fetchDepartments = async () => {
-        try {
-            const res = await axios.get("http://localhost:5000/get_department");
-            setDepartment(res.data);
-        } catch (err) {
-            console.error("❌ Department fetch error:", err);
-            setErrorMessage("Failed to load department list");
-        }
-    };
-
-    const fetchPrograms = async (dprtmnt_id) => {
-        if(!dprtmnt_id) return;
-        try {
-            const res = await axios.get(`http://localhost:5000/api/applied_program/${dprtmnt_id}`);
-            setPrograms(res.data);
-        } catch (err) {
-            console.error("❌ Department fetch error:", err);
-            setErrorMessage("Failed to load department list");
-        }
-    };
-
-    const fetchStudents = async () => {
-        try {
-            const res = await axios.get("http://localhost:5000/api/students");
-            setStudents(res.data);
-        } catch (err) {
-            console.error("❌ Student fetch error:", err);
-            setErrorMessage("Failed to load Student accounts");
-        }
-    };
-
-    // Handle form field changes
-    const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
-    };
-
-    const handleFileChange = (e) => {
-        setFile(e.target.files[0]);
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const fd = new FormData();
-
-            // ✅ Append all fields properly
-            fd.append("student_number", form.student_number);
-            fd.append("last_name", form.last_name);
-            fd.append("middle_name", form.middle_name);
-            fd.append("first_name", form.first_name);
-            fd.append("email", form.email);
-            fd.append("password", form.password);
-            fd.append("status", form.status || 1);
-            fd.append("dprtmnt_id", form.dprtmnt_id);
-            fd.append("curriculum_id", form.curriculum_id);
-            if (form.profile_picture) fd.append("profile_picture", form.profile_picture);
-
-            // 🟢 Decide if this is an edit or create
-            const url = editData
-            ? `http://localhost:5000/update_student/${editData.user_id}`
-            : "http://localhost:5000/register_student";
-
-            if (editData) {
-                await axios.put(url, fd, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                });
-                fetchStudents();
-            } else {
-                await axios.post(url, fd, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                });
-            }
-
-            // ✅ Success flow
-            setOpenSnackbar(true);
-            setOpenDialog(false);
-            setEditData(null);
-            setForm({
-            student_number: "",
-            last_name: "",
-            middle_name: "",
-            first_name: "",
-            role: "student",
-            email: "",
-            password: "",
-            status: 1,
-            dprtmnt_id: "",
-            curriculum_id: "",
-            profile_picture: null,
-            preview: "",
-            });
-            fetchStudents();
-        } catch (err) {
-            console.error("❌ Submit error:", err);
-            setErrorMessage(err.response?.data?.message || "Something went wrong");
-        }
-    };
-
-    const handleEdit = (r) => {
-        setEditData(r);
-        setForm({
-            student_number: r.student_number || "",
-            first_name: r.first_name || "",
-            middle_name: r.middle_name || "",
-            last_name: r.last_name || "",
-            email: r.email || "",
-            password: "",
-            role: r.role || "student",
-            status: r.status,
-            dprtmnt_id: r.dprtmnt_id || "",
-            curriculum_id: r.curriculum_id || "",
-            program_id: r.program_id || "", 
-        });
-        if (r.dprtmnt_id) fetchPrograms(r.dprtmnt_id);
-        setOpenDialog(true);
-    };
-
-    const handleCloseDialog = () => {
-        setOpenDialog(false);
-        setEditData(null);
-    };
-
-    // Export CSV
-    const handleExportCSV = () => {
-        if (Students.length === 0) return alert("No data to export!");
-
-        const headers = ["Student Number", "Full Name", "Email", "Department", "Program", "Status"];
-        const rows = Students.map((r) => [
-            r.student_number,
-            `${r.first_name} ${r.middle_name || ""} ${r.last_name}`,
-            r.email,
-            `${r.dprtmnt_name || "N/A"} (${r.dprtmnt_code})`,
-            `${r.program_description || "N/A"} (${r.program_code})`,
-            r.status === 1 ? "Active" : "Inactive",
-        ]);
-        const csv = [headers, ...rows].map((row) => row.join(",")).join("\n");
-
-        const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.setAttribute("download", "Students.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
-
-    const handleImportFile = async () => {
-        if (!file) {
-        alert("Please select an Excel file first.");
-        return;
-        }
-
-        const formData = new FormData();
-        formData.append("file", file);
-
-        try {
-        const res = await axios.post("http://localhost:5000/import_xslx_student", formData, {
-            headers: {
-            "Content-Type": "multipart/form-data",
-            },
-        });
-        alert(res.data.message || "File imported successfully!");
-        } catch (err) {
-        console.error("❌ Import failed:", err);
-        alert("Error importing file");
-        }
-    };
-
-    const handleToggleStatus = async (id, currentStatus) => {
-        const newStatus = currentStatus === 1 ? 0 : 1;
-        try {
-            await axios.put(`http://localhost:5000/update_student_status/${id}`, { status: newStatus });
-            fetchStudents(); // 🔄 refresh list
-        } catch (error) {
-            console.error("❌ Error toggling status:", error);
-            setErrorMessage("Failed to update status");
-        }
-    };
-
-     const filteredStudent = Students
+    const filteredRegistrar = registrars
         .filter((r) =>
             selectedDepartmentFilter
                 ? r.dprtmnt_name === selectedDepartmentFilter
@@ -256,16 +128,16 @@ const RegisterStudents = () => {
             return 0;
         });
 
-    const totalPages = Math.ceil(filteredStudent.length / itemsPerPage);
+    const totalPages = Math.ceil(filteredRegistrar.length / itemsPerPage);
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentStudent = filteredStudent.slice(indexOfFirstItem, indexOfLastItem);
+    const currentRegistrar = filteredRegistrar.slice(indexOfFirstItem, indexOfLastItem);
 
     useEffect(() => {
         if (currentPage > totalPages) {
             setCurrentPage(totalPages || 1);
         }
-    }, [filteredStudent.length, totalPages]);
+    }, [filteredRegistrar.length, totalPages]);
 
     const maxButtonsToShow = 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxButtonsToShow / 2));
@@ -281,17 +153,177 @@ const RegisterStudents = () => {
     }
 
 
+
+    useEffect(() => {
+        fetchDepartments();
+        fetchRegistrars();
+    }, []);
+
+    // 📥 Fetch Departments
+    const fetchDepartments = async () => {
+        try {
+            const res = await axios.get("http://localhost:5000/get_department");
+            setDepartment(res.data);
+        } catch (err) {
+            console.error("❌ Department fetch error:", err);
+            setErrorMessage("Failed to load department list");
+        }
+    };
+
+    const fetchRegistrars = async () => {
+        try {
+            const res = await axios.get("http://localhost:5000/api/registrars");
+            setRegistrars(res.data);
+        } catch (err) {
+            console.error("❌ Registrar fetch error:", err);
+            setErrorMessage("Failed to load registrar accounts");
+        }
+    };
+
+    // Handle form field changes
+    const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        try {
+            const fd = new FormData();
+            // append all text fields
+            Object.entries(form).forEach(([key, value]) => {
+                if (value !== null && key !== "preview") {
+                    fd.append(key, value);
+                }
+            });
+
+            if (editData) {
+                // 🟢 Update existing registrar
+                await axios.post(`http://localhost:5000/update_registrar/${editData.id}`, fd, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                });
+            } else {
+                // 🟢 Add new registrar
+                await axios.post("http://localhost:5000/register_registrar", fd, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                });
+            }
+
+
+            setOpenSnackbar(true);
+            setOpenDialog(false);
+            setEditData(null);
+            setForm({
+                employee_id: "",
+                last_name: "",
+                middle_name: "",
+                first_name: "",
+                role: "registrar",
+                email: "",
+                password: "",
+                status: "",
+                dprtmnt_id: "",
+                profile_picture: null,
+                preview: "",
+            });
+            fetchRegistrars();
+        } catch (err) {
+            console.error("❌ Submit error:", err);
+            setErrorMessage(err.response?.data?.message || "Something went wrong");
+        }
+    };
+
+    const handleEdit = (r) => {
+        setEditData(r);
+        setForm({
+            employee_id: r.employee_id || "",
+            first_name: r.first_name || "",
+            middle_name: r.middle_name || "",
+            last_name: r.last_name || "",
+            email: r.email || "",
+            password: "",
+            role: r.role || "registrar",
+            status: Number(r.status), // ✅ ensure numeric
+            dprtmnt_id: r.dprtmnt_id || "",
+        });
+        setOpenDialog(true);
+    };
+
+    const handleCloseDialog = () => {
+        setOpenDialog(false);
+        setEditData(null);
+    };
+
+    // Export CSV
+    const handleExportCSV = () => {
+        if (registrars.length === 0) return alert("No data to export!");
+
+        const headers = ["Employee ID", "Full Name", "Email", "Department", "Status"];
+        const rows = registrars.map((r) => [
+            r.employee_id,
+            `${r.first_name} ${r.middle_name || ""} ${r.last_name}`,
+            r.email,
+            r.dprtmnt_name || "N/A",
+            r.status === 1 ? "Active" : "Inactive",
+        ]);
+        const csv = [headers, ...rows].map((row) => row.join(",")).join("\n");
+
+        const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute("download", "registrars.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleToggleStatus = async (id, currentStatus) => {
+        const newStatus = currentStatus === 1 ? 0 : 1;
+        try {
+            await axios.put(`http://localhost:5000/update_registrar/${id}`, { status: newStatus });
+            fetchRegistrars(); // 🔄 refresh list
+        } catch (error) {
+            console.error("❌ Error toggling status:", error);
+            setErrorMessage("Failed to update status");
+        }
+    };
+
+
+
+
+    // Put this at the very bottom before the return 
+    if (loading || hasAccess === null) {
+        return <LoadingOverlay open={loading} message="Check Access" />;
+    }
+
+    if (!hasAccess) {
+        return (
+            <Unauthorized />
+        );
+    }
+
+
+
+
+
+
+
+
     return (
         <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", pr: 1 }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2} mt={2}>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2} >
                 {/* Left: Header */}
                 <Typography variant="h4" fontWeight="bold" color="maroon">
-                    STUDENTS ACCOUNTS
+                    REGISTRAR ACCOUNTS
                 </Typography>
+
+                {/* Right: Search */}
 
             </Box>
 
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
+
+
             <br />
 
             <TableContainer component={Paper} sx={{ width: '100%' }}>
@@ -308,9 +340,9 @@ const RegisterStudents = () => {
                                 }}
                             >
                                 <Box display="flex" justifyContent="space-between" alignItems="center">
-                                    {/* Left: Student List Count */}
+                                    {/* Left: Registrar List Count */}
                                     <Typography fontSize="14px" fontWeight="bold" color="white">
-                                        Total Number of Students in List: {filteredStudent.length}
+                                        Registrar's List:
                                     </Typography>
 
                                     {/* Right: Pagination Controls */}
@@ -472,7 +504,9 @@ const RegisterStudents = () => {
                 component={Paper}
                 sx={{
                     width: "100%",
+
                     border: "2px solid #800000",
+
                 }}
             >
                 <Table>
@@ -488,17 +522,17 @@ const RegisterStudents = () => {
                                         gap: 2,
                                     }}
                                 >
-                                    {/* ➕ Left: Add Student Button */}
+                                    {/* ➕ Left: Add Registrar Button */}
                                     <Button
                                         startIcon={<AddIcon />}
                                         variant="contained"
                                         onClick={() => {
                                             setForm({
-                                                student_number: "",
+                                                employee_id: "",
                                                 last_name: "",
                                                 middle_name: "",
                                                 first_name: "",
-                                                role: "Student",
+                                                role: "registrar",
                                                 email: "",
                                                 password: "",
                                                 status: "",
@@ -515,7 +549,7 @@ const RegisterStudents = () => {
                                             "&:hover": { backgroundColor: "#6D2323" },
                                         }}
                                     >
-                                        Add Student
+                                        Add Registrar
                                     </Button>
 
                                     {/* ⚙️ Right: Filter, Sort, Export */}
@@ -556,23 +590,6 @@ const RegisterStudents = () => {
                                             </Select>
                                         </FormControl>
 
-                                        <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} />
-                                        
-                                        <Button
-                                            variant="outlined"
-                                            startIcon={<FileUpload />}
-                                            onClick={handleImportFile}
-                                            sx={{
-                                                borderColor: "#800000",
-                                                color: "#800000",
-                                                textTransform: "none",
-                                                fontWeight: "bold",
-                                                "&:hover": { borderColor: "#a52a2a", color: "white", background: "#a52a2a"},
-                                            }}
-                                        >
-                                            Import XLSX
-                                        </Button>
-
                                         {/* Export CSV */}
                                         <Button
                                             variant="outlined"
@@ -601,12 +618,12 @@ const RegisterStudents = () => {
                     <TableHead sx={{ backgroundColor: "#6D2323" }}>
                         <TableRow>
                             {[
-                                "Student Number",
+                                "EMPLOYEE ID",
                                 "Image",
                                 "Full Name",
                                 "Email",
-                                "Program",
-                                "Year Level",
+                                "Department",
+                                "Position",
                                 "Actions",
                                 "Status",
 
@@ -628,10 +645,10 @@ const RegisterStudents = () => {
                     </TableHead>
 
                     <TableBody>
-                        {filteredStudent.length > 0 ? (
-                            filteredStudent.map((r) => (
-                                <TableRow key={r.user_id}>
-                                    <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>{r.student_number}</TableCell>
+                        {registrars.length > 0 ? (
+                            registrars.map((r) => (
+                                <TableRow key={r.id}>
+                                    <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>{r.employee_id}</TableCell>
 
                                     <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>
                                         {r.profile_picture ? (
@@ -654,11 +671,11 @@ const RegisterStudents = () => {
                                     <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>{r.email}</TableCell>
 
                                     <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>
-                                        {r.program_description|| "N/A"}
+                                        {r.dprtmnt_name || "N/A"}
                                     </TableCell>
 
                                     <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>
-                                        {r.year_level_description || "None"}
+                                        {r.role || "Registrar"}
                                     </TableCell>
 
 
@@ -683,7 +700,7 @@ const RegisterStudents = () => {
                                     {/* ✅ STATUS TOGGLE BUTTON */}
                                     <TableCell sx={{ border: "1px solid maroon" }}>
                                         <Button
-                                            onClick={() => handleToggleStatus(r.user_id, r.status)}
+                                            onClick={() => handleToggleStatus(r.id, r.status)}
                                             sx={{
                                                 backgroundColor: r.status === 1 ? "green" : "maroon",
                                                 color: "white",
@@ -707,7 +724,7 @@ const RegisterStudents = () => {
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={8} align="center">
-                                    No Student accounts found.
+                                    No registrar accounts found.
                                 </TableCell>
                             </TableRow>
                         )}
@@ -715,10 +732,11 @@ const RegisterStudents = () => {
                 </Table>
             </TableContainer>
 
-            {/* ➕ / ✏️ Student Modal */}
+
+            {/* ➕ / ✏️ Registrar Modal */}
             <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="sm">
                 <DialogTitle sx={{ color: "maroon", fontWeight: "bold" }}>
-                    {editData ? "Edit Student" : "Add New Student"}
+                    {editData ? "Edit Registrar" : "Add New Registrar"}
                 </DialogTitle>
                 <hr style={{ border: "1px solid #ccc", width: "100%" }} />
 
@@ -770,12 +788,12 @@ const RegisterStudents = () => {
                                 />
                             </Button>
                         </Stack>
-                    
-                        {/* 🔹 Student Information */}
+
+                        {/* 🔹 Registrar Information */}
                         <TextField
-                            label="Student Number"
-                            name="student_number"
-                            value={form.student_number}
+                            label="Employee ID"
+                            name="employee_id"
+                            value={form.employee_id}
                             onChange={handleChange}
                             fullWidth
                         />
@@ -825,11 +843,7 @@ const RegisterStudents = () => {
                                 name="dprtmnt_id"
                                 value={form.dprtmnt_id}
                                 label="Department"
-                                onChange={(e) => {
-                                    const selectedId = e.target.value;
-                                    setForm({ ...form, dprtmnt_id: selectedId, program_id: "" }); // reset program
-                                    if (selectedId) fetchPrograms(selectedId); // fetch related programs
-                                }}
+                                onChange={handleChange}
                             >
                                 <MenuItem value="">Select Department</MenuItem>
                                 {department.map((dep) => (
@@ -840,40 +854,22 @@ const RegisterStudents = () => {
                             </Select>
                         </FormControl>
 
-                        <FormControl fullWidth>
-                            <InputLabel id="program-label">Program</InputLabel>
-                            <Select
-                                labelId="program-label"
-                                name="curriculum_id"
-                                value={form.curriculum_id}
-                                label="Program"
-                                onChange={handleChange}
-                            >
-                                <MenuItem value="">Select Program</MenuItem>
-                                {programs.map((dep) => (
-                                    <MenuItem key={dep.curriculum_id} value={dep.curriculum_id}>
-                                        {dep.program_description} ({dep.program_code}-{dep.year_description})
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-
                         {/* 🔹 Status Dropdown (Active/Inactive) */}
-                        
-                        <FormControl fullWidth>
-                            <InputLabel id="status-label">Status</InputLabel>
-                            <Select
-                                labelId="status-label"
-                                name="status"
-                                value={form.status}
-                                label="Status"
-                                disabled={!!editData} 
-                                onChange={handleChange}
-                            >
-                                <MenuItem value={1}>Active</MenuItem>
-                                <MenuItem value={0}>Inactive</MenuItem>
-                            </Select>
-                        </FormControl>
+                        {editData && (
+                            <FormControl fullWidth>
+                                <InputLabel id="status-label">Status</InputLabel>
+                                <Select
+                                    labelId="status-label"
+                                    name="status"
+                                    value={form.status}
+                                    label="Status"
+                                    onChange={handleChange}
+                                >
+                                    <MenuItem value={1}>Active</MenuItem>
+                                    <MenuItem value={0}>Inactive</MenuItem>
+                                </Select>
+                            </FormControl>
+                        )}
                     </Stack>
                 </DialogContent>
 
@@ -893,6 +889,7 @@ const RegisterStudents = () => {
                 </DialogActions>
             </Dialog>
 
+
             <Snackbar
                 open={openSnackbar}
                 autoHideDuration={3000}
@@ -900,11 +897,11 @@ const RegisterStudents = () => {
                 anchorOrigin={{ vertical: "top", horizontal: "center" }}
             >
                 <Alert severity="success" sx={{ width: "100%" }}>
-                    Student registered successfully!
+                    Registrar registered successfully!
                 </Alert>
             </Snackbar>
         </Box>
     );
 }
 
-export default RegisterStudents;
+export default RegisterRegistrar;

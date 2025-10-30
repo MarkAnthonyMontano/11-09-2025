@@ -409,7 +409,17 @@ const DentalAssessment = () => {
                 e.stopPropagation();
             }
         });
+        
+        // Put this at the very bottom before the return 
+    if (loading || hasAccess === null) {
+        return <LoadingOverlay open={loading} message="Check Access" />;
+    }
 
+    if (!hasAccess) {
+        return (
+            <Unauthorized />
+        );
+    }
 
         return (
             <Box
@@ -501,16 +511,7 @@ const DentalAssessment = () => {
         );
     };
 
-    // Put this at the very bottom before the return 
-    if (loading || hasAccess === null) {
-        return <LoadingOverlay open={loading} message="Check Access" />;
-    }
-
-    if (!hasAccess) {
-        return (
-            <Unauthorized />
-        );
-    }
+    
 
 
     return (
