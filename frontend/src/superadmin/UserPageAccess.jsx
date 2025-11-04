@@ -18,6 +18,8 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { Search } from "@mui/icons-material";
+import SearchIcon from "@mui/icons-material/Search";
+
 
 const UserPageAccess = () => {
   const [userFound, setUserFound] = useState(null);
@@ -155,17 +157,16 @@ const UserPageAccess = () => {
             placeholder="Search by Person ID"
             value={userID}
             onChange={(e) => setUserID(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search sx={{ color: "gray" }} />
-                </InputAdornment>
-              ),
-            }}
             sx={{
-              width: { xs: "100%", sm: "350px" },
-              backgroundColor: "white",
-              borderRadius: "5px",
+              width: 450,
+              backgroundColor: "#fff",
+              borderRadius: 1,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "10px",
+              },
+            }}
+            InputProps={{
+              startAdornment: <SearchIcon sx={{ mr: 1, color: "gray" }} />,
             }}
           />
         </Box>

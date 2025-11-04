@@ -19,6 +19,7 @@ import {
 import { Search } from "@mui/icons-material";
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
+import SearchIcon from "@mui/icons-material/Search";
 
 const Notifications = () => {
     // Also put it at the very top
@@ -146,7 +147,7 @@ const Notifications = () => {
 
 
     return (
-        <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1,}}>
+        <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1, }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                 {/* Left: Header */}
                 <Typography variant="h4" fontWeight="bold" color="maroon">
@@ -159,14 +160,22 @@ const Notifications = () => {
                     placeholder="Search by Applicant / Message / Type"
                     size="small"
 
-                    style={{ width: '500px', marginRight: "25px" }}
+
                     value={searchQuery}
                     onChange={(e) => {
                         setSearchQuery(e.target.value);
                         setCurrentPage(1);
                     }}
+                    sx={{
+                        width: 450,
+                        backgroundColor: "#fff",
+                        borderRadius: 1,
+                        "& .MuiOutlinedInput-root": {
+                            borderRadius: "10px",
+                        },
+                    }}
                     InputProps={{
-                        startAdornment: <Search sx={{ mr: 1 }} />,
+                        startAdornment: <SearchIcon sx={{ mr: 1, color: "gray" }} />,
                     }}
                 />
             </Box>

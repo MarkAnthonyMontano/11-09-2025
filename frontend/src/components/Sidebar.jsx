@@ -169,7 +169,7 @@ const SideBar = ({ setIsAuthenticated }) => {
                 htmlFor="sidebar-profile-upload"
                 style={{
                   position: "absolute",
-                  bottom: "61px",
+                  bottom: "64px",
                   right: "calc(50% - 55px)",
                   cursor: "pointer",
                 }}

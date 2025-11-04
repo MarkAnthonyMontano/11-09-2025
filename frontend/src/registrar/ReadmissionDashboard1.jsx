@@ -24,7 +24,12 @@ import ExamPermit from "../applicant/ExamPermit";
 import { Snackbar, Alert } from '@mui/material';
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
-
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import ClassIcon from "@mui/icons-material/Class";
+import SearchIcon from "@mui/icons-material/Search";
+import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
+import GradeIcon from "@mui/icons-material/Grade";
 
 const ReadmissionDashboard1 = () => {
     const [snack, setSnack] = useState({ open: false, message: '', severity: 'info' });
@@ -183,44 +188,32 @@ const ReadmissionDashboard1 = () => {
         }
     };
 
-    useEffect(() => {
-        let consumedFlag = false;
-
-        const tryLoad = async () => {
-            if (queryPersonId) {
-                await fetchByPersonId(queryPersonId);
-                setExplicitSelection(true);
-                consumedFlag = true;
-                return;
-            }
-
-            // fallback only if it's a fresh selection from Applicant List
-            const source = sessionStorage.getItem("admin_edit_person_id_source");
-            const tsStr = sessionStorage.getItem("admin_edit_person_id_ts");
-            const id = sessionStorage.getItem("admin_edit_person_id");
-            const ts = tsStr ? parseInt(tsStr, 10) : 0;
-            const isFresh = source === "applicant_list" && Date.now() - ts < 5 * 60 * 1000;
-
-            if (id && isFresh) {
-                await fetchByPersonId(id);
-                setExplicitSelection(true);
-                consumedFlag = true;
-            }
-        };
-
-        tryLoad().finally(() => {
-            // consume the freshness so it won't auto-load again later
-            if (consumedFlag) {
-                sessionStorage.removeItem("admin_edit_person_id_source");
-                sessionStorage.removeItem("admin_edit_person_id_ts");
-            }
-        });
-    }, [queryPersonId]);
 
 
 
     const [activeStep, setActiveStep] = useState(0);
     const [clickedSteps, setClickedSteps] = useState([]);
+
+    const stepsData = [
+        { label: "Applicant List", to: "/super_admin_applicant_list", icon: <ListAltIcon /> },
+        { label: "Applicant Form", to: "/readmission_dashboard1", icon: <PersonAddIcon /> },
+        { label: "Class List", to: "/class_roster", icon: <ClassIcon /> },
+        { label: "Search Certificate of Registration", to: "/search_cor", icon: <SearchIcon /> },
+        { label: "Student Numbering", to: "/student_numbering", icon: <ConfirmationNumberIcon /> },
+        { label: "Report of Grades", to: "/report_of_grades", icon: <GradeIcon /> },
+        { label: "Transcript of Records", to: "/transcript_of_records", icon: <SchoolIcon /> },
+
+    ];
+
+    const [currentStep, setCurrentStep] = useState(1);
+    const [visitedSteps, setVisitedSteps] = useState(Array(stepsData.length).fill(false));
+
+
+
+
+
+
+
 
     const steps = [
         { label: "Personal Information", icon: <PersonIcon />, path: "/readmission_dashboard1" },
@@ -818,11 +811,17 @@ const ReadmissionDashboard1 = () => {
                         placeholder="Search Student Name / Email / Student Number"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        InputProps={{
-                            readOnly: true,
-                            startAdornment: <Search sx={{ mr: 1 }} />,
+                        sx={{
+                            width: 450,
+                            backgroundColor: "#fff",
+                            borderRadius: 1,
+                            "& .MuiOutlinedInput-root": {
+                                borderRadius: "10px",
+                            },
                         }}
-                        sx={{ width: { xs: "100%", sm: "425px" } }}
+                        InputProps={{
+                            startAdornment: <SearchIcon sx={{ mr: 1, color: "gray" }} />,
+                        }}
                     />
 
 
@@ -832,6 +831,77 @@ const ReadmissionDashboard1 = () => {
             {searchError && <Typography color="error">{searchError}</Typography>}
 
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
+            <br />
+
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    flexWrap: "nowrap", // prevent wrapping
+                    width: "100%",
+                    mt: 3,
+
+                }}
+            >
+                {stepsData.map((step, index) => (
+                    <React.Fragment key={index}>
+                        {/* Step Card */}
+                        <Card
+                            onClick={() => handleNavigateStep(index, step.to)}
+                            sx={{
+                                flex: `1 1 ${100 / stepsData.length}%`, // evenly divide width
+                                height: 120,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                cursor: "pointer",
+                                borderRadius: 2,
+                                border: "2px solid #6D2323",
+                                backgroundColor: currentStep === index ? "#6D2323" : "#E8C999",
+                                color: currentStep === index ? "#fff" : "#000",
+                                boxShadow:
+                                    currentStep === index
+                                        ? "0px 4px 10px rgba(0,0,0,0.3)"
+                                        : "0px 2px 6px rgba(0,0,0,0.15)",
+                                transition: "0.3s ease",
+                                "&:hover": {
+                                    backgroundColor: currentStep === index ? "#5a1c1c" : "#f5d98f",
+                                },
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                }}
+                            >
+                                <Box sx={{ fontSize: 40, mb: 1 }}>{step.icon}</Box>
+                                <Typography
+                                    sx={{
+                                        fontSize: 14,
+                                        fontWeight: "bold",
+                                        textAlign: "center",
+                                    }}
+                                >
+                                    {step.label}
+                                </Typography>
+                            </Box>
+                        </Card>
+
+                        {/* Spacer (line gap between steps) */}
+                        {index < stepsData.length - 1 && (
+                            <Box
+                                sx={{
+                                    flex: 0.05,
+                                    mx: 1, // spacing between cards
+                                }}
+                            />
+                        )}
+                    </React.Fragment>
+                ))}
+            </Box>
+
             <br />
 
             <TableContainer component={Paper} sx={{ width: '100%', mb: 1 }}>
@@ -863,6 +933,8 @@ const ReadmissionDashboard1 = () => {
             </TableContainer>
 
             <Container>
+
+
 
                 <Box
                     sx={{
@@ -1004,6 +1076,7 @@ const ReadmissionDashboard1 = () => {
                 </Container>
 
                 <br />
+
 
                 <Box sx={{ display: "flex", justifyContent: "center", width: "100%", px: 4 }}>
                     {steps.map((step, index) => (

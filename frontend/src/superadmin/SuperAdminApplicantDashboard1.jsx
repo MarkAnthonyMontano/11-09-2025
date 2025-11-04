@@ -23,6 +23,7 @@ import { FaFileExcel } from "react-icons/fa";
 import ExamPermit from "../applicant/ExamPermit";
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
+import SearchIcon from "@mui/icons-material/Search";
 
 
 
@@ -1064,8 +1065,17 @@ const SuperAdminApplicantDashboard1 = () => {
                     placeholder="Search Applicant Name / Email / Applicant ID"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    InputProps={{ startAdornment: <Search sx={{ mr: 1 }} /> }}
-                    sx={{ width: { xs: "100%", sm: "425px" } }}
+                    sx={{
+                        width: 450,
+                        backgroundColor: "#fff",
+                        borderRadius: 1,
+                        "& .MuiOutlinedInput-root": {
+                            borderRadius: "10px",
+                        },
+                    }}
+                    InputProps={{
+                        startAdornment: <SearchIcon sx={{ mr: 1, color: "gray" }} />,
+                    }}
                 />
 
             </Box>

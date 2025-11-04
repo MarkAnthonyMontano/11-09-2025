@@ -3454,21 +3454,30 @@ app.post("/request-otp", async (req, res) => {
   const now = Date.now();
   const existing = otpStore[email];
 
-  // prevent spamming OTP
+  // Prevent spamming OTP (use shorter cooldown if needed)
   if (existing && existing.cooldownUntil > now) {
     const secondsLeft = Math.ceil((existing.cooldownUntil - now) / 1000);
-    return res.status(429).json({ message: `OTP already sent. Please wait ${secondsLeft}s.` });
+    return res
+      .status(429)
+      .json({ message: `OTP already sent. Please wait ${secondsLeft}s.` });
   }
 
   const otp = generateOTP();
 
   otpStore[email] = {
     otp,
-    expiresAt: now + 5 * 60 * 1000,     // valid for 5 minutes
-    cooldownUntil: now + 5 * 60 * 1000, // resend cooldown 5 minutes
+    expiresAt: now + 5 * 60 * 1000, // OTP valid for 5 minutes
+    cooldownUntil: now + 60 * 1000, // Allow resend after 1 minute
   };
 
   try {
+    // ✅ Fetch short_term from settings table (fallback to "School")
+    const [settings] = await db
+      .promise()
+      .query("SELECT short_term FROM settings LIMIT 1");
+    const shortTerm = settings?.[0]?.short_term || "School";
+
+    // ✅ Configure email transport
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -3477,16 +3486,18 @@ app.post("/request-otp", async (req, res) => {
       },
     });
 
+    // ✅ Send OTP Email
     await transporter.sendMail({
-      from: `" OTP Verification" <${process.env.EMAIL_USER}>`,
+      from: `"${shortTerm} OTP Verification" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: "Your OTP Code is",
-      text: `Your OTP is: ${otp} (Valid for 5 minutes)`,
+      subject: `${shortTerm} OTP Code`,
+      text: `Your ${shortTerm} OTP is: ${otp}. It is valid for 5 minutes.`,
     });
 
-    res.json({ message: "OTP sent to email" });
+    console.log(`✅ OTP sent to ${email}: ${otp}`);
+    res.json({ message: `${shortTerm} OTP sent to your email` });
   } catch (err) {
-    console.error("OTP email error:", err);
+    console.error("⚠️ OTP email error:", err);
     delete otpStore[email];
     res.status(500).json({ message: "Failed to send OTP" });
   }
@@ -3495,41 +3506,62 @@ app.post("/request-otp", async (req, res) => {
 // ----------------- VERIFY OTP -----------------
 app.post("/verify-otp", (req, res) => {
   const { email, otp } = req.body;
+  if (!email || !otp)
+    return res.status(400).json({ message: "Email and OTP are required" });
+
   const now = Date.now();
 
-  let record = loginAttempts[email] || { count: 0, lockUntil: null };
+  // Retrieve stored OTP data
+  const stored = otpStore[email];
+  const record = loginAttempts[email] || { count: 0, lockUntil: null };
 
-  // if locked
+  // Check if locked due to failed OTPs
   if (record.lockUntil && record.lockUntil > now) {
     const secondsLeft = Math.ceil((record.lockUntil - now) / 1000);
-    return res.status(429).json({ message: `Too many failed attempts. Try again in ${secondsLeft}s.` });
+    return res.status(429).json({
+      message: `Too many failed attempts. Try again in ${secondsLeft}s.`,
+    });
   }
 
-  const stored = otpStore[email];
-  if (!stored || stored.otp !== otp || stored.expiresAt < now) {
-    // failed OTP attempt
+  // Handle missing or expired OTP
+  if (!stored) {
+    return res.status(400).json({ message: "No OTP request found for this email" });
+  }
+
+  if (stored.expiresAt < now) {
+    delete otpStore[email];
+    return res.status(400).json({ message: "OTP has expired. Please request a new one." });
+  }
+
+  // Handle invalid OTP input
+  if (stored.otp !== otp.trim()) {
     record.count++;
     if (record.count >= 3) {
-      record.lockUntil = now + 3 * 60 * 1000; // lock 3 min
+      record.lockUntil = now + 3 * 60 * 1000; // Lock for 3 minutes
       loginAttempts[email] = record;
-      return res.status(429).json({ message: "Too many failed OTP attempts. Locked for 3 minutes." });
+      return res
+        .status(429)
+        .json({ message: "Too many failed OTP attempts. Locked for 3 minutes." });
     }
     loginAttempts[email] = record;
-    return res.status(400).json({ message: "Invalid or expired OTP" });
+    return res.status(400).json({ message: "Invalid OTP. Please try again." });
   }
 
-  // ✅ OTP correct → reset everything
-  delete loginAttempts[email];
+  // ✅ OTP is correct — reset state
   delete otpStore[email];
+  delete loginAttempts[email];
 
   res.json({ message: "OTP verified successfully" });
 });
 
+// ----------------- VERIFY PASSWORD -----------------
 app.post("/api/verify-password", async (req, res) => {
   const { person_id, password } = req.body;
 
   if (!person_id || !password) {
-    return res.status(400).json({ success: false, message: "Person ID and password required" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Person ID and password required" });
   }
 
   try {
@@ -3539,19 +3571,26 @@ app.post("/api/verify-password", async (req, res) => {
     );
 
     if (rows.length === 0) {
-      return res.status(400).json({ success: false, message: "User not found" });
+      return res
+        .status(400)
+        .json({ success: false, message: "User not found" });
     }
 
     const user = rows[0];
     const isMatch = await bcrypt.compare(password, user.password);
+
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: "Invalid password" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid password" });
     }
 
     res.json({ success: true });
   } catch (err) {
     console.error("verify-password error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    res
+      .status(500)
+      .json({ success: false, message: "Server error during password verification" });
   }
 });
 
@@ -3566,7 +3605,6 @@ app.post("/login", async (req, res) => {
   const now = Date.now();
   const record = loginAttempts[loginCredentials] || { count: 0, lockUntil: null };
 
-  // check lockout
   if (record.lockUntil && record.lockUntil > now) {
     const secondsLeft = Math.ceil((record.lockUntil - now) / 1000);
     return res.status(429).json({ message: `Too many failed attempts. Try again in ${secondsLeft}s.` });
@@ -3574,45 +3612,45 @@ app.post("/login", async (req, res) => {
 
   try {
     const query = `(
-  SELECT 
-    ua.id AS account_id,
-    ua.person_id,
-    ua.email,
-    ua.password,
-    ua.role,
-    NULL AS profile_image,
-    NULL AS fname,
-    NULL AS mname,
-    NULL AS lname,
-    ua.status AS status,
-    'user' AS source,
-    ua.dprtmnt_id,
-    dt.dprtmnt_name
-  FROM user_accounts AS ua
-  LEFT JOIN dprtmnt_table AS dt ON ua.dprtmnt_id = dt.dprtmnt_id
-  LEFT JOIN student_numbering_table AS snt ON snt.person_id = ua.person_id
-  WHERE (ua.email = ? OR snt.student_number = ?)
-)
-UNION ALL
-(
-  SELECT 
-    ua.prof_id AS account_id,
-    ua.person_id,
-    ua.email,
-    ua.password,
-    ua.role,
-    ua.profile_image,
-    ua.fname,
-    ua.mname,
-    ua.lname,
-    ua.status,
-    'prof' AS source,
-    NULL AS dprtmnt_id,
-    NULL AS dprtmnt_name
-  FROM prof_table AS ua
-  LEFT JOIN person_prof_table AS pt ON pt.person_id = ua.person_id
-  WHERE ua.email = ?
-);`;
+      SELECT 
+        ua.id AS account_id,
+        ua.person_id,
+        ua.email,
+        ua.password,
+        ua.role,
+        NULL AS profile_image,
+        NULL AS fname,
+        NULL AS mname,
+        NULL AS lname,
+        ua.status AS status,
+        'user' AS source,
+        ua.dprtmnt_id,
+        dt.dprtmnt_name
+      FROM user_accounts AS ua
+      LEFT JOIN dprtmnt_table AS dt ON ua.dprtmnt_id = dt.dprtmnt_id
+      LEFT JOIN student_numbering_table AS snt ON snt.person_id = ua.person_id
+      WHERE (ua.email = ? OR snt.student_number = ?)
+    )
+    UNION ALL
+    (
+      SELECT 
+        ua.prof_id AS account_id,
+        ua.person_id,
+        ua.email,
+        ua.password,
+        ua.role,
+        ua.profile_image,
+        ua.fname,
+        ua.mname,
+        ua.lname,
+        ua.status,
+        'prof' AS source,
+        NULL AS dprtmnt_id,
+        NULL AS dprtmnt_name
+      FROM prof_table AS ua
+      LEFT JOIN person_prof_table AS pt ON pt.person_id = ua.person_id
+      WHERE ua.email = ?
+    );`;
 
     const [results] = await db3.query(query, [loginCredentials, loginCredentials, loginCredentials]);
 
@@ -3629,7 +3667,6 @@ UNION ALL
 
     const user = results[0];
 
-    // password check
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       record.count++;
@@ -3648,41 +3685,45 @@ UNION ALL
       });
     }
 
-    // ✅ NOTE: don’t clear loginAttempts yet → clear only after OTP verification
-
-    // block inactive accounts
     if ((user.source === "prof" || user.source === "user") && user.status === 0) {
       return res.status(400).json({ message: "The Account is Inactive" });
     }
 
-    // generate OTP
+    // ✅ Generate OTP
     const otp = generateOTP();
     otpStore[user.email] = {
       otp,
-      expiresAt: now + 60 * 1000,
-      cooldownUntil: now + 60 * 1000,
+      expiresAt: now + 5 * 60 * 1000, // 5 minutes
+      cooldownUntil: now + 5 * 60 * 1000,
     };
 
-    // send OTP
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-    });
-
     try {
-      await transporter.sendMail({
-        from: `"OTP Verification" <${process.env.EMAIL_USER}>`,
-        to: user.email,
-        subject: "Your OTP Code",
-        text: `Your OTP is: ${otp} (Valid for 5 minutes)`,
+      // ✅ Fetch short_term from company_settings
+      const [companyResult] = await db.query("SELECT short_term FROM company_settings WHERE id = 1");
+      const shortTerm = companyResult?.[0]?.short_term || "School";
+
+      // ✅ Configure mail transport
+      const transporter = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true,
+        auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
       });
+
+      // ✅ Use dynamic short term in subject and body
+      await transporter.sendMail({
+        from: `"${shortTerm} OTP Verification" <${process.env.EMAIL_USER}>`,
+        to: user.email,
+        subject: `${shortTerm} OTP Code`,
+        text: `Your ${shortTerm} OTP is: ${otp} (Valid for 5 minutes)`,
+      });
+
+      console.log(`✅ Sent ${shortTerm} OTP to ${user.email}`);
     } catch (err) {
       console.error("⚠️ Failed to send OTP email:", err.message);
     }
 
-    // generate JWT
+    // ✅ Generate JWT
     const token = webtoken.sign(
       { person_id: user.person_id, email: user.email, role: user.role, department: user.department },
       process.env.JWT_SECRET,
@@ -3695,7 +3736,7 @@ UNION ALL
       email: user.email,
       role: user.role,
       person_id: user.person_id,
-      department: user.dprtmnt_id
+      department: user.dprtmnt_id,
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -4032,14 +4073,13 @@ app.post("/superadmin-get-registrar", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
 // ---------------- Registrar: Reset Password ----------------
-// 🔹 FORGOT PASSWORD (handles student, registrar, faculty)
+// FORGOT PASSWORD (handles student, registrar, faculty)
 app.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ message: "Email is required" });
 
-  // ✅ Generate uppercase temporary password (A–Z + 0–9)
+  // Generate uppercase temporary password (A–Z + 0–9)
   const generateTempPassword = () => {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     return Array.from({ length: 8 }, () =>
@@ -4051,43 +4091,48 @@ app.post("/forgot-password", async (req, res) => {
   const hashedPassword = await bcrypt.hash(newPassword, 10);
 
   try {
-    // 1️⃣ Check in user_accounts (student / registrar)
+    // Fetch short_term from company_settings
+    const [company] = await db.query("SELECT short_term FROM company_settings WHERE id = 1");
+    const shortTerm = company?.[0]?.short_term || "School";
+
+    // 1. Check in user_accounts (student / registrar)
     const [userResult] = await db3.query(
       "UPDATE user_accounts SET password = ? WHERE email = ? AND (role = 'student' OR role = 'registrar')",
       [hashedPassword, email]
     );
 
     if (userResult.affectedRows > 0) {
-      await sendResetEmail(email, newPassword, "Student/Registrar Account");
+      await sendResetEmail(email, newPassword, "Student/Registrar Account", shortTerm);
       return res.json({
-        message: "Password reset successfully. Please check your email.",
+        message: `${shortTerm} password reset successfully. Please check your email.`,
       });
     }
 
-    // 2️⃣ Check in prof_table (faculty)
+    // 2. Check in prof_table (faculty)
     const [profResult] = await db3.query(
       "UPDATE prof_table SET password = ? WHERE email = ? AND role = 'faculty'",
       [hashedPassword, email]
     );
 
     if (profResult.affectedRows > 0) {
-      await sendResetEmail(email, newPassword, "Faculty Account");
+      await sendResetEmail(email, newPassword, "Faculty Account", shortTerm);
       return res.json({
-        message: "Password reset successfully. Please check your email.",
+        message: `${shortTerm} password reset successfully. Please check your email.`,
       });
     }
 
-    // 3️⃣ Not found
+    // 3. Not found
     return res
       .status(404)
-      .json({ message: "Account not found. Please check your email address." });
+      .json({ message: `${shortTerm} account not found. Please check your email address.` });
   } catch (err) {
-    console.error("❌ Forgot password error:", err);
+    console.error("Forgot password error:", err);
     res.status(500).json({ message: "Internal server error" });
   }
 });
-// 🔹 Email sender
-async function sendResetEmail(to, tempPassword, accountType) {
+
+// Email sender
+async function sendResetEmail(to, tempPassword, accountType, shortTerm) {
   try {
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -4098,26 +4143,28 @@ async function sendResetEmail(to, tempPassword, accountType) {
     });
 
     const mailOptions = {
-      from: `"Information System" <${process.env.EMAIL_USER}>`, 
+      from: `"${shortTerm} Information System" <${process.env.EMAIL_USER}>`,
       to,
-      subject: `🔐 ${accountType} Password Reset`,
+      subject: `${shortTerm} ${accountType} Password Reset`,
       html: `
-        <div style="font-family: Arial, sans-serif; color: #333;">
-          <h2 style="color:#1E90FF;">${accountType} Password Reset</h2>
+        <div>
           <p>Hello,</p>
           <p>Your new temporary password is:</p>
-          <p style="font-size: 18px; font-weight: bold; color:#1E90FF;">${tempPassword}</p>
+          <p style="font-size: 18px; font-weight: bold;">${tempPassword}</p>
           <p>Please log in using this password and change it immediately.</p>
+          <p>— ${shortTerm} Information System</p>
         </div>
       `,
     };
 
     await transporter.sendMail(mailOptions);
-    console.log(`📧 Reset email sent to ${to} (${accountType})`);
+    console.log(`${shortTerm} reset email sent to ${to} (${accountType})`);
   } catch (emailErr) {
-    console.error("❌ Email send error:", emailErr);
+    console.error("Email send error:", emailErr);
   }
 }
+
+
 
 // ---------------- Registrar: Update Status ----------------
 app.post("/superadmin-update-status-registrar", async (req, res) => {
@@ -4210,11 +4257,10 @@ app.post("/superadmin-reset-faculty", async (req, res) => {
       to: email,
       subject: "Faculty Password Reset",
       html: `
-        <div style="font-family: Arial, sans-serif; color: #333;">
-          <h2 style="color:#1E90FF;">Faculty Password Reset</h2>
+        <div>
           <p>Hello,</p>
           <p>Your new temporary password is:</p>
-          <p style="font-size: 18px; font-weight: bold; color:#1E90FF;">${newPassword}</p>
+          <p style="font-size: 18px; font-weight: bold;">${newPassword}</p>
           <p>Please log in using this password and change it immediately.</p>
         </div>
       `,
@@ -4462,8 +4508,6 @@ app.post("/faculty-change-password", async (req, res) => {
 
 
 
-
-
 io.on("connection", (socket) => {
   console.log("✅ Socket.IO client connected");
 
@@ -4473,9 +4517,9 @@ io.on("connection", (socket) => {
       // ✅ 1️⃣ Check if applicant exists
       const [rows] = await db.query(
         `SELECT ua.email, p.campus
-       FROM user_accounts ua
-       JOIN person_table p ON ua.person_id = p.person_id
-       WHERE ua.email = ?`,
+         FROM user_accounts ua
+         JOIN person_table p ON ua.person_id = p.person_id
+         WHERE ua.email = ?`,
         [email]
       );
 
@@ -4486,11 +4530,11 @@ io.on("connection", (socket) => {
         });
       }
 
-      // ✅ 2️⃣ Fetch company name dynamically from settings
+      // ✅ 2️⃣ Fetch short_term from company_settings table
       const [[company]] = await db.query(
-        "SELECT company_name FROM company_settings WHERE id = 1"
+        "SELECT short_term FROM company_settings WHERE id = 1"
       );
-      const companyName = company?.company_name || "Admissions Office";
+      const shortTerm = company?.short_term || "School";
 
       // ✅ 3️⃣ Generate new password
       const newPassword = Math.random().toString(36).slice(-8).toUpperCase();
@@ -4510,17 +4554,17 @@ io.on("connection", (socket) => {
         },
       });
 
-      // ✅ 5️⃣ Compose email dynamically with companyName
+      // ✅ 5️⃣ Compose email dynamically using shortTerm
       const mailOptions = {
-        from: `"${companyName} Enrollment Notice" <${process.env.EMAIL_USER}>`,
+        from: `"${shortTerm} Enrollment Notice" <${process.env.EMAIL_USER}>`,
         to: email,
-        subject: "Your Password has been Reset!",
+        subject: `${shortTerm} Password Reset Notice`,
         text: `Hi,
 
 Please log in with your new password: ${newPassword}
 
 Yours truly,
-${companyName}`,
+${shortTerm} MIS Office`,
       };
 
       await transporter.sendMail(mailOptions);
@@ -4528,7 +4572,7 @@ ${companyName}`,
       // ✅ 6️⃣ Notify frontend that email was sent successfully
       socket.emit("password-reset-result-applicant", {
         success: true,
-        message: "New password sent to your email.",
+        message: `${shortTerm} password reset sent to your email.`,
       });
     } catch (error) {
       console.error("Reset error (applicant):", error);
@@ -4545,9 +4589,9 @@ ${companyName}`,
       // ✅ 1️⃣ Check if email exists
       const [rows] = await db3.query(
         `SELECT ua.email, p.campus
-       FROM user_accounts ua
-       JOIN person_table p ON ua.person_id = p.person_id
-       WHERE ua.email = ?`,
+         FROM user_accounts ua
+         JOIN person_table p ON ua.person_id = p.person_id
+         WHERE ua.email = ?`,
         [email]
       );
 
@@ -4558,11 +4602,11 @@ ${companyName}`,
         });
       }
 
-      // ✅ 2️⃣ Fetch company name dynamically
-      const [[company]] = await db.query(
-        "SELECT company_name FROM company_settings WHERE id = 1"
+      // ✅ 2️⃣ Fetch short_term from company_settings table
+      const [[company]] = await db3.query(
+        "SELECT short_term FROM company_settings WHERE id = 1"
       );
-      const companyName = company?.company_name || "Admissions Office";
+      const shortTerm = company?.short_term || "School";
 
       // ✅ 3️⃣ Generate new password
       const newPassword = Math.random().toString(36).slice(-8).toUpperCase();
@@ -4572,7 +4616,7 @@ ${companyName}`,
         email,
       ]);
 
-      // ✅ 4️⃣ Configure email sender (no hardcoded address)
+      // ✅ 4️⃣ Configure email sender
       const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
@@ -4581,17 +4625,17 @@ ${companyName}`,
         },
       });
 
-      // ✅ 5️⃣ Compose email dynamically using company name
+      // ✅ 5️⃣ Compose email dynamically using shortTerm
       const mailOptions = {
-        from: `"${companyName} Enrollment Notice" <${process.env.EMAIL_USER}>`,
+        from: `"${shortTerm} Enrollment Notice" <${process.env.EMAIL_USER}>`,
         to: email,
-        subject: "Your Password has been Reset!",
+        subject: `${shortTerm} Password Reset Notice`,
         text: `Hi,
 
 Please log in with your new password: ${newPassword}
 
 Yours truly,
-${companyName}`,
+${shortTerm} MIS Office`,
       };
 
       await transporter.sendMail(mailOptions);
@@ -4599,7 +4643,7 @@ ${companyName}`,
       // ✅ 6️⃣ Emit success response
       socket.emit("password-reset-result-registrar", {
         success: true,
-        message: "New password sent to your email.",
+        message: `${shortTerm} password reset sent to your email.`,
       });
     } catch (error) {
       console.error("Reset error (registrar):", error);

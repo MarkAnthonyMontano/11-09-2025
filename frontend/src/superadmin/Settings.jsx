@@ -166,21 +166,52 @@ function Settings({ onUpdate }) {
     if (!hasAccess) {
         return <Unauthorized />;
     }
-
     return (
         <Box
             sx={{
                 width: "100%",
                 height: "100vh",
                 display: "flex",
-                justifyContent: "center",
-                alignItems: "flex-start",
+                flexDirection: "column",
+                alignItems: "center",
                 backgroundColor: "transparent",
                 overflowY: "auto",
                 overflowX: "hidden",
-                padding: "40px 0",
+                
             }}
         >
+            {/* ✅ Header Section */}
+            <Box
+                sx={{
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "left",
+                    alignItems: "left",
+                    flexDirection: "column",
+                    mb: 3,
+                }}
+            >
+                <Typography
+                    variant="h4"
+                    sx={{
+                        fontWeight: "bold",
+                        color: "maroon",
+                        fontSize: "36px",
+                        mb: 1,
+                    }}
+                >
+                    SETTINGS
+                </Typography>
+                <hr
+                    style={{
+                        border: "1px solid #ccc",
+                        width: "100%",
+                        margin: 0,
+                    }}
+                />
+            </Box>
+
+            {/* ✅ Main Content */}
             <Paper
                 elevation={6}
                 sx={{
@@ -385,6 +416,7 @@ function Settings({ onUpdate }) {
             </Snackbar>
         </Box>
     );
+
 }
 
 export default Settings;

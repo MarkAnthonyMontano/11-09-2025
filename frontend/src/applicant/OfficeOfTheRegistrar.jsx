@@ -11,6 +11,7 @@ const OfficeOfTheRegistrar = () => {
     const settings = useContext(SettingsContext);
     const [fetchedLogo, setFetchedLogo] = useState(null);
     const [companyName, setCompanyName] = useState("");
+    const [shortTerm, setShortTerm] = useState("");
 
     useEffect(() => {
         if (settings) {
@@ -24,6 +25,7 @@ const OfficeOfTheRegistrar = () => {
             // ✅ load dynamic name + address
             if (settings.company_name) setCompanyName(settings.company_name);
             if (settings.campus_address) setCampusAddress(settings.campus_address);
+            if (settings.short_term) setShortTerm(settings.short_term);
         }
     }, [settings]);
 
@@ -151,7 +153,7 @@ const OfficeOfTheRegistrar = () => {
   }
 
   html, body {
-    margin: 0;
+    margin: 1;
     padding: 0;
     width: 210mm;
     height: 297mm;
@@ -160,7 +162,7 @@ const OfficeOfTheRegistrar = () => {
 
   *, *::before, *::after {
     box-sizing: border-box;
-    margin: 0;
+    margin: 1;
     padding: 0;
   }
 
@@ -176,7 +178,7 @@ const OfficeOfTheRegistrar = () => {
   }
 
     .student-table {
-    margin-top: -15px !important;
+    margin-top: -30px !important;
   }
 
 
@@ -279,10 +281,10 @@ const OfficeOfTheRegistrar = () => {
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
             <br />
 
-              {/* ✅ PRINT BUTTON (unchanged) */}
-                <button
-                  onClick={printDiv}
-                  style={{
+            {/* ✅ PRINT BUTTON (unchanged) */}
+            <button
+                onClick={printDiv}
+                style={{
                     marginBottom: "1rem",
                     padding: "10px 20px",
                     border: "2px solid black",
@@ -294,24 +296,24 @@ const OfficeOfTheRegistrar = () => {
                     fontSize: "16px",
                     fontWeight: "bold",
                     transition: "background-color 0.3s, transform 0.2s",
-                  }}
-                  onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
-                  onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
-                  onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
-                  onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
-                >
-                  <span
+                }}
+                onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
+                onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
+                onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
+                onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
+            >
+                <span
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
                     }}
-                  >
+                >
                     <FcPrint size={20} />
                     Print Office of the Registrar
-                  </span>
-                </button>
-               
+                </span>
+            </button>
+
 
             <Container>
                 <div ref={divToPrintRef}>
@@ -402,20 +404,21 @@ const OfficeOfTheRegistrar = () => {
                                             {campusAddress}
                                         </div>
                                     )}
-                                    <br />
+
 
                                     <div style={{
-                                        fontSize: "15px",
+                                        fontSize: "14px",
                                         fontFamily: "Arial",
                                         fontWeight: "bold",
                                         marginBottom: "5px",
+                                        marginTop: "5px",
 
                                         marginLeft: "-145px",
                                         fontFamily: "Times new roman",
                                         textAlign: "center",
                                     }}>
                                         OFFICE OF THE REGISTRAR<br />
-                                        APPLICATION FOR EARIST COLLEGE ADMISSION
+                                        APPLICATION FOR {shortTerm ? shortTerm.toUpperCase() : ""} COLLEGE ADMISSION
                                     </div>
 
 
@@ -431,7 +434,7 @@ const OfficeOfTheRegistrar = () => {
                             borderCollapse: "collapse",
                             fontFamily: "Arial, Helvetica, sans-serif",
                             width: "8in",
-                            marginTop: "-50px",
+                            marginTop: "-90px",
                             margin: "0 auto",
                             textAlign: "center",
                             tableLayout: "fixed",
@@ -446,9 +449,9 @@ const OfficeOfTheRegistrar = () => {
                                     colSpan={23}
                                     style={{
                                         fontFamily: "Times New Roman",
-                                        fontSize: "14px",
+                                        fontSize: "13px",
                                         paddingTop: "5px",  // you can reduce this if needed
-                                        marginTop: -5,
+                                        marginTop: -10,
 
                                         textAlign: "left",
 
@@ -465,7 +468,7 @@ const OfficeOfTheRegistrar = () => {
                                         fontFamily: "Times New Roman",
                                         fontSize: "14px",
                                         paddingTop: "5px",  // you can reduce this if needed
-                                        marginTop: -5,
+                                        marginTop: -10,
                                         textAlign: "right",
 
                                     }}
@@ -657,7 +660,7 @@ const OfficeOfTheRegistrar = () => {
 
                             </tr>
                             <tr>
-                                <td colSpan="40" style={{ height: "20px" }}>
+                                <td colSpan="40" style={{ height: "10px" }}>
 
                                 </td>
                             </tr>
@@ -668,7 +671,7 @@ const OfficeOfTheRegistrar = () => {
                                     colSpan={10}
                                     style={{
                                         fontFamily: "Times New Roman",
-                                        fontSize: "14px",
+                                        fontSize: "13px",
                                         paddingTop: "5px",
                                         marginTop: 0,
                                         textAlign: "left",
@@ -726,7 +729,7 @@ const OfficeOfTheRegistrar = () => {
                                     colSpan={10}
                                     style={{
                                         fontFamily: "Times New Roman",
-                                        fontSize: "14px",
+                                        fontSize: "13px",
                                         paddingTop: "5px",  // you can reduce this if needed
                                         marginTop: 0,
                                         textAlign: "left",
@@ -782,7 +785,7 @@ const OfficeOfTheRegistrar = () => {
                                     colSpan={40}
                                     style={{
                                         fontFamily: "Times New Roman",
-                                        fontSize: "14px",
+                                        fontSize: "13px",
                                         paddingTop: "5px",  // you can reduce this if needed
                                         marginTop: 0,
                                         textAlign: "left",
@@ -1877,7 +1880,7 @@ const OfficeOfTheRegistrar = () => {
                                     colSpan={13}
                                     style={{
                                         fontFamily: "Times New Roman",
-                                        fontSize: "14px",
+                                        fontSize: "13px",
                                         paddingTop: "5px",  // you can reduce this if needed
                                         marginTop: 0,
                                         textAlign: "left",
@@ -1887,7 +1890,7 @@ const OfficeOfTheRegistrar = () => {
                                     }}
                                 >
                                     <span style={{ fontWeight: "bold", marginRight: "30px", textAlign: "left" }}>
-                                        Junior High School
+                                        Junior High School:
                                     </span>{" "}
 
                                 </td>
@@ -1929,7 +1932,7 @@ const OfficeOfTheRegistrar = () => {
                                     colSpan={9}
                                     style={{
                                         fontFamily: "Times New Roman",
-                                        fontSize: "14px",
+                                        fontSize: "13px",
                                         paddingTop: "5px",  // you can reduce this if needed
                                         marginTop: 0,
                                         textAlign: "left",
@@ -1938,7 +1941,7 @@ const OfficeOfTheRegistrar = () => {
 
                                     }}
                                 >
-                                    Voc'l. School
+                                    Voc'l. School:
 
                                 </td>
                                 <td
@@ -2137,7 +2140,7 @@ const OfficeOfTheRegistrar = () => {
                                     colSpan={13}
                                     style={{
                                         fontFamily: "Times New Roman",
-                                        fontSize: "14px",
+                                        fontSize: "13px",
                                         paddingTop: "5px",  // you can reduce this if needed
                                         marginTop: 0,
                                         textAlign: "left",
@@ -2148,7 +2151,7 @@ const OfficeOfTheRegistrar = () => {
 
                                     }}
                                 >
-                                    Senior High School
+                                    Senior High School:
                                 </td>
                                 <td
                                     colSpan={7}
@@ -2190,7 +2193,7 @@ const OfficeOfTheRegistrar = () => {
                                     colSpan={9}
                                     style={{
                                         fontFamily: "Times New Roman",
-                                        fontSize: "14px",
+                                        fontSize: "13px",
                                         paddingTop: "5px",  // you can reduce this if needed
                                         marginTop: 0,
                                         textAlign: "left",
@@ -2199,7 +2202,7 @@ const OfficeOfTheRegistrar = () => {
 
                                     }}
                                 >
-                                    Graduate Studies
+                                    Graduate Studies:
 
                                 </td>
                                 <td
@@ -2655,7 +2658,7 @@ const OfficeOfTheRegistrar = () => {
                                     colSpan={7}
                                     style={{
                                         fontFamily: "Times New Roman",
-                                        fontSize: "14px",
+                                        fontSize: "13px",
                                         paddingTop: "5px",  // you can reduce this if needed
                                         marginTop: 0,
                                         textAlign: "left",

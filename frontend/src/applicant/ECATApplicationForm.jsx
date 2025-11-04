@@ -195,7 +195,7 @@ const ECATApplicationForm = () => {
       }
 
          .student-table {
-    margin-top: 130px !important;
+    margin-top: 160px !important;
   }
 
 

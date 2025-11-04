@@ -26,18 +26,17 @@ import { io } from "socket.io-client";
 import { Snackbar, Alert } from '@mui/material';
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { IconButton, InputAdornment } from "@mui/material";
-import PersonIcon from "@mui/icons-material/Person";
-import DescriptionIcon from "@mui/icons-material/Description";
-import SchoolIcon from "@mui/icons-material/School";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
-import HowToRegIcon from "@mui/icons-material/HowToReg";
-import ListAltIcon from "@mui/icons-material/ListAlt";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import FactCheckIcon from '@mui/icons-material/FactCheck';
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 import SearchIcon from "@mui/icons-material/Search";
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import ClassIcon from "@mui/icons-material/Class";
+import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
+import GradeIcon from "@mui/icons-material/Grade";
+import SchoolIcon from "@mui/icons-material/School";
+
 
 const socket = io("http://localhost:5000");
 
@@ -101,15 +100,16 @@ const StudentNumbering = () => {
 
 
 
-    const tabs = [
-        { label: "Applicant List", to: "/applicant_list", icon: <ListAltIcon /> },
-        { label: "Applicant Form", to: "/admin_dashboard1", icon: <PersonIcon /> },
-        { label: "Documents Submitted", to: "/student_requirements", icon: <DescriptionIcon /> },
-        { label: "Entrance Examination Scores", to: "/applicant_scoring", icon: <SchoolIcon /> },
-        { label: "Qualifying / Interview Examination Scores", to: "/qualifying_exam_scores", icon: <FactCheckIcon /> },
-        { label: "Medical Clearance", to: "/medical_clearance", icon: <LocalHospitalIcon /> },
-        { label: "Student Numbering", to: "/student_numbering", icon: <HowToRegIcon /> },
+    const tabs1 = [
+        { label: "Applicant List", to: "/super_admin_applicant_list", icon: <ListAltIcon /> },
+        { label: "Applicant Form", to: "/readmission_dashboard1", icon: <PersonAddIcon /> },
+        { label: "Class List", to: "/class_roster", icon: <ClassIcon /> },
+        { label: "Search Certificate of Registration", to: "/search_cor", icon: <SearchIcon /> },
+        { label: "Student Numbering", to: "/student_numbering", icon: <ConfirmationNumberIcon /> },
+        { label: "Report of Grades", to: "/report_of_grades", icon: <GradeIcon /> },
+        { label: "Transcript of Records", to: "/transcript_of_records", icon: <SchoolIcon /> },
     ];
+
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -189,8 +189,8 @@ const StudentNumbering = () => {
         }
     };
 
-    const [activeStep, setActiveStep] = useState(6);
-    const [clickedSteps, setClickedSteps] = useState(Array(tabs.length).fill(false));
+    const [activeStep, setActiveStep] = useState(4);
+    const [clickedSteps, setClickedSteps] = useState(Array(tabs1.length).fill(false));
     const [explicitSelection, setExplicitSelection] = useState(false);
 
     const [persons, setPersons] = useState([]);
@@ -555,17 +555,16 @@ const StudentNumbering = () => {
                     alignItems: "center",
                     width: "100%",
                     mt: 2,
-                    flexWrap: "wrap", // so it wraps on smaller screens
                 }}
             >
-                {tabs.map((tab, index) => (
+                {tabs1.map((tab, index) => (
                     <React.Fragment key={index}>
                         {/* Step Card */}
                         <Card
                             onClick={() => handleStepClick(index, tab.to)}
                             sx={{
                                 flex: 1,
-                                maxWidth: `${100 / tabs.length}%`, // evenly fit in one row
+                                maxWidth: `${100 / tabs1.length}%`, // evenly fit 100%
                                 height: 100,
                                 display: "flex",
                                 alignItems: "center",
@@ -603,17 +602,19 @@ const StudentNumbering = () => {
                         </Card>
 
                         {/* Spacer instead of line */}
-                        {index < tabs.length - 1 && (
+                        {index < tabs1.length - 1 && (
                             <Box
                                 sx={{
                                     flex: 0.1,
-                                    mx: 1, // keeps spacing between cards
+                                    mx: 1, // margin to keep spacing
                                 }}
                             />
                         )}
                     </React.Fragment>
                 ))}
             </Box>
+
+
             <br />
 
             <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon", }}>

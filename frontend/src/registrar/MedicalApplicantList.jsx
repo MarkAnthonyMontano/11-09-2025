@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
 import axios from 'axios';
 import {
     Box,
@@ -45,6 +46,30 @@ import SearchIcon from "@mui/icons-material/Search";
 const socket = io("http://localhost:5000");
 
 const MedicalApplicantList = () => {
+    const settings = useContext(SettingsContext);
+    const [fetchedLogo, setFetchedLogo] = useState(null);
+    const [companyName, setCompanyName] = useState("");
+
+    useEffect(() => {
+        if (settings) {
+            // ✅ load dynamic logo
+            if (settings.logo_url) {
+                setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+            } else {
+                setFetchedLogo(EaristLogo);
+            }
+
+            // ✅ load dynamic name + address
+            if (settings.company_name) setCompanyName(settings.company_name);
+            if (settings.campus_address) setCampusAddress(settings.campus_address);
+        }
+    }, [settings]);
+
+    const words = companyName.trim().split(" ");
+    const middle = Math.ceil(words.length / 2);
+    const firstLine = words.slice(0, middle).join(" ");
+    const secondLine = words.slice(middle).join(" ");
+
     const documentOptions = [
         { label: 'PSA Birth Certificate', key: 'BirthCertificate' },
         { label: 'Form 138 (4th Quarter / No failing Grades)', key: 'Form138' },
@@ -597,150 +622,181 @@ const MedicalApplicantList = () => {
 
 
     const printDiv = () => {
-        // Pick address based on selected campus
+        // ✅ Determine dynamic campus address (dropdown or custom)
         let campusAddress = "";
-        if (person?.campus === "0") {
-            campusAddress = "Nagtahan St. Sampaloc, Manila";
-        } else if (person?.campus === "1") {
-            campusAddress = "Blk. 3 Lot 2, 5 Congressional Rd, General Mariano Alvarez";
+        if (settings?.campus_address && settings.campus_address.trim() !== "") {
+            campusAddress = settings.campus_address;
+        } else if (settings?.address && settings.address.trim() !== "") {
+            campusAddress = settings.address;
+        } else {
+            campusAddress = "No address set in Settings";
         }
 
+        // ✅ Dynamic logo and company name
+        const logoSrc = fetchedLogo || EaristLogo;
+        const name = companyName?.trim() || "";
+
+        // ✅ Split company name into two balanced lines
+        const words = name.split(" ");
+        const middleIndex = Math.ceil(words.length / 2);
+        const firstLine = words.slice(0, middleIndex).join(" ");
+        const secondLine = words.slice(middleIndex).join(" ");
+
+        // ✅ Generate printable HTML
         const newWin = window.open("", "Print-Window");
         newWin.document.open();
         newWin.document.write(`
-    <html>
-      <head>
-        <title>Applicant List</title>
-        <style>
-          @page {
-            size: A4;
-            margin: 10mm;
-          }
-          body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-          }
-          .print-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-          }
-          .print-header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            width: 100%;
-          }
-          .print-header img {
-            position: absolute;
-            left: 0;
-            margin-left: 10px;
-            width: 120px;
-            height: 120px;
-          }
-          table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-top: 20px;
-          }
-          th, td {
-            border: 0.5px solid black;
-            padding: 4px 6px;
-            font-size: 12px;
-            text-align: center;
-          }
-          th {
-            background-color: #800000;
-            color: white;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-          }
-        </style>
-      </head>
-      <body onload="window.print(); setTimeout(() => window.close(), 100);">
-        <div class="print-container">
-
-          <!-- Header -->
-          <div class="print-header">
-            <img src="${EaristLogo}" alt="Earist Logo" 
-                 style="width: 125px; height: 125px;" />
-            <div>
-              <div>Republic of the Philippines</div>
-              <b style="letter-spacing: 1px; font-size: 20px;">
-                Eulogio "Amang" Rodriguez
-              </b>
-              <div style="letter-spacing: 1px; font-size: 20px;">
-                <b>Institute of Science and Technology</b>
-              </div>
-              <div>${campusAddress}</div>
-              <div style="margin-top: 30px;">
-                <b style="font-size: 24px; letter-spacing: 1px;">
-                Medical Records For Applicant
-                </b>
-              </div>
-            </div>
-          </div>
-
-          <!-- Table -->
-          <table>
-            <thead>
-              <tr>
-                <th>Student Number</th>
-                <th>Applicant Name</th>
-                <th>Program</th>
-                
-                <th>Date Applied</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${filteredPersons.map(person => `
-                <tr>
-                  <td>${person.student_number ?? "N/A"}</td>
-                  <td>${person.last_name}, ${person.first_name} ${person.middle_name ?? ""} ${person.extension ?? ""}</td>
-                  <td>${curriculumOptions.find(
-            item => item.curriculum_id?.toString() === person.program?.toString()
-        )?.program_code ?? "N/A"}</td>
-                 
-                  <td>${new Date(person.created_at).toLocaleDateString("en-PH")}</td>
-                  <td>${person.registrar_status === 1
-                ? "Submitted"
-                : person.registrar_status === 0
-                    ? "Unsubmitted / Incomplete"
+       <html>
+         <head>
+           <title>Medical Student List</title>
+           <style>
+             @page { size: A4; margin: 10mm; }
+             body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+             .print-container {
+               display: flex;
+               flex-direction: column;
+               align-items: center;
+               text-align: center;
+             }
+             .print-header {
+               display: flex;
+               align-items: center;
+               justify-content: center;
+               position: relative;
+               width: 100%;
+             }
+             .print-header img {
+               width: 120px;
+               height: 120px;
+               border-radius: 50%;
+               object-fit: cover;
+             }
+   
+       /* ✅ Uniform and visible table borders (fix thin right side) */
+   table {
+     border-collapse: collapse; /* better for print consistency */
+     width: 100%;
+     margin-top: 20px;
+     border: 1.2px solid black; /* slightly thicker for print clarity */
+     table-layout: fixed;
+   }
+   
+   th, td {
+     border: 1.2px solid black;
+     padding: 4px 6px;
+     font-size: 12px;
+     text-align: center;
+     box-sizing: border-box;
+   }
+   
+   th, td {
+     word-wrap: break-word;
+   }
+   
+   /* ✅ Ensure rightmost edge doesn’t fade out */
+   table tr td:last-child,
+   table tr th:last-child {
+     border-right: 1.2px solid black !important;
+   }
+   
+   /* ✅ Optional: add slight table padding to prevent cutoff at page edge */
+   .print-container {
+     padding-right: 10px; /* ensures right border isn’t cut off */
+     padding-left: 10px;
+   }
+   
+   th {
+     background-color: #800000;
+     color: white;
+     -webkit-print-color-adjust: exact;
+     print-color-adjust: exact;
+   }
+   
+           </style>
+         </head>
+         <body onload="window.print(); setTimeout(() => window.close(), 100);">
+           <div class="print-container">
+   
+             <!-- ✅ HEADER -->
+             <div class="print-header">
+               <img src="${logoSrc}" alt="School Logo" class="logo" style="width: 18%;"/>
+               <div style="width: 64%;">
+                 <div>Republic of the Philippines</div>
+   
+                 <!-- ✅ Dynamic company name -->
+                 ${name
+                ? `
+                       <b style="letter-spacing: 1px; font-size: 20px;">
+                         ${firstLine}
+                       </b>
+                       ${secondLine
+                    ? `<div style="letter-spacing: 1px; font-size: 20px;">
+                               <b>${secondLine}</b>
+                             </div>`
                     : ""
-            }</td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>
-
-        </div>
-      </body>
-    </html>
-  `);
+                }
+                     `
+                : ""
+            }
+   
+                 <!-- ✅ Dynamic campus address -->
+                 <div style="font-size: 12px;">${campusAddress}</div>
+               </div>
+               <div style="min-width: 18%;"></div>
+             </div>
+           
+             <div style="font-size: 24px; letter-spacing: 1px; font-weight: bold;">Medical Student List</div>
+   
+             <!-- ✅ TABLE -->
+             <table>
+               <thead>
+                 <tr>
+                   <th>Student ID</th>
+                   <th>Student Name</th>
+                   <th>Program</th>
+                   <th>SHS GWA</th>
+                   <th>Date Applied</th>
+                   <th>Status</th>
+                 </tr>
+               </thead>
+               <tbody>
+                 ${filteredPersons
+                .map(
+                    (person) => `
+                       <tr>
+                         <td>${person.applicant_number ?? "N/A"}</td>
+                         <td>${person.last_name}, ${person.first_name} ${person.middle_name ?? ""} ${person.extension ?? ""}</td>
+                         <td>${curriculumOptions.find(
+                        (item) =>
+                            item.curriculum_id?.toString() === person.program?.toString()
+                    )?.program_code ?? "N/A"
+                        }</td>
+                         <td>${person.generalAverage1 ?? ""}</td>
+                         <td>${new Date(person.created_at).toLocaleDateString("en-PH", {
+                            year: "numeric",
+                            month: "short",
+                            day: "2-digit",
+                        })}</td>
+                         <td>${person.registrar_status === 1
+                            ? "Submitted"
+                            : person.registrar_status === 0
+                                ? "Unsubmitted / Incomplete"
+                                : ""
+                        }</td>
+                       </tr>
+                     `
+                )
+                .join("")}
+               </tbody>
+             </table>
+           </div>
+         </body>
+       </html>
+     `);
         newWin.document.close();
     };
 
-    // 🔒 Disable right-click
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-    // 🔒 Block DevTools shortcuts + Ctrl+P silently
-    document.addEventListener('keydown', (e) => {
-        const isBlockedKey =
-            e.key === 'F12' || // DevTools
-            e.key === 'F11' || // Fullscreen
-            (e.ctrlKey && e.shiftKey && (e.key.toLowerCase() === 'i' || e.key.toLowerCase() === 'j')) || // Ctrl+Shift+I/J
-            (e.ctrlKey && e.key.toLowerCase() === 'u') || // Ctrl+U (View Source)
-            (e.ctrlKey && e.key.toLowerCase() === 'p');   // Ctrl+P (Print)
-
-        if (isBlockedKey) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-    });
 
 
     // Put this at the very bottom before the return 
@@ -877,72 +933,9 @@ const MedicalApplicantList = () => {
             <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon", p: 2 }}>
                 <Box display="flex" justifyContent="space-between" flexWrap="wrap" rowGap={2}>
 
-                    {/* Left Side: From and To Date */}
-                    <Box display="flex" flexDirection="column" gap={2}>
-
-                        {/* From Date + Print Button */}
-                        <Box display="flex" alignItems="flex-end" gap={2}>
-
-                            <FormControl size="small" sx={{ width: 200 }}>
-                                <InputLabel shrink htmlFor="from-date">From Date</InputLabel>
-                                <TextField
-                                    id="from-date"
-                                    type="date"
-                                    size="small"
-                                    name="fromDate"
-                                    value={person.fromDate || ""}
-                                    onChange={(e) => setPerson(prev => ({ ...prev, fromDate: e.target.value }))}
-                                    InputLabelProps={{ shrink: true }}
-                                />
-                            </FormControl>
-
-                            <button
-                                onClick={printDiv}
-                                style={{
-                                    padding: "5px 20px",
-                                    border: "2px solid black",
-                                    backgroundColor: "#f0f0f0",
-                                    color: "black",
-                                    borderRadius: "5px",
-                                    cursor: "pointer",
-                                    fontSize: "14px",
-                                    fontWeight: "bold",
-                                    transition: "background-color 0.3s, transform 0.2s",
-                                    height: "40px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "8px",
-                                    userSelect: "none",
-                                }}
-                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#d3d3d3"}
-                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#f0f0f0"}
-                                onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.95)"}
-                                onMouseUp={(e) => e.currentTarget.style.transform = "scale(1)"}
-                                type="button"
-                            >
-                                <FcPrint size={20} />
-                                Print Student List
-                            </button>
-                        </Box>
-
-                        {/* To Date */}
-                        <FormControl size="small" sx={{ width: 200 }}>
-                            <InputLabel shrink htmlFor="to-date">To Date</InputLabel>
-                            <TextField
-                                id="to-date"
-                                type="date"
-                                size="small"
-                                name="toDate"
-                                value={person.toDate || ""}
-                                onChange={(e) => setPerson(prev => ({ ...prev, toDate: e.target.value }))}
-                                InputLabelProps={{ shrink: true }}
-                            />
-                        </FormControl>
-                    </Box>
-
-                    {/* Right Side: Campus Dropdown */}
+                    {/* Left Side: Campus Dropdown */}
                     <Box display="flex" flexDirection="column" gap={1} sx={{ minWidth: 200 }}>
-                        <Typography fontSize={13} >Campus:</Typography>
+                        <Typography fontSize={13}>Campus:</Typography>
                         <FormControl size="small" sx={{ width: "200px" }}>
                             <InputLabel id="campus-label">Campus</InputLabel>
                             <Select
@@ -960,7 +953,68 @@ const MedicalApplicantList = () => {
                                 <MenuItem value="1">CAVITE</MenuItem>
                             </Select>
                         </FormControl>
+                    </Box>
 
+                    {/* Right Side: Print Button + Dates (in one row) */}
+                    <Box display="flex" alignItems="flex-end" gap={2}>
+
+                        {/* Print Button */}
+                        <button
+                            onClick={printDiv}
+                            style={{
+                                padding: "5px 20px",
+                                border: "2px solid black",
+                                backgroundColor: "#f0f0f0",
+                                color: "black",
+                                borderRadius: "5px",
+                                cursor: "pointer",
+                                fontSize: "14px",
+                                fontWeight: "bold",
+                                transition: "background-color 0.3s, transform 0.2s",
+                                height: "40px",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px",
+                                userSelect: "none",
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#d3d3d3"}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#f0f0f0"}
+                            onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.95)"}
+                            onMouseUp={(e) => e.currentTarget.style.transform = "scale(1)"}
+                            type="button"
+                        >
+                            <FcPrint size={20} />
+                            Print Student Medical List
+                        </button>
+
+                        {/* To Date */}
+                        <FormControl size="small" sx={{ width: 200 }}>
+
+                            <InputLabel shrink htmlFor="to-date">To Date</InputLabel>
+                            <TextField
+                                id="to-date"
+                                type="date"
+                                size="small"
+                                name="toDate"
+                                value={person.toDate || ""}
+                                onChange={(e) => setPerson(prev => ({ ...prev, toDate: e.target.value }))}
+                                InputLabelProps={{ shrink: true }}
+                            />
+                        </FormControl>
+
+                        {/* From Date */}
+                        <FormControl size="small" sx={{ width: 200 }}>
+                            <InputLabel shrink htmlFor="from-date">From Date</InputLabel>
+                            <TextField
+                                id="from-date"
+                                type="date"
+                                size="small"
+                                name="fromDate"
+                                value={person.fromDate || ""}
+                                onChange={(e) => setPerson(prev => ({ ...prev, fromDate: e.target.value }))}
+                                InputLabelProps={{ shrink: true }}
+                            />
+                        </FormControl>
                     </Box>
 
                 </Box>
@@ -1169,42 +1223,6 @@ const MedicalApplicantList = () => {
                         </Box>
 
 
-                        {/* Applicant Status */}
-                        <Box display="flex" alignItems="center" gap={1}>
-                            <Typography fontSize={13} sx={{ minWidth: "140px" }}>Applicant Status:</Typography>
-                            <FormControl size="small" sx={{ width: "275px" }}>
-                                <Select
-                                    value={selectedApplicantStatus}
-                                    onChange={(e) => setSelectedApplicantStatus(e.target.value)}
-                                    displayEmpty
-                                >
-                                    <MenuItem value="">Select status</MenuItem>
-                                    <MenuItem value="On process">On process</MenuItem>
-                                    <MenuItem value="Documents Verified & ECAT">Documents Verified & ECAT</MenuItem>
-                                    <MenuItem value="Disapproved">Disapproved</MenuItem>
-                                    <MenuItem value="Program Closed">Program Closed</MenuItem>
-                                </Select>
-                            </FormControl>
-                        </Box>
-
-                        {/* Registrar Status + Submitted Docs Checkbox */}
-                        <Box display="flex" alignItems="center" gap={2}>
-                            <Typography fontSize={13} sx={{ minWidth: "140px" }}>Registrar Status:</Typography>
-                            <FormControl size="small" sx={{ width: "275px" }}>
-                                <Select
-                                    value={selectedRegistrarStatus}
-                                    onChange={(e) => setSelectedRegistrarStatus(e.target.value)}
-                                    displayEmpty
-                                >
-                                    <MenuItem value="">Select status</MenuItem>
-                                    <MenuItem value="Submitted">Submitted</MenuItem>
-                                    <MenuItem value="Unsubmitted / Incomplete">Unsubmitted / Incomplete</MenuItem>
-                                </Select>
-                            </FormControl>
-
-                            {/* ✅ New Checkbox for Submitted Documents */}
-
-                        </Box>
                         <FormControl size="small" sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
                             <Checkbox
                                 checked={showSubmittedOnly}

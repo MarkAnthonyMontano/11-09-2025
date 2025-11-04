@@ -1,4 +1,4 @@
-import { Box, Typography, TextField, Snackbar, Alert, Avatar } from "@mui/material";
+import { Box, Typography, TextField, Snackbar, Alert, Avatar, Card } from "@mui/material";
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { SettingsContext } from "../App";
 import EaristLogo from "../assets/EaristLogo.png";
@@ -7,7 +7,15 @@ import { useLocation } from "react-router-dom";
 import axios from "axios";
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import ClassIcon from "@mui/icons-material/Class";
 import SearchIcon from "@mui/icons-material/Search";
+import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
+import GradeIcon from "@mui/icons-material/Grade";
+import SchoolIcon from "@mui/icons-material/School";
+import { useNavigate } from "react-router-dom";
+
 
 
 const TOR = () => {
@@ -143,6 +151,28 @@ const TOR = () => {
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
+
+    const [activeStep, setActiveStep] = useState(6);
+    const [clickedSteps, setClickedSteps] = useState([]);
+
+    const navigate = useNavigate();
+
+    const tabs1 = [
+        { label: "Applicant List", to: "/super_admin_applicant_list", icon: <ListAltIcon /> },
+        { label: "Applicant Form", to: "/readmission_dashboard1", icon: <PersonAddIcon /> },
+        { label: "Class List", to: "/class_roster", icon: <ClassIcon /> },
+        { label: "Search Certificate of Registration", to: "/search_cor", icon: <SearchIcon /> },
+        { label: "Student Numbering", to: "/student_numbering", icon: <ConfirmationNumberIcon /> },
+        { label: "Report of Grades", to: "/report_of_grades", icon: <GradeIcon /> },
+        { label: "Transcript of Records", to: "/transcript_of_records", icon: <SchoolIcon /> },
+    ];
+
+
+    const handleStepClick = (index, to) => {
+        setActiveStep(index);
+        navigate(to); // this will actually change the page
+    };
+
 
 
 
@@ -398,6 +428,77 @@ const TOR = () => {
             </Box>
 
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
+            <br/>
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    width: "100%",
+                    mt: 2,
+                }}
+            >
+                {tabs1.map((tab, index) => (
+                    <React.Fragment key={index}>
+                        {/* Step Card */}
+                        <Card
+                            onClick={() => handleStepClick(index, tab.to)}
+                            sx={{
+                                flex: 1,
+                                maxWidth: `${100 / tabs1.length}%`, // evenly fit 100%
+                                height: 100,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                cursor: "pointer",
+                                borderRadius: 2,
+                                border: "2px solid #6D2323",
+
+                                backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+                                color: activeStep === index ? "#fff" : "#000",
+                                boxShadow:
+                                    activeStep === index
+                                        ? "0px 4px 10px rgba(0,0,0,0.3)"
+                                        : "0px 2px 6px rgba(0,0,0,0.15)",
+                                transition: "0.3s ease",
+                                "&:hover": {
+                                    backgroundColor: activeStep === index ? "#5a1c1c" : "#f5d98f",
+                                },
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                }}
+                            >
+                                <Box sx={{ fontSize: 32, mb: 0.5 }}>{tab.icon}</Box>
+                                <Typography
+                                    sx={{ fontSize: 14, fontWeight: "bold", textAlign: "center" }}
+                                >
+                                    {tab.label}
+                                </Typography>
+                            </Box>
+                        </Card>
+
+                        {/* Spacer instead of line */}
+                        {index < tabs1.length - 1 && (
+                            <Box
+                                sx={{
+                                    flex: 0.1,
+                                    mx: 1, // margin to keep spacing
+                                }}
+                            />
+                        )}
+                    </React.Fragment>
+                ))}
+            </Box>
+
+
+            <br />
+
+
             <br />
 
 

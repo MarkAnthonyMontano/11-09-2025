@@ -200,16 +200,14 @@ const AdmissionFormProcess = () => {
 }
 
   .student-table {
-    margin-top: 0 !important;
+    margin-top: 15px !important;
   }
 
   button {
     display: none;
   }
 
-    .student-table {
-    margin-top: -40px !important;
-  }
+  
 
   .dataField{
     margin-top: 2px !important;
@@ -384,6 +382,7 @@ return (
           <Container>
 
             <div
+              className="student-table"
               style={{
                 width: "8in", // matches table width assuming 8in for 40 columns
                 maxWidth: "100%",
@@ -572,7 +571,7 @@ return (
           <br />
           <br />
           <table
-            className="student-table"
+          
             style={{
               borderCollapse: "collapse",
               fontFamily: "Arial, Helvetica, sans-serif",
@@ -1358,7 +1357,7 @@ return (
           <br />
           <br />
           <table
-            className="student-table"
+         
             style={{
               borderCollapse: "collapse",
               fontFamily: "Arial, Helvetica, sans-serif",

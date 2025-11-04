@@ -33,23 +33,20 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import { FcPrint } from "react-icons/fc";
 import EaristLogo from "../assets/EaristLogo.png";
 import { Link } from "react-router-dom";
-import PersonIcon from "@mui/icons-material/Person";
-import DescriptionIcon from "@mui/icons-material/Description";
-import QuizIcon from '@mui/icons-material/Quiz';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
-import HowToRegIcon from "@mui/icons-material/HowToReg";
 import ListAltIcon from "@mui/icons-material/ListAlt";
-import SchoolIcon from '@mui/icons-material/School';        // For Entrance Examination Scores
-import FactCheckIcon from '@mui/icons-material/FactCheck';  // For Qualifying Examination Scores
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import ClassIcon from "@mui/icons-material/Class";
+import SearchIcon from "@mui/icons-material/Search";
+import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
+import GradeIcon from "@mui/icons-material/Grade";
+import SchoolIcon from "@mui/icons-material/School";
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 
 
 const socket = io("http://localhost:5000");
 
-const ApplicantList = () => {
+const SuperAdminApplicantList = () => {
     const settings = useContext(SettingsContext);
     const [fetchedLogo, setFetchedLogo] = useState(null);
     const [companyName, setCompanyName] = useState("");
@@ -109,13 +106,13 @@ const ApplicantList = () => {
     };
 
     const tabs1 = [
-        { label: "Applicant List", to: "/applicant_list", icon: <ListAltIcon /> },
-        { label: "Applicant Form", to: "/admin_dashboard1", icon: <PersonIcon /> },
-        { label: "Documents Submitted", to: "/student_requirements", icon: <DescriptionIcon /> },
-        { label: "Entrance Examination Scores", to: "/applicant_scoring", icon: <SchoolIcon /> },
-        { label: "Qualifying / Interview Examination Scores", to: "/qualifying_exam_scores", icon: <FactCheckIcon /> },
-        { label: "Medical Clearance", to: "/medical_clearance", icon: <LocalHospitalIcon /> },
-        { label: "Student Numbering", to: "/student_numbering", icon: <HowToRegIcon /> },
+        { label: "Applicant List", to: "/super_admin_applicant_list", icon: <ListAltIcon /> },
+        { label: "Applicant Form", to: "/readmission_dashboard1", icon: <PersonAddIcon /> },
+        { label: "Class List", to: "/class_roster", icon: <ClassIcon /> },
+        { label: "Search Certificate of Registration", to: "/search_cor", icon: <SearchIcon /> },
+        { label: "Student Numbering", to: "/student_numbering", icon: <ConfirmationNumberIcon /> },
+        { label: "Report of Grades", to: "/report_of_grades", icon: <GradeIcon /> },
+        { label: "Transcript of Records", to: "/transcript_of_records", icon: <SchoolIcon /> },
     ];
 
     const navigate = useNavigate();
@@ -1909,4 +1906,4 @@ th {
     );
 };
 
-export default ApplicantList;
+export default SuperAdminApplicantList;

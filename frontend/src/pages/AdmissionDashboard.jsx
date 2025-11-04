@@ -26,6 +26,25 @@ import {
   Class,
   Search,
   Payment,
+  FamilyRestroom,
+  MedicalServices,
+  FolderShared,
+  FilePresent,
+  FolderCopy,
+  AccountCircle,
+  Psychology,
+  HealthAndSafety,
+  AssignmentOutlined,
+  Summarize,
+  EditCalendar,
+  HistoryEdu,
+  ListAltOutlined,
+  FactCheck,
+  FolderSpecial,
+  Verified,
+  Badge,
+  ContactEmergency,
+  Diversity3,
 } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
@@ -84,75 +103,74 @@ const AdmissionDashboardPanel = () => {
     return <Unauthorized />;
   }
 
-  // ✅ Define grouped menu items by section
+  // ✅ Grouped Menu Items
   const groupedMenu = [
     {
       label: "ADMISSION OFFICE",
       items: [
-        { title: "APPLICANT LIST", link: "/applicant_list_admin", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
-        { title: "PERSONAL INFORMATION", link: "/admin_dashboard1", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
-        { title: "FAMILY BACKGROUND", link: "/admin_dashboard2", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
-        { title: "EDUCATIONAL ATTAINMENT", link: "/admin_dashboard3", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
-        { title: "HEALTH MEDICAL RECORDS", link: "/admin_dashboard4", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
-        { title: "OTHER INFORMATION", link: "/admin_dashboard5", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
+        { title: "APPLICANT LIST", link: "/applicant_list_admin", icon: <ListAltOutlined className="text-maroon-500 text-2xl" /> },
+        { title: "PERSONAL INFORMATION", link: "/admin_dashboard1", icon: <AccountCircle className="text-maroon-500 text-2xl" /> },
+        { title: "FAMILY BACKGROUND", link: "/admin_dashboard2", icon: <FamilyRestroom className="text-maroon-500 text-2xl" /> },
+        { title: "EDUCATIONAL ATTAINMENT", link: "/admin_dashboard3", icon: <School className="text-maroon-500 text-2xl" /> },
+        { title: "HEALTH MEDICAL RECORDS", link: "/admin_dashboard4", icon: <LocalHospital className="text-maroon-500 text-2xl" /> },
+        { title: "OTHER INFORMATION", link: "/admin_dashboard5", icon: <Info className="text-maroon-500 text-2xl" /> },
         { title: "DOCUMENTS SUBMITTED", link: "/student_requirements", icon: <Description className="text-maroon-500 text-2xl" /> },
-        { title: "ENTRANCE EXAM ROOM ASSIGNMENT", link: "/assign_entrance_exam", icon: <Assignment className="text-maroon-500 text-2xl" /> },
-        { title: "ENTRANCE EXAM SCHEDULE MANAGEMENT", link: "/assign_schedule_applicant", icon: <Schedule className="text-maroon-500 text-2xl" /> },
-        { title: "EXAMINATION PERMIT", link: "/registrar_examination_profile", icon: <AssignmentInd className="text-maroon-500 text-2xl" /> },
-        { title: "PROCTOR'S APPLICANT LIST", link: "/proctor_applicant_list", icon: <AssignmentInd className="text-maroon-500 text-2xl" /> },
+        { title: "ENTRANCE EXAM ROOM ASSIGNMENT", link: "/assign_entrance_exam", icon: <MeetingRoom className="text-maroon-500 text-2xl" /> },
+        { title: "ENTRANCE EXAM SCHEDULE MANAGEMENT", link: "/assign_schedule_applicant", icon: <EditCalendar className="text-maroon-500 text-2xl" /> },
+        { title: "EXAMINATION PERMIT", link: "/registrar_examination_profile", icon: <Badge className="text-maroon-500 text-2xl" /> },
+        { title: "PROCTOR'S APPLICANT LIST", link: "/proctor_applicant_list", icon: <People className="text-maroon-500 text-2xl" /> },
         { title: "ENTRANCE EXAMINATION SCORES", link: "/applicant_scoring", icon: <Score className="text-maroon-500 text-2xl" /> },
       ],
     },
     {
       label: "ENROLLMENT OFFICER",
       items: [
-        { title: "APPLICANT LIST", link: "/applicant_list", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
-        { title: "PERSONAL INFORMATION", link: "/registrar_dashboard1", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
-        { title: "FAMILY BACKGROUND", link: "/registrar_dashboard2", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
-        { title: "EDUCATIONAL ATTAINMENT", link: "/registrar_dashboard3", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
-        { title: "HEALTH MEDICAL RECORDS", link: "/registrar_dashboard4", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
-        { title: "OTHER INFORMATION", link: "/registrar_dashboard5", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
-        { title: "DOCUMENTS SUBMITTED", link: "/registrar_requirements", icon: <Description className="text-maroon-500 text-2xl" /> },
-        { title: "INTERVIEW ROOM MANAGEMENT", link: "/assign_interview_exam", icon: <Assignment className="text-maroon-500 text-2xl" /> },
-        { title: "INTERVIEW SCHEDULE MANAGEMENT", link: "/assign_schedule_applicants_interview", icon: <Schedule className="text-maroon-500 text-2xl" /> },
-        { title: "INTERVIEWER APPLICANT LIST", link: "/interviewer_applicant_list", icon: <AssignmentInd className="text-maroon-500 text-2xl" /> },
-        { title: "QUALIFYING / INTERVIEW EXAM SCORES", link: "/qualying_exam_scores", icon: <AssignmentInd className="text-maroon-500 text-2xl" /> },
-        { title: "STUDENT NUMBERING FOR COLLEGE", link: "/qualifying_exam_scores", icon: <Score className="text-maroon-500 text-2xl" /> },
-        { title: "COURSE TAGGING", link: "/course_tagging", icon: <People className="text-maroon-500 text-2xl" /> },
+        { title: "APPLICANT LIST", link: "/applicant_list", icon: <ListAlt className="text-maroon-500 text-2xl" /> },
+        { title: "PERSONAL INFORMATION", link: "/registrar_dashboard1", icon: <AccountCircle className="text-maroon-500 text-2xl" /> },
+        { title: "FAMILY BACKGROUND", link: "/registrar_dashboard2", icon: <FamilyRestroom className="text-maroon-500 text-2xl" /> },
+        { title: "EDUCATIONAL ATTAINMENT", link: "/registrar_dashboard3", icon: <School className="text-maroon-500 text-2xl" /> },
+        { title: "HEALTH MEDICAL RECORDS", link: "/registrar_dashboard4", icon: <MedicalServices className="text-maroon-500 text-2xl" /> },
+        { title: "OTHER INFORMATION", link: "/registrar_dashboard5", icon: <Info className="text-maroon-500 text-2xl" /> },
+        { title: "DOCUMENTS SUBMITTED", link: "/registrar_requirements", icon: <FolderCopy className="text-maroon-500 text-2xl" /> },
+        { title: "INTERVIEW ROOM MANAGEMENT", link: "/assign_interview_exam", icon: <MeetingRoom className="text-maroon-500 text-2xl" /> },
+        { title: "INTERVIEW SCHEDULE MANAGEMENT", link: "/assign_schedule_applicants_interview", icon: <EditCalendar className="text-maroon-500 text-2xl" /> },
+        { title: "INTERVIEWER APPLICANT LIST", link: "/interviewer_applicant_list", icon: <People className="text-maroon-500 text-2xl" /> },
+        { title: "QUALIFYING / INTERVIEW EXAM SCORES", link: "/qualying_exam_scores", icon: <Assessment className="text-maroon-500 text-2xl" /> },
+        { title: "STUDENT NUMBERING FOR COLLEGE", link: "/qualifying_exam_scores", icon: <FormatListNumbered className="text-maroon-500 text-2xl" /> },
+        { title: "COURSE TAGGING", link: "/course_tagging", icon: <Class className="text-maroon-500 text-2xl" /> },
       ],
     },
     {
       label: "MEDICAL AND DENTAL SECTION",
       items: [
-        { title: "APPLICANT LIST", link: "/medical_applicant_list", icon: <LocalHospital className="text-maroon-500 text-2xl" /> },
-        { title: "PERSONAL INFORMATION", link: "/medical_dashboard1", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
-        { title: "FAMILY BACKGROUND", link: "/medical_dashboard2", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
-        { title: "EDUCATIONAL ATTAINMENT", link: "/medical_dashboard3", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
-        { title: "HEALTH MEDICAL RECORDS", link: "/medical_dashboard4", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
-        { title: "OTHER INFORMATION", link: "/medical_dashboard5", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
+        { title: "APPLICANT LIST", link: "/medical_applicant_list", icon: <ListAltOutlined className="text-maroon-500 text-2xl" /> },
+        { title: "PERSONAL INFORMATION", link: "/medical_dashboard1", icon: <AccountCircle className="text-maroon-500 text-2xl" /> },
+        { title: "FAMILY BACKGROUND", link: "/medical_dashboard2", icon: <FamilyRestroom className="text-maroon-500 text-2xl" /> },
+        { title: "EDUCATIONAL ATTAINMENT", link: "/medical_dashboard3", icon: <School className="text-maroon-500 text-2xl" /> },
+        { title: "HEALTH MEDICAL RECORDS", link: "/medical_dashboard4", icon: <HealthAndSafety className="text-maroon-500 text-2xl" /> },
+        { title: "OTHER INFORMATION", link: "/medical_dashboard5", icon: <Info className="text-maroon-500 text-2xl" /> },
         { title: "DOCUMENTS SUBMITTED", link: "/medical_requirements", icon: <Description className="text-maroon-500 text-2xl" /> },
-        { title: "MEDICAL REQUIREMENTS", link: "/medical_requirements_form", icon: <Group className="text-maroon-500 text-2xl" /> },
-        { title: "DENTAL ASSESSMENT", link: "/dental_assessment", icon: <Group className="text-maroon-500 text-2xl" /> },
-        { title: "PHYSICAL AND NEUROLOGICAL EXAMINATION", link: "/physical_neuro_exam", icon: <Group className="text-maroon-500 text-2xl" /> },
-        { title: "HEALTH RECORDS CERTIFICATE", link: "/health_records", icon: <Group className="text-maroon-500 text-2xl" /> },
-        { title: "MEDICAL CERTIFICATE", link: "/medical_certificate", icon: <Group className="text-maroon-500 text-2xl" /> },
-
+        { title: "MEDICAL REQUIREMENTS", link: "/medical_requirements_form", icon: <MedicalServices className="text-maroon-500 text-2xl" /> },
+        { title: "DENTAL ASSESSMENT", link: "/dental_assessment", icon: <HealthAndSafety className="text-maroon-500 text-2xl" /> },
+        { title: "PHYSICAL AND NEUROLOGICAL EXAMINATION", link: "/physical_neuro_exam", icon: <Psychology className="text-maroon-500 text-2xl" /> },
+        { title: "HEALTH RECORDS CERTIFICATE", link: "/health_record", icon: <FactCheck className="text-maroon-500 text-2xl" /> },
+        { title: "MEDICAL CERTIFICATE", link: "/medical_certificate", icon: <ContactEmergency className="text-maroon-500 text-2xl" /> },
       ],
     },
     {
       label: "REGISTRAR OFFICE",
       items: [
-        { title: "APPLICANT LIST", link: "/super_admin_applicant_list", icon: <LocalHospital className="text-maroon-500 text-2xl" /> },
-        { title: "TRANSCRIPT OF RECORDS", link: "/transcript_of_records", icon: <People className="text-maroon-500 text-2xl" /> },
-        { title: "CLASS LIST", link: "/class_roster", icon: <People className="text-maroon-500 text-2xl" /> },
-        { title: "REPORT OF GRADES", link: "/report_of_grades", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
-        { title: "SEARCH CERTIFICATE OF REGISTRATION", link: "/search_cor", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
-        { title: "STUDENT NUMBERING PANEL", link: "/student_numbering", icon: <FormatListNumbered className="text-maroon-500 text-2xl" /> },
-        { title: "PERSONAL INFORMATION", link: "/readmission_dashboard1", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
-        { title: "FAMILY BACKGROUND", link: "/readmission_dashboard2", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
-        { title: "EDUCATIONAL ATTAINMENT", link: "/readmission_dashboard3", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
-        { title: "HEALTH MEDICAL RECORDS", link: "/readmission_dashboard4", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
-        { title: "OTHER INFORMATION", link: "/readmission_dashboard5", icon: <CollectionsBookmark className="text-maroon-500 text-2xl" /> },
+        { title: "APPLICANT LIST", link: "/super_admin_applicant_list", icon: <ListAltOutlined className="text-maroon-500 text-2xl" /> },
+        { title: "PERSONAL INFORMATION", link: "/readmission_dashboard1", icon: <AccountCircle className="text-maroon-500 text-2xl" /> },
+        { title: "FAMILY BACKGROUND", link: "/readmission_dashboard2", icon: <FamilyRestroom className="text-maroon-500 text-2xl" /> },
+        { title: "EDUCATIONAL ATTAINMENT", link: "/readmission_dashboard3", icon: <School className="text-maroon-500 text-2xl" /> },
+        { title: "HEALTH MEDICAL RECORDS", link: "/readmission_dashboard4", icon: <HealthAndSafety className="text-maroon-500 text-2xl" /> },
+        { title: "OTHER INFORMATION", link: "/readmission_dashboard5", icon: <Info className="text-maroon-500 text-2xl" /> },
+        { title: "CLASS LIST", link: "/class_roster", icon: <Class className="text-maroon-500 text-2xl" /> },
+        { title: "SEARCH CERTIFICATE OF REGISTRATION", link: "/search_cor", icon: <Search className="text-maroon-500 text-2xl" /> },
+        { title: "STUDENT NUMBERING PANEL", link: "/student_numbering", icon: <Numbers className="text-maroon-500 text-2xl" /> },
+        { title: "REPORT OF GRADES", link: "/report_of_grades", icon: <Assessment className="text-maroon-500 text-2xl" /> },
+        { title: "TRANSCRIPT OF RECORDS", link: "/transcript_of_records", icon: <HistoryEdu className="text-maroon-500 text-2xl" /> },
 
       ],
     },
@@ -169,7 +187,6 @@ const AdmissionDashboardPanel = () => {
     >
       {groupedMenu.map((group, idx) => (
         <Box key={idx} sx={{ mb: 5 }}>
-          {/* ✅ Full-width Section Header */}
           <Box
             sx={{
               display: "flex",
@@ -192,11 +209,8 @@ const AdmissionDashboardPanel = () => {
             >
               {group.label}
             </Typography>
-
-
           </Box>
 
-          {/* ✅ Grid Items */}
           <div className="p-2 px-10 w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {group.items.map((item, i) => (
               <div className="relative" key={i}>
@@ -213,7 +227,6 @@ const AdmissionDashboardPanel = () => {
           </div>
         </Box>
       ))}
-
     </Box>
   );
 };

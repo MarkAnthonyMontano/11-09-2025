@@ -25,11 +25,12 @@ import { Add, Search, SortByAlpha, FileDownload } from "@mui/icons-material";
 import axios from "axios";
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
+import SearchIcon from "@mui/icons-material/Search";
 
 
 
 const RegisterProf = () => {
-    // Also put it at the very top
+  // Also put it at the very top
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
   const [userRole, setUserRole] = useState("");
@@ -328,16 +329,25 @@ const RegisterProf = () => {
           variant="outlined"
           placeholder="Search by name or email"
           size="small"
-          style={{ width: '400px', marginRight: "25px" }}
+
           value={searchQuery}
           onChange={(e) => {
             setSearchQuery(e.target.value.toLowerCase());
             setCurrentPage(1); // reset to page 1 when searching
           }}
+          sx={{
+            width: 450,
+            backgroundColor: "#fff",
+            borderRadius: 1,
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "10px",
+            },
+          }}
           InputProps={{
-            startAdornment: <Search sx={{ mr: 1 }} />,
+            startAdornment: <SearchIcon sx={{ mr: 1, color: "gray" }} />,
           }}
         />
+
       </Box>
 
       <hr style={{ border: "1px solid #ccc", width: "100%" }} />

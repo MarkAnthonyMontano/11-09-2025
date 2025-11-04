@@ -12,7 +12,7 @@ import {
 import { Search } from "@mui/icons-material";
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
-
+import SearchIcon from "@mui/icons-material/Search";
 
 
 const SuperAdminRegistrarResetPassword = () => {
@@ -191,14 +191,17 @@ const SuperAdminRegistrarResetPassword = () => {
                     placeholder="Search Email Address"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <Search sx={{ mr: 1 }} />
-                            </InputAdornment>
-                        ),
+                    sx={{
+                        width: 450,
+                        backgroundColor: "#fff",
+                        borderRadius: 1,
+                        "& .MuiOutlinedInput-root": {
+                            borderRadius: "10px",
+                        },
                     }}
-                    sx={{ width: { xs: "100%", sm: "425px" }, mt: { xs: 2, sm: 0 } }}
+                    InputProps={{
+                        startAdornment: <SearchIcon sx={{ mr: 1, color: "gray" }} />,
+                    }}
                 />
             </Box>
 
