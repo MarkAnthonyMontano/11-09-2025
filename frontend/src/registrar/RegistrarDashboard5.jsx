@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
+
 import axios from "axios";
 import { Button, Box, TextField, Container, Card, TableContainer, Paper, Table, TableHead, TableRow, Modal, TableCell, Typography, FormControl, FormHelperText, InputLabel, Select, MenuItem, Checkbox, FormControlLabel } from "@mui/material";
 import { Link } from "react-router-dom";
@@ -25,6 +27,35 @@ import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 
 const RegistrarDashboard5 = () => {
+    const settings = useContext(SettingsContext);
+    const [fetchedLogo, setFetchedLogo] = useState(null);
+    const [companyName, setCompanyName] = useState("");
+    const [shortTerm, setShortTerm] = useState("");
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const response = await axios.get("http://localhost:5000/api/settings");
+                const data = response.data;
+
+                if (data.logo_url) {
+                    setFetchedLogo(`http://localhost:5000${data.logo_url}`);
+                } else {
+                    setFetchedLogo(EaristLogo);
+                }
+
+                // ✅ set company + short term + address
+                setCompanyName(data.company_name || "");
+                setShortTerm(data.short_term || "");
+                setCampusAddress(data.address || "");
+            } catch (err) {
+                console.error("Error fetching settings in ApplicantDashboard:", err);
+            }
+        };
+
+        fetchSettings();
+    }, []);
+
     const stepsData = [
         { label: "Admission Process For College", to: "/applicant_list", icon: <SchoolIcon fontSize="large" /> },
         { label: "Applicant Form", to: "/registrar_dashboard1", icon: <AssignmentIcon fontSize="large" /> },
@@ -70,56 +101,56 @@ const RegistrarDashboard5 = () => {
     const [userRole, setUserRole] = useState("");
     const [selectedPerson, setSelectedPerson] = useState(null);
 
-    
 
 
-const [hasAccess, setHasAccess] = useState(null);
-const [loading, setLoading] = useState(false);
+
+    const [hasAccess, setHasAccess] = useState(null);
+    const [loading, setLoading] = useState(false);
 
 
-const pageId = 54;
+    const pageId = 54;
 
-//Put this After putting the code of the past code
-useEffect(() => {
-    
-    const storedUser = localStorage.getItem("email");
-    const storedRole = localStorage.getItem("role");
-    const storedID = localStorage.getItem("person_id");
+    //Put this After putting the code of the past code
+    useEffect(() => {
 
-    if (storedUser && storedRole && storedID) {
-      setUser(storedUser);
-      setUserRole(storedRole);
-      setUserID(storedID);
+        const storedUser = localStorage.getItem("email");
+        const storedRole = localStorage.getItem("role");
+        const storedID = localStorage.getItem("person_id");
 
-      if (storedRole === "registrar") {
-        checkAccess(storedID);
-      } else {
-        window.location.href = "/login";
-      }
-    } else {
-      window.location.href = "/login";
-    }
-  }, []);
+        if (storedUser && storedRole && storedID) {
+            setUser(storedUser);
+            setUserRole(storedRole);
+            setUserID(storedID);
 
-const checkAccess = async (userID) => {
-    try {
-        const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
-        if (response.data && response.data.page_privilege === 1) {
-          setHasAccess(true);
+            if (storedRole === "registrar") {
+                checkAccess(storedID);
+            } else {
+                window.location.href = "/login";
+            }
         } else {
-          setHasAccess(false);
+            window.location.href = "/login";
         }
-    } catch (error) {
-        console.error('Error checking access:', error);
-        setHasAccess(false);
-        if (error.response && error.response.data.message) {
-          console.log(error.response.data.message);
-        } else {
-          console.log("An unexpected error occurred.");
+    }, []);
+
+    const checkAccess = async (userID) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+            if (response.data && response.data.page_privilege === 1) {
+                setHasAccess(true);
+            } else {
+                setHasAccess(false);
+            }
+        } catch (error) {
+            console.error('Error checking access:', error);
+            setHasAccess(false);
+            if (error.response && error.response.data.message) {
+                console.log(error.response.data.message);
+            } else {
+                console.log("An unexpected error occurred.");
+            }
+            setLoading(false);
         }
-        setLoading(false);
-    }
-  };
+    };
 
 
 
@@ -245,87 +276,87 @@ const checkAccess = async (userID) => {
     };
 
 
-     // ✅ Safe handleBlur for SuperAdmin — updates correct applicant only
-     const handleBlur = async () => {
-       try {
-         // ✅ Determine correct applicant/person_id
-         const targetId = selectedPerson?.person_id || queryPersonId || person.person_id;
-         if (!targetId) {
-           console.warn("⚠️ No valid applicant ID found — skipping update.");
-           return;
-         }
-   
-         const allowedFields = [
-           "person_id", "profile_img", "campus", "academicProgram", "classifiedAs", "applyingAs",
-           "program", "program2", "program3", "yearLevel",
-           "last_name", "first_name", "middle_name", "extension", "nickname",
-           "height", "weight", "lrnNumber", "nolrnNumber", "gender",
-           "pwdMember", "pwdType", "pwdId",
-           "birthOfDate", "age", "birthPlace", "languageDialectSpoken",
-           "citizenship", "religion", "civilStatus", "tribeEthnicGroup",
-           "cellphoneNumber", "emailAddress",
-           "presentStreet", "presentBarangay", "presentZipCode", "presentRegion",
-           "presentProvince", "presentMunicipality", "presentDswdHouseholdNumber",
-           "sameAsPresentAddress",
-           "permanentStreet", "permanentBarangay", "permanentZipCode",
-           "permanentRegion", "permanentProvince", "permanentMunicipality",
-           "permanentDswdHouseholdNumber",
-           "solo_parent",
-           "father_deceased", "father_family_name", "father_given_name", "father_middle_name",
-           "father_ext", "father_nickname", "father_education", "father_education_level",
-           "father_last_school", "father_course", "father_year_graduated", "father_school_address",
-           "father_contact", "father_occupation", "father_employer", "father_income", "father_email",
-           "mother_deceased", "mother_family_name", "mother_given_name", "mother_middle_name",
-           "mother_ext", "mother_nickname", "mother_education", "mother_education_level",
-           "mother_last_school", "mother_course", "mother_year_graduated", "mother_school_address",
-           "mother_contact", "mother_occupation", "mother_employer", "mother_income", "mother_email",
-           "guardian", "guardian_family_name", "guardian_given_name", "guardian_middle_name",
-           "guardian_ext", "guardian_nickname", "guardian_address", "guardian_contact", "guardian_email",
-           "annual_income",
-           "schoolLevel", "schoolLastAttended", "schoolAddress", "courseProgram",
-           "honor", "generalAverage", "yearGraduated",
-           "schoolLevel1", "schoolLastAttended1", "schoolAddress1", "courseProgram1",
-           "honor1", "generalAverage1", "yearGraduated1",
-           "strand",
-           // 🩺 Health and medical
-           "cough", "colds", "fever", "asthma", "faintingSpells", "heartDisease",
-           "tuberculosis", "frequentHeadaches", "hernia", "chronicCough", "headNeckInjury",
-           "hiv", "highBloodPressure", "diabetesMellitus", "allergies", "cancer",
-           "smokingCigarette", "alcoholDrinking", "hospitalized", "hospitalizationDetails",
-           "medications",
-           // 🧬 Covid / Vaccination
-           "hadCovid", "covidDate",
-           "vaccine1Brand", "vaccine1Date", "vaccine2Brand", "vaccine2Date",
-           "booster1Brand", "booster1Date", "booster2Brand", "booster2Date",
-           // 🧪 Lab results / medical findings
-           "chestXray", "cbc", "urinalysis", "otherworkups",
-           // 🧍 Additional fields
-           "symptomsToday", "remarks",
-           // ✅ Agreement / Meta
-           "termsOfAgreement", "created_at", "current_step"
-         ];
-   
-         // ✅ Clean payload before sending
-         const cleanedData = Object.fromEntries(
-           Object.entries(person).filter(([key]) => allowedFields.includes(key))
-         );
-   
-         if (Object.keys(cleanedData).length === 0) {
-           console.warn("⚠️ No valid fields to update — skipping blur save.");
-           return;
-         }
-   
-         // ✅ Execute safe update
-         await axios.put(`http://localhost:5000/api/person/${targetId}`, cleanedData);
-         console.log(`💾 Auto-saved (on blur) for person_id: ${targetId}`);
-       } catch (err) {
-         console.error("❌ Auto-save (on blur) failed:", {
-           message: err.message,
-           status: err.response?.status,
-           details: err.response?.data || err,
-         });
-       }
-     };
+    // ✅ Safe handleBlur for SuperAdmin — updates correct applicant only
+    const handleBlur = async () => {
+        try {
+            // ✅ Determine correct applicant/person_id
+            const targetId = selectedPerson?.person_id || queryPersonId || person.person_id;
+            if (!targetId) {
+                console.warn("⚠️ No valid applicant ID found — skipping update.");
+                return;
+            }
+
+            const allowedFields = [
+                "person_id", "profile_img", "campus", "academicProgram", "classifiedAs", "applyingAs",
+                "program", "program2", "program3", "yearLevel",
+                "last_name", "first_name", "middle_name", "extension", "nickname",
+                "height", "weight", "lrnNumber", "nolrnNumber", "gender",
+                "pwdMember", "pwdType", "pwdId",
+                "birthOfDate", "age", "birthPlace", "languageDialectSpoken",
+                "citizenship", "religion", "civilStatus", "tribeEthnicGroup",
+                "cellphoneNumber", "emailAddress",
+                "presentStreet", "presentBarangay", "presentZipCode", "presentRegion",
+                "presentProvince", "presentMunicipality", "presentDswdHouseholdNumber",
+                "sameAsPresentAddress",
+                "permanentStreet", "permanentBarangay", "permanentZipCode",
+                "permanentRegion", "permanentProvince", "permanentMunicipality",
+                "permanentDswdHouseholdNumber",
+                "solo_parent",
+                "father_deceased", "father_family_name", "father_given_name", "father_middle_name",
+                "father_ext", "father_nickname", "father_education", "father_education_level",
+                "father_last_school", "father_course", "father_year_graduated", "father_school_address",
+                "father_contact", "father_occupation", "father_employer", "father_income", "father_email",
+                "mother_deceased", "mother_family_name", "mother_given_name", "mother_middle_name",
+                "mother_ext", "mother_nickname", "mother_education", "mother_education_level",
+                "mother_last_school", "mother_course", "mother_year_graduated", "mother_school_address",
+                "mother_contact", "mother_occupation", "mother_employer", "mother_income", "mother_email",
+                "guardian", "guardian_family_name", "guardian_given_name", "guardian_middle_name",
+                "guardian_ext", "guardian_nickname", "guardian_address", "guardian_contact", "guardian_email",
+                "annual_income",
+                "schoolLevel", "schoolLastAttended", "schoolAddress", "courseProgram",
+                "honor", "generalAverage", "yearGraduated",
+                "schoolLevel1", "schoolLastAttended1", "schoolAddress1", "courseProgram1",
+                "honor1", "generalAverage1", "yearGraduated1",
+                "strand",
+                // 🩺 Health and medical
+                "cough", "colds", "fever", "asthma", "faintingSpells", "heartDisease",
+                "tuberculosis", "frequentHeadaches", "hernia", "chronicCough", "headNeckInjury",
+                "hiv", "highBloodPressure", "diabetesMellitus", "allergies", "cancer",
+                "smokingCigarette", "alcoholDrinking", "hospitalized", "hospitalizationDetails",
+                "medications",
+                // 🧬 Covid / Vaccination
+                "hadCovid", "covidDate",
+                "vaccine1Brand", "vaccine1Date", "vaccine2Brand", "vaccine2Date",
+                "booster1Brand", "booster1Date", "booster2Brand", "booster2Date",
+                // 🧪 Lab results / medical findings
+                "chestXray", "cbc", "urinalysis", "otherworkups",
+                // 🧍 Additional fields
+                "symptomsToday", "remarks",
+                // ✅ Agreement / Meta
+                "termsOfAgreement", "created_at", "current_step"
+            ];
+
+            // ✅ Clean payload before sending
+            const cleanedData = Object.fromEntries(
+                Object.entries(person).filter(([key]) => allowedFields.includes(key))
+            );
+
+            if (Object.keys(cleanedData).length === 0) {
+                console.warn("⚠️ No valid fields to update — skipping blur save.");
+                return;
+            }
+
+            // ✅ Execute safe update
+            await axios.put(`http://localhost:5000/api/person/${targetId}`, cleanedData);
+            console.log(`💾 Auto-saved (on blur) for person_id: ${targetId}`);
+        } catch (err) {
+            console.error("❌ Auto-save (on blur) failed:", {
+                message: err.message,
+                status: err.response?.status,
+                details: err.response?.data || err,
+            });
+        }
+    };
 
     const [errors, setErrors] = useState({});
     const isFormValid = () => {
@@ -426,13 +457,15 @@ const checkAccess = async (userID) => {
         }
     };
 
-
     const links = [
-        { to: `/admin_ecat_application_form`, label: "ECAT Application Form" },
-        { to: `/admission_form_process`, label: "Admission Form Process" },
-        { to: `/admin_personal_data_form`, label: "Personal Data Form" },
-        { to: `/admin_office_of_the_registrar`, label: "Application For EARIST College Admission" },
-        { to: `/admission_services`, label: "Application/Student Satisfactory Survey" },
+        { to: "/admin_ecat_application_form", label: "ECAT Application Form" },
+        { to: "/admission_form_process", label: "Admission Form Process" },
+        { to: "/admin_personal_data_form", label: "Personal Data Form" },
+        {
+            to: "/admin_office_of_the_registrar",
+            label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""} College Admission`,
+        },
+        { to: "/admission_services", label: "Application/Student Satisfactory Survey" },
         { label: "Examination Permit", onClick: handleExamPermitClick }, // ✅
     ];
 
@@ -449,18 +482,18 @@ const checkAccess = async (userID) => {
             });
     }, [userID]);
 
-    
 
-// Put this at the very bottom before the return 
-if (loading || hasAccess === null) {
-   return <LoadingOverlay open={loading} message="Check Access"/>;
-}
 
-  if (!hasAccess) {
-    return (
-      <Unauthorized />
-    );
-  }
+    // Put this at the very bottom before the return 
+    if (loading || hasAccess === null) {
+        return <LoadingOverlay open={loading} message="Check Access" />;
+    }
+
+    if (!hasAccess) {
+        return (
+            <Unauthorized />
+        );
+    }
 
 
     // dot not alter
@@ -480,9 +513,9 @@ if (loading || hasAccess === null) {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     flexWrap: 'wrap',
-                 
+
                     mb: 2,
-                    
+
                 }}
             >
                 <Typography
@@ -493,7 +526,7 @@ if (loading || hasAccess === null) {
                         fontSize: '36px',
                     }}
                 >
-                   APPLICANT FORM - OTHER INFORMATION
+                    APPLICANT FORM - OTHER INFORMATION
                 </Typography>
             </Box>
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
@@ -738,7 +771,16 @@ if (loading || hasAccess === null) {
                         APPLICANT FORM
                     </h1>
                     <div style={{ textAlign: "center" }}>
-                        Complete the applicant form to secure your place for the upcoming academic year at EARIST.
+                        Complete the applicant form to secure your place for the upcoming academic year at{" "}
+                        {shortTerm ? (
+                            <>
+                                <strong>{shortTerm.toUpperCase()}</strong> <br />
+                                {companyName || ""}
+                            </>
+                        ) : (
+                            companyName || ""
+                        )}
+                        .
                     </div>
                 </Container>
                 <br />
@@ -823,15 +865,31 @@ if (loading || hasAccess === null) {
                             In accordance with RA 10173 or Data Privacy Act of 2012, I give my consent to the following terms and conditions on the collection, use, processing, and disclosure of my personal data:
                         </Typography>
                         < br />
-                        <Typography style={{ fontSize: "12px", fontFamily: "Arial", textAlign: "Left" }}>
-                            1. I am aware that the Eulogio "Amang" Rodriguez Institute of Science and Technology (EARIST) has collected and stored my personal data during my admission/enrollment at EARIST. This data includes my demographic profile, contact details like home address, email address, landline numbers, and mobile numbers.
+                        <Typography
+                            style={{ fontSize: "12px", fontFamily: "Arial", textAlign: "left" }}
+                        >
+                            1. I am aware that the{" "}
+                            {companyName || "Your School Name"}{" "}
+                            {shortTerm ? `(${shortTerm.toUpperCase()})` : ""}{" "}
+                            has collected and stored my personal data during my admission/enrollment at{" "}
+                            {shortTerm ? shortTerm.toUpperCase() : companyName || "the institution"}.
+                            This data includes my demographic profile, contact details like home address,
+                            email address, landline numbers, and mobile numbers.
                         </Typography>
+
                         <Typography style={{ fontSize: "12px", fontFamily: "Arial", textAlign: "Left" }}>
                             2. I agree to personally update these data through personal request from the Office of the registrar.
                         </Typography>
-                        <Typography style={{ fontSize: "12px", fontFamily: "Arial", textAlign: "Left" }}>
-                            3. In consonance with the above stated Act, I am aware that the University will protect my school records related to my being a student/graduated of EARIST. However, I have the right to authorize a representative to claim the same subject to the policy of the University.
+                        <Typography
+                            style={{ fontSize: "12px", fontFamily: "Arial", textAlign: "left" }}
+                        >
+                            3. In consonance with the above stated Act, I am aware that the University will
+                            protect my school records related to my being a student/graduate of{" "}
+                            {shortTerm ? shortTerm.toUpperCase() : "the University"}. However, I have the
+                            right to authorize a representative to claim the same subject to the policy of
+                            the University.
                         </Typography>
+
 
                         <Typography style={{ fontSize: "12px", fontFamily: "Arial", textAlign: "Left" }}>
                             4. In order to promote efficient management of the organization’s records, I authorize the University to manage my data for data sharing with industry partners, government agencies/embassies, other educational institutions, and other offices for the university for employment, statistics, immigration, transfer credentials, and other legal purposes that may serve me best.

@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
+
 import axios from "axios";
 import { Button, Box, TextField, Container, Card, Modal, Typography, FormControl, FormHelperText, InputLabel, Select, MenuItem, Checkbox, FormControlLabel } from "@mui/material";
 import { Link } from "react-router-dom";
@@ -16,6 +18,35 @@ import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import ExamPermit from "../applicant/ExamPermit";
 
 const Dashboard2 = (props) => {
+  const settings = useContext(SettingsContext);
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/settings");
+        const data = response.data;
+
+        if (data.logo_url) {
+          setFetchedLogo(`http://localhost:5000${data.logo_url}`);
+        } else {
+          setFetchedLogo(EaristLogo);
+        }
+
+        // ✅ set company + short term + address
+        setCompanyName(data.company_name || "");
+        setShortTerm(data.short_term || "");
+        setCampusAddress(data.address || "");
+      } catch (err) {
+        console.error("Error fetching settings in ApplicantDashboard:", err);
+      }
+    };
+
+    fetchSettings();
+  }, []);
+
   const navigate = useNavigate();
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
@@ -352,11 +383,14 @@ const Dashboard2 = (props) => {
     { to: "/ecat_application_form", label: "ECAT Application Form" },
     { to: "/admission_form_process", label: "Admission Form Process" },
     { to: "/personal_data_form", label: "Personal Data Form" },
-    { to: "/office_of_the_registrar", label: "Application For EARIST College Admission" },
+    {
+      to: "/office_of_the_registrar",
+      label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""} College Admission`,
+    },
     { to: "/admission_services", label: "Application/Student Satisfactory Survey" },
     { label: "Examination Permit", onClick: handleExamPermitClick },
-
   ];
+
 
 
   const [canPrintPermit, setCanPrintPermit] = useState(false);
@@ -566,7 +600,19 @@ const Dashboard2 = (props) => {
 
         <Container>
           <h1 style={{ fontSize: "50px", fontWeight: "bold", textAlign: "center", color: "maroon", marginTop: "25px" }}>APPLICANT FORM</h1>
-          <div style={{ textAlign: "center" }}>Complete the applicant form to secure your place for the upcoming academic year at EARIST.</div>
+          <div style={{ textAlign: "center" }}>
+            Complete the applicant form to secure your place for the upcoming academic year at{" "}
+            {shortTerm ? (
+              <>
+                <strong>{shortTerm.toUpperCase()}</strong> <br />
+                {companyName || ""}
+              </>
+            ) : (
+              companyName || ""
+            )}
+            .
+          </div>
+
         </Container>
         <br />
 

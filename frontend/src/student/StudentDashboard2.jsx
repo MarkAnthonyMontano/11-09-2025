@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
+
 import axios from "axios";
 import { Button, Box, TextField, Container, Card, TableContainer, Paper, Table, TableHead, TableRow, TableCell, Typography, FormControl, FormHelperText, InputLabel, Select, MenuItem, Checkbox, FormControlLabel } from "@mui/material";
 import { Link } from "react-router-dom";
@@ -21,6 +23,35 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 
 const StudentDashboard2 = () => {
+    const settings = useContext(SettingsContext);
+    const [fetchedLogo, setFetchedLogo] = useState(null);
+    const [companyName, setCompanyName] = useState("");
+    const [shortTerm, setShortTerm] = useState("");
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const response = await axios.get("http://localhost:5000/api/settings");
+                const data = response.data;
+
+                if (data.logo_url) {
+                    setFetchedLogo(`http://localhost:5000${data.logo_url}`);
+                } else {
+                    setFetchedLogo(EaristLogo);
+                }
+
+                // ✅ set company + short term + address
+                setCompanyName(data.company_name || "");
+                setShortTerm(data.short_term || "");
+                setCampusAddress(data.address || "");
+            } catch (err) {
+                console.error("Error fetching settings in ApplicantDashboard:", err);
+            }
+        };
+
+        fetchSettings();
+    }, []);
+
 
 
 
@@ -306,12 +337,12 @@ const StudentDashboard2 = () => {
         { to: `/student_ecat_application_form`, label: "ECAT Application Form" },
         { to: `/student_form_process`, label: "Admission Form Process" },
         { to: `/student_personal_data_form`, label: "Personal Data Form" },
-        { to: `/student_office_of_the_registrar`, label: "Application For EARIST College Admission" },
+        { to: `/student_office_of_the_registrar`, label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""}  College Admission" ` },
         { to: `/student_admission_services`, label: "Admission Services" },
 
     ];
 
-        // 🔒 Disable right-click
+    // 🔒 Disable right-click
     document.addEventListener('contextmenu', (e) => e.preventDefault());
 
     // 🔒 Block DevTools shortcuts silently
@@ -337,9 +368,9 @@ const StudentDashboard2 = () => {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     flexWrap: 'wrap',
-                   
+
                     mb: 2,
-                   
+
                 }}
             >
                 <Typography
@@ -496,7 +527,18 @@ const StudentDashboard2 = () => {
 
                 <Container>
                     <h1 style={{ fontSize: "50px", fontWeight: "bold", textAlign: "center", color: "maroon", marginTop: "25px" }}>APPLICANT FORM</h1>
-                    <div style={{ textAlign: "center" }}>Complete the applicant form to secure your place for the upcoming academic year at EARIST.</div>
+                    <div style={{ textAlign: "center" }}>
+                        Complete the applicant form to secure your place for the upcoming academic year at{" "}
+                        {shortTerm ? (
+                            <>
+                                <strong>{shortTerm.toUpperCase()}</strong> <br />
+                                {companyName || ""}
+                            </>
+                        ) : (
+                            companyName || ""
+                        )}
+                        .
+                    </div>
                 </Container>
                 <br />
 

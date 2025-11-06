@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
+
 import axios from "axios";
 import { Button, Box, TextField, Container, Typography, Card, TableContainer, Paper, Table, TableHead, TableRow, TableCell, FormHelperText, FormControl, InputLabel, Select, MenuItem, Modal, FormControlLabel, Checkbox, FormGroup, TableBody, } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
@@ -25,20 +27,49 @@ import GradeIcon from "@mui/icons-material/Grade";
 
 
 const ReadmissionDashboard4 = () => {
-  
+    const settings = useContext(SettingsContext);
+    const [fetchedLogo, setFetchedLogo] = useState(null);
+    const [companyName, setCompanyName] = useState("");
+    const [shortTerm, setShortTerm] = useState("");
 
-const stepsData = [
-    { label: "Applicant List", to: "/super_admin_applicant_list", icon: <ListAltIcon /> },
-    { label: "Applicant Form", to: "/readmission_dashboard1", icon: <PersonAddIcon /> },
-    { label: "Class List", to: "/class_roster", icon: <ClassIcon /> },
-    { label: "Search Certificate of Registration", to: "/search_cor", icon: <SearchIcon /> },
-    { label: "Student Numbering", to: "/student_numbering", icon: <ConfirmationNumberIcon /> },
-    { label: "Report of Grades", to: "/report_of_grades", icon: <GradeIcon /> },
-    { label: "Transcript of Records", to: "/transcript_of_records", icon: <SchoolIcon /> },
-  ];
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const response = await axios.get("http://localhost:5000/api/settings");
+                const data = response.data;
 
-  const [currentStep, setCurrentStep] = useState(1);
-  const [visitedSteps, setVisitedSteps] = useState(Array(stepsData.length).fill(false));
+                if (data.logo_url) {
+                    setFetchedLogo(`http://localhost:5000${data.logo_url}`);
+                } else {
+                    setFetchedLogo(EaristLogo);
+                }
+
+                // ✅ set company + short term + address
+                setCompanyName(data.company_name || "");
+                setShortTerm(data.short_term || "");
+                setCampusAddress(data.address || "");
+            } catch (err) {
+                console.error("Error fetching settings in ApplicantDashboard:", err);
+            }
+        };
+
+        fetchSettings();
+    }, []);
+
+
+
+    const stepsData = [
+        { label: "Applicant List", to: "/super_admin_applicant_list", icon: <ListAltIcon /> },
+        { label: "Applicant Form", to: "/readmission_dashboard1", icon: <PersonAddIcon /> },
+        { label: "Class List", to: "/class_roster", icon: <ClassIcon /> },
+        { label: "Search Certificate of Registration", to: "/search_cor", icon: <SearchIcon /> },
+        { label: "Student Numbering", to: "/student_numbering", icon: <ConfirmationNumberIcon /> },
+        { label: "Report of Grades", to: "/report_of_grades", icon: <GradeIcon /> },
+        { label: "Transcript of Records", to: "/transcript_of_records", icon: <SchoolIcon /> },
+    ];
+
+    const [currentStep, setCurrentStep] = useState(1);
+    const [visitedSteps, setVisitedSteps] = useState(Array(stepsData.length).fill(false));
 
 
     const navigate = useNavigate();
@@ -55,7 +86,7 @@ const stepsData = [
         chestXray: "", cbc: "", urinalysis: "", otherworkups: "", symptomsToday: "", remarks: ""
     });
 
-     const handleNavigateStep = (index, to) => {
+    const handleNavigateStep = (index, to) => {
         setCurrentStep(index);
 
         const pid = sessionStorage.getItem("admin_edit_person_id");
@@ -168,7 +199,7 @@ const stepsData = [
     };
 
 
-  
+
 
 
 
@@ -196,88 +227,88 @@ const stepsData = [
 
 
 
-      // ✅ Safe handleBlur for SuperAdmin — updates correct applicant only
-      const handleBlur = async () => {
+    // ✅ Safe handleBlur for SuperAdmin — updates correct applicant only
+    const handleBlur = async () => {
         try {
-          // ✅ Determine correct applicant/person_id
-          const targetId = selectedPerson?.person_id || queryPersonId || person.person_id;
-          if (!targetId) {
-            console.warn("⚠️ No valid applicant ID found — skipping update.");
-            return;
-          }
-    
-          const allowedFields = [
-            "person_id", "profile_img", "campus", "academicProgram", "classifiedAs", "applyingAs",
-            "program", "program2", "program3", "yearLevel",
-            "last_name", "first_name", "middle_name", "extension", "nickname",
-            "height", "weight", "lrnNumber", "nolrnNumber", "gender",
-            "pwdMember", "pwdType", "pwdId",
-            "birthOfDate", "age", "birthPlace", "languageDialectSpoken",
-            "citizenship", "religion", "civilStatus", "tribeEthnicGroup",
-            "cellphoneNumber", "emailAddress",
-            "presentStreet", "presentBarangay", "presentZipCode", "presentRegion",
-            "presentProvince", "presentMunicipality", "presentDswdHouseholdNumber",
-            "sameAsPresentAddress",
-            "permanentStreet", "permanentBarangay", "permanentZipCode",
-            "permanentRegion", "permanentProvince", "permanentMunicipality",
-            "permanentDswdHouseholdNumber",
-            "solo_parent",
-            "father_deceased", "father_family_name", "father_given_name", "father_middle_name",
-            "father_ext", "father_nickname", "father_education", "father_education_level",
-            "father_last_school", "father_course", "father_year_graduated", "father_school_address",
-            "father_contact", "father_occupation", "father_employer", "father_income", "father_email",
-            "mother_deceased", "mother_family_name", "mother_given_name", "mother_middle_name",
-            "mother_ext", "mother_nickname", "mother_education", "mother_education_level",
-            "mother_last_school", "mother_course", "mother_year_graduated", "mother_school_address",
-            "mother_contact", "mother_occupation", "mother_employer", "mother_income", "mother_email",
-            "guardian", "guardian_family_name", "guardian_given_name", "guardian_middle_name",
-            "guardian_ext", "guardian_nickname", "guardian_address", "guardian_contact", "guardian_email",
-            "annual_income",
-            "schoolLevel", "schoolLastAttended", "schoolAddress", "courseProgram",
-            "honor", "generalAverage", "yearGraduated",
-            "schoolLevel1", "schoolLastAttended1", "schoolAddress1", "courseProgram1",
-            "honor1", "generalAverage1", "yearGraduated1",
-            "strand",
-            // 🩺 Health and medical
-            "cough", "colds", "fever", "asthma", "faintingSpells", "heartDisease",
-            "tuberculosis", "frequentHeadaches", "hernia", "chronicCough", "headNeckInjury",
-            "hiv", "highBloodPressure", "diabetesMellitus", "allergies", "cancer",
-            "smokingCigarette", "alcoholDrinking", "hospitalized", "hospitalizationDetails",
-            "medications",
-            // 🧬 Covid / Vaccination
-            "hadCovid", "covidDate",
-            "vaccine1Brand", "vaccine1Date", "vaccine2Brand", "vaccine2Date",
-            "booster1Brand", "booster1Date", "booster2Brand", "booster2Date",
-            // 🧪 Lab results / medical findings
-            "chestXray", "cbc", "urinalysis", "otherworkups",
-            // 🧍 Additional fields
-            "symptomsToday", "remarks",
-            // ✅ Agreement / Meta
-            "termsOfAgreement", "created_at", "current_step"
-          ];
-    
-          // ✅ Clean payload before sending
-          const cleanedData = Object.fromEntries(
-            Object.entries(person).filter(([key]) => allowedFields.includes(key))
-          );
-    
-          if (Object.keys(cleanedData).length === 0) {
-            console.warn("⚠️ No valid fields to update — skipping blur save.");
-            return;
-          }
-    
-          // ✅ Execute safe update
-          await axios.put(`http://localhost:5000/api/person/${targetId}`, cleanedData);
-          console.log(`💾 Auto-saved (on blur) for person_id: ${targetId}`);
+            // ✅ Determine correct applicant/person_id
+            const targetId = selectedPerson?.person_id || queryPersonId || person.person_id;
+            if (!targetId) {
+                console.warn("⚠️ No valid applicant ID found — skipping update.");
+                return;
+            }
+
+            const allowedFields = [
+                "person_id", "profile_img", "campus", "academicProgram", "classifiedAs", "applyingAs",
+                "program", "program2", "program3", "yearLevel",
+                "last_name", "first_name", "middle_name", "extension", "nickname",
+                "height", "weight", "lrnNumber", "nolrnNumber", "gender",
+                "pwdMember", "pwdType", "pwdId",
+                "birthOfDate", "age", "birthPlace", "languageDialectSpoken",
+                "citizenship", "religion", "civilStatus", "tribeEthnicGroup",
+                "cellphoneNumber", "emailAddress",
+                "presentStreet", "presentBarangay", "presentZipCode", "presentRegion",
+                "presentProvince", "presentMunicipality", "presentDswdHouseholdNumber",
+                "sameAsPresentAddress",
+                "permanentStreet", "permanentBarangay", "permanentZipCode",
+                "permanentRegion", "permanentProvince", "permanentMunicipality",
+                "permanentDswdHouseholdNumber",
+                "solo_parent",
+                "father_deceased", "father_family_name", "father_given_name", "father_middle_name",
+                "father_ext", "father_nickname", "father_education", "father_education_level",
+                "father_last_school", "father_course", "father_year_graduated", "father_school_address",
+                "father_contact", "father_occupation", "father_employer", "father_income", "father_email",
+                "mother_deceased", "mother_family_name", "mother_given_name", "mother_middle_name",
+                "mother_ext", "mother_nickname", "mother_education", "mother_education_level",
+                "mother_last_school", "mother_course", "mother_year_graduated", "mother_school_address",
+                "mother_contact", "mother_occupation", "mother_employer", "mother_income", "mother_email",
+                "guardian", "guardian_family_name", "guardian_given_name", "guardian_middle_name",
+                "guardian_ext", "guardian_nickname", "guardian_address", "guardian_contact", "guardian_email",
+                "annual_income",
+                "schoolLevel", "schoolLastAttended", "schoolAddress", "courseProgram",
+                "honor", "generalAverage", "yearGraduated",
+                "schoolLevel1", "schoolLastAttended1", "schoolAddress1", "courseProgram1",
+                "honor1", "generalAverage1", "yearGraduated1",
+                "strand",
+                // 🩺 Health and medical
+                "cough", "colds", "fever", "asthma", "faintingSpells", "heartDisease",
+                "tuberculosis", "frequentHeadaches", "hernia", "chronicCough", "headNeckInjury",
+                "hiv", "highBloodPressure", "diabetesMellitus", "allergies", "cancer",
+                "smokingCigarette", "alcoholDrinking", "hospitalized", "hospitalizationDetails",
+                "medications",
+                // 🧬 Covid / Vaccination
+                "hadCovid", "covidDate",
+                "vaccine1Brand", "vaccine1Date", "vaccine2Brand", "vaccine2Date",
+                "booster1Brand", "booster1Date", "booster2Brand", "booster2Date",
+                // 🧪 Lab results / medical findings
+                "chestXray", "cbc", "urinalysis", "otherworkups",
+                // 🧍 Additional fields
+                "symptomsToday", "remarks",
+                // ✅ Agreement / Meta
+                "termsOfAgreement", "created_at", "current_step"
+            ];
+
+            // ✅ Clean payload before sending
+            const cleanedData = Object.fromEntries(
+                Object.entries(person).filter(([key]) => allowedFields.includes(key))
+            );
+
+            if (Object.keys(cleanedData).length === 0) {
+                console.warn("⚠️ No valid fields to update — skipping blur save.");
+                return;
+            }
+
+            // ✅ Execute safe update
+            await axios.put(`http://localhost:5000/api/person/${targetId}`, cleanedData);
+            console.log(`💾 Auto-saved (on blur) for person_id: ${targetId}`);
         } catch (err) {
-          console.error("❌ Auto-save (on blur) failed:", {
-            message: err.message,
-            status: err.response?.status,
-            details: err.response?.data || err,
-          });
+            console.error("❌ Auto-save (on blur) failed:", {
+                message: err.message,
+                status: err.response?.status,
+                details: err.response?.data || err,
+            });
         }
-      };
-    
+    };
+
     const [activeStep, setActiveStep] = useState(3);
     const [clickedSteps, setClickedSteps] = useState([]);
 
@@ -361,7 +392,7 @@ const stepsData = [
         { to: `/admin_ecat_application_form`, label: "ECAT Application Form" },
         { to: `/admission_form_process`, label: "Admission Form Process" },
         { to: `/admin_personal_data_form`, label: "Personal Data Form" },
-        { to: `/admin_office_of_the_registrar`, label: "Application For EARIST College Admission" },
+        { to: `/admin_office_of_the_registrar`, label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""} College Admission" ` },
         { to: `/admission_services`, label: "Application/Student Satisfactory Survey" },
 
     ];
@@ -447,78 +478,78 @@ const stepsData = [
             <br />
 
 
-            
 
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          flexWrap: "nowrap", // prevent wrapping
-          width: "100%",
-          mt: 3,
 
-        }}
-      >
-        {stepsData.map((step, index) => (
-          <React.Fragment key={index}>
-            {/* Step Card */}
-            <Card
-              onClick={() => handleNavigateStep(index, step.to)}
-              sx={{
-                flex: `1 1 ${100 / stepsData.length}%`, // evenly divide width
-                height: 120,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                borderRadius: 2,
-                border: "2px solid #6D2323",
-                backgroundColor: currentStep === index ? "#6D2323" : "#E8C999",
-                color: currentStep === index ? "#fff" : "#000",
-                boxShadow:
-                  currentStep === index
-                    ? "0px 4px 10px rgba(0,0,0,0.3)"
-                    : "0px 2px 6px rgba(0,0,0,0.15)",
-                transition: "0.3s ease",
-                "&:hover": {
-                  backgroundColor: currentStep === index ? "#5a1c1c" : "#f5d98f",
-                },
-              }}
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    flexWrap: "nowrap", // prevent wrapping
+                    width: "100%",
+                    mt: 3,
+
+                }}
             >
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                }}
-              >
-                <Box sx={{ fontSize: 40, mb: 1 }}>{step.icon}</Box>
-                <Typography
-                  sx={{
-                    fontSize: 14,
-                    fontWeight: "bold",
-                    textAlign: "center",
-                  }}
-                >
-                  {step.label}
-                </Typography>
-              </Box>
-            </Card>
+                {stepsData.map((step, index) => (
+                    <React.Fragment key={index}>
+                        {/* Step Card */}
+                        <Card
+                            onClick={() => handleNavigateStep(index, step.to)}
+                            sx={{
+                                flex: `1 1 ${100 / stepsData.length}%`, // evenly divide width
+                                height: 120,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                cursor: "pointer",
+                                borderRadius: 2,
+                                border: "2px solid #6D2323",
+                                backgroundColor: currentStep === index ? "#6D2323" : "#E8C999",
+                                color: currentStep === index ? "#fff" : "#000",
+                                boxShadow:
+                                    currentStep === index
+                                        ? "0px 4px 10px rgba(0,0,0,0.3)"
+                                        : "0px 2px 6px rgba(0,0,0,0.15)",
+                                transition: "0.3s ease",
+                                "&:hover": {
+                                    backgroundColor: currentStep === index ? "#5a1c1c" : "#f5d98f",
+                                },
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                }}
+                            >
+                                <Box sx={{ fontSize: 40, mb: 1 }}>{step.icon}</Box>
+                                <Typography
+                                    sx={{
+                                        fontSize: 14,
+                                        fontWeight: "bold",
+                                        textAlign: "center",
+                                    }}
+                                >
+                                    {step.label}
+                                </Typography>
+                            </Box>
+                        </Card>
 
-            {/* Spacer (line gap between steps) */}
-            {index < stepsData.length - 1 && (
-              <Box
-                sx={{
-                  flex: 0.05,
-                  mx: 1, // spacing between cards
-                }}
-              />
-            )}
-          </React.Fragment>
-        ))}
-      </Box>
+                        {/* Spacer (line gap between steps) */}
+                        {index < stepsData.length - 1 && (
+                            <Box
+                                sx={{
+                                    flex: 0.05,
+                                    mx: 1, // spacing between cards
+                                }}
+                            />
+                        )}
+                    </React.Fragment>
+                ))}
+            </Box>
 
-      <br />
+            <br />
 
             <TableContainer component={Paper} sx={{ width: '100%', mb: 1 }}>
                 <Table>
@@ -685,7 +716,18 @@ const stepsData = [
 
                 <Container>
                     <h1 style={{ fontSize: "50px", fontWeight: "bold", textAlign: "center", color: "maroon", marginTop: "25px" }}>APPLICANT FORM</h1>
-                    <div style={{ textAlign: "center" }}>Complete the applicant form to secure your place for the upcoming academic year at EARIST.</div>
+                    <div style={{ textAlign: "center" }}>
+                        Complete the applicant form to secure your place for the upcoming academic year at{" "}
+                        {shortTerm ? (
+                            <>
+                                <strong>{shortTerm.toUpperCase()}</strong> <br />
+                                {companyName || ""}
+                            </>
+                        ) : (
+                            companyName || ""
+                        )}
+                        .
+                    </div>
                 </Container>
                 <br />
 
@@ -775,7 +817,7 @@ const stepsData = [
                         <FormGroup row sx={{ ml: 2 }}>
                             {["cough", "colds", "fever"].map((symptom) => (
                                 <FormControlLabel
-                                disabled
+                                    disabled
                                     key={symptom}
                                     control={
                                         <Checkbox
@@ -858,7 +900,7 @@ const stepsData = [
                                                                 {/* YES */}
                                                                 <div style={{ display: "flex", alignItems: "center", gap: "1px", }}>
                                                                     <Checkbox
-                                                                    disabled
+                                                                        disabled
                                                                         name={key}
                                                                         checked={person[key] === 1}
                                                                         onChange={() => {
@@ -877,7 +919,7 @@ const stepsData = [
                                                                 {/* NO */}
                                                                 <div style={{ display: "flex", alignItems: "center", gap: "1px" }}>
                                                                     <Checkbox
-                                                                    disabled
+                                                                        disabled
                                                                         name={key}
                                                                         checked={person[key] === 0}
                                                                         onChange={() => {
@@ -918,7 +960,7 @@ const stepsData = [
                                         <FormControlLabel
                                             control={
                                                 <Checkbox
-                                                disabled
+                                                    disabled
                                                     name="hospitalized"
                                                     checked={person.hospitalized === 1}
                                                     onChange={() => {
@@ -939,7 +981,7 @@ const stepsData = [
                                         <FormControlLabel
                                             control={
                                                 <Checkbox
-                                                disabled
+                                                    disabled
                                                     name="hospitalized"
                                                     checked={person.hospitalized === 0}
                                                     onChange={() => {
@@ -970,7 +1012,7 @@ const stepsData = [
                                 IF YES, PLEASE SPECIFY:
                             </Typography>
                             <TextField
-                                  InputProps={{ readOnly: true }}
+                                InputProps={{ readOnly: true }}
 
                                 fullWidth
                                 name="hospitalizationDetails"
@@ -1001,7 +1043,7 @@ const stepsData = [
 
                         <Box mb={2}>
                             <TextField
-                                   InputProps={{ readOnly: true }}
+                                InputProps={{ readOnly: true }}
 
                                 fullWidth
                                 multiline
@@ -1057,7 +1099,7 @@ const stepsData = [
                                                 {/* YES */}
                                                 <Box display="flex" alignItems="center" gap="1px">
                                                     <Checkbox
-                                                    disabled
+                                                        disabled
                                                         name="hadCovid"
                                                         checked={person.hadCovid === 1}
                                                         onChange={() => {
@@ -1076,7 +1118,7 @@ const stepsData = [
                                                 {/* NO */}
                                                 <Box display="flex" alignItems="center" gap="1px">
                                                     <Checkbox
-                                                    disabled
+                                                        disabled
                                                         name="hadCovid"
                                                         checked={person.hadCovid === 0}
                                                         onChange={() => {
@@ -1098,7 +1140,7 @@ const stepsData = [
                                             {/* IF YES, WHEN */}
                                             <span>IF YES, WHEN:</span>
                                             <input
-                                            readOnly
+                                                readOnly
                                                 type="date"
                                                 name="covidDate"
                                                 value={person.covidDate || ""}
@@ -1161,7 +1203,7 @@ const stepsData = [
                                                     {["vaccine1Brand", "vaccine2Brand", "booster1Brand", "booster2Brand"].map((field) => (
                                                         <td key={field} style={{ padding: "4px" }}>
                                                             <input
-                                                            disabled
+                                                                disabled
                                                                 type="text"
                                                                 name={field}
                                                                 value={person[field] || ""}
@@ -1187,7 +1229,7 @@ const stepsData = [
                                                     {["vaccine1Date", "vaccine2Date", "booster1Date", "booster2Date"].map((field) => (
                                                         <td key={field} style={{ padding: "4px" }}>
                                                             <input
-                                                            readOnly
+                                                                readOnly
                                                                 type="date"
                                                                 name={field}
                                                                 value={person[field] || ""}
@@ -1228,7 +1270,7 @@ const stepsData = [
                                     <td className="border border-black p-2 w-1/3 font-medium">Chest X-ray:</td>
                                     <td className="border border-black p-2 w-2/3">
                                         <input
-                                        readOnly
+                                            readOnly
                                             type="text"
                                             name="chestXray"
                                             value={person.chestXray || ""}
@@ -1249,7 +1291,7 @@ const stepsData = [
                                     <td className="border border-black p-2 font-medium">CBC:</td>
                                     <td className="border border-black p-2">
                                         <input
-                                        readOnly
+                                            readOnly
                                             type="text"
                                             name="cbc"
                                             value={person.cbc || ""}
@@ -1270,7 +1312,7 @@ const stepsData = [
                                     <td className="border border-black p-2 font-medium">Urinalysis:</td>
                                     <td className="border border-black p-2">
                                         <input
-                                        readOnly
+                                            readOnly
                                             type="text"
                                             name="urinalysis"
                                             value={person.urinalysis || ""}
@@ -1291,7 +1333,7 @@ const stepsData = [
                                     <td className="border border-black p-2 font-medium">Other Workups:</td>
                                     <td className="border border-black p-2">
                                         <input
-                                        readOnly
+                                            readOnly
                                             type="text"
                                             name="otherworkups"
                                             value={person.otherworkups || ""}
@@ -1345,7 +1387,7 @@ const stepsData = [
                                                 {/* Physically Fit (0) */}
                                                 <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
                                                     <Checkbox
-                                                    disabled
+                                                        disabled
                                                         name="symptomsToday"
                                                         checked={person.symptomsToday === 0}
                                                         onChange={() => {
@@ -1364,7 +1406,7 @@ const stepsData = [
                                                 {/* For Compliance (1) */}
                                                 <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
                                                     <Checkbox
-                                                    disabled
+                                                        disabled
                                                         name="symptomsToday"
                                                         checked={person.symptomsToday === 1}
                                                         onChange={() => {
@@ -1404,7 +1446,7 @@ const stepsData = [
                                     <TableRow>
                                         <TableCell sx={{ border: "1px solid black", p: 1 }}>
                                             <TextField
-                                           disabled
+                                                disabled
                                                 name="remarks"
                                                 multiline
                                                 minRows={2}
@@ -1514,7 +1556,7 @@ const stepsData = [
                             <Button
                                 variant="contained"
                                 onClick={(e) => {
-                                   
+
                                     navigate("/medical_dashboard4");
 
                                 }}

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
 import axios from "axios";
 import { Button, Box, TextField, Container, Card, Modal, TableContainer, Paper, Table, TableHead, TableRow, TableCell, Typography, FormControl, FormHelperText, InputLabel, Select, MenuItem, Checkbox, FormControlLabel } from "@mui/material";
 import { Link } from "react-router-dom";
@@ -26,6 +27,35 @@ import LoadingOverlay from "../components/LoadingOverlay";
 import ExamPermit from "../applicant/ExamPermit";
 
 const AdminDashboard2 = () => {
+  const settings = useContext(SettingsContext);
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/settings");
+        const data = response.data;
+
+        if (data.logo_url) {
+          setFetchedLogo(`http://localhost:5000${data.logo_url}`);
+        } else {
+          setFetchedLogo(EaristLogo);
+        }
+
+        // ✅ set company + short term + address
+        setCompanyName(data.company_name || "");
+        setShortTerm(data.short_term || "");
+        setCampusAddress(data.address || "");
+      } catch (err) {
+        console.error("Error fetching settings in ApplicantDashboard:", err);
+      }
+    };
+
+    fetchSettings();
+  }, []);
+
   const stepsData = [
     { label: "Admission Process for Registrar", to: "/applicant_list_admin", icon: <SchoolIcon fontSize="large" /> },
     { label: "Applicant Form", to: "/admin_dashboard1", icon: <DashboardIcon fontSize="large" /> },
@@ -273,210 +303,210 @@ const AdminDashboard2 = () => {
   const [errors, setErrors] = useState({});
 
 
-   const handleUpdate = async (updatedData) => {
-         if (!person) return;
- 
-         try {
-             // ✅ Get correct applicant ID
-             const targetId = selectedPerson?.person_id || queryPersonId || person.person_id;
-             if (!targetId) {
-                 console.warn("⚠️ No valid applicant ID found — skipping update.");
-                 return;
-             }
- 
-             const allowedFields = [
-                 "person_id", "profile_img", "campus", "academicProgram", "classifiedAs", "applyingAs",
-                 "program", "program2", "program3", "yearLevel",
-                 "last_name", "first_name", "middle_name", "extension", "nickname",
-                 "height", "weight", "lrnNumber", "nolrnNumber", "gender",
-                 "pwdMember", "pwdType", "pwdId",
-                 "birthOfDate", "age", "birthPlace", "languageDialectSpoken",
-                 "citizenship", "religion", "civilStatus", "tribeEthnicGroup",
-                 "cellphoneNumber", "emailAddress",
-                 "presentStreet", "presentBarangay", "presentZipCode", "presentRegion",
-                 "presentProvince", "presentMunicipality", "presentDswdHouseholdNumber",
-                 "sameAsPresentAddress",
-                 "permanentStreet", "permanentBarangay", "permanentZipCode",
-                 "permanentRegion", "permanentProvince", "permanentMunicipality",
-                 "permanentDswdHouseholdNumber",
-                 "solo_parent",
-                 "father_deceased", "father_family_name", "father_given_name", "father_middle_name",
-                 "father_ext", "father_nickname", "father_education", "father_education_level",
-                 "father_last_school", "father_course", "father_year_graduated", "father_school_address",
-                 "father_contact", "father_occupation", "father_employer", "father_income", "father_email",
-                 "mother_deceased", "mother_family_name", "mother_given_name", "mother_middle_name",
-                 "mother_ext", "mother_nickname", "mother_education", "mother_education_level",
-                 "mother_last_school", "mother_course", "mother_year_graduated", "mother_school_address",
-                 "mother_contact", "mother_occupation", "mother_employer", "mother_income", "mother_email",
-                 "guardian", "guardian_family_name", "guardian_given_name", "guardian_middle_name",
-                 "guardian_ext", "guardian_nickname", "guardian_address", "guardian_contact", "guardian_email",
-                 "annual_income",
-                 "schoolLevel", "schoolLastAttended", "schoolAddress", "courseProgram",
-                 "honor", "generalAverage", "yearGraduated",
-                 "schoolLevel1", "schoolLastAttended1", "schoolAddress1", "courseProgram1",
-                 "honor1", "generalAverage1", "yearGraduated1",
-                 "strand",
-                 // 🩺 Health and medical
-                 "cough", "colds", "fever", "asthma", "faintingSpells", "heartDisease",
-                 "tuberculosis", "frequentHeadaches", "hernia", "chronicCough", "headNeckInjury",
-                 "hiv", "highBloodPressure", "diabetesMellitus", "allergies", "cancer",
-                 "smokingCigarette", "alcoholDrinking", "hospitalized", "hospitalizationDetails",
-                 "medications",
-                 // 🧬 Covid / Vaccination
-                 "hadCovid", "covidDate",
-                 "vaccine1Brand", "vaccine1Date", "vaccine2Brand", "vaccine2Date",
-                 "booster1Brand", "booster1Date", "booster2Brand", "booster2Date",
-                 // 🧪 Lab results / medical findings
-                 "chestXray", "cbc", "urinalysis", "otherworkups",
-                 // 🧍 Additional fields
-                 "symptomsToday", "remarks",
-                 // ✅ Agreement / Meta
-                 "termsOfAgreement", "created_at", "current_step"
-             ];
-             // ✅ Clean the payload
-             const cleanedData = Object.fromEntries(
-                 Object.entries(updatedData).filter(([key]) => allowedFields.includes(key))
-             );
- 
-             if (Object.keys(cleanedData).length === 0) {
-                 console.warn("⚠️ No valid fields to update — skipping request.");
-                 return;
-             }
- 
-             // ✅ Send update request
-             await axios.put(`http://localhost:5000/api/person/${targetId}`, cleanedData);
- 
-             console.log(`✅ SuperAdmin updated person_id: ${targetId} successfully.`);
-         } catch (error) {
-             console.error("❌ SuperAdmin update failed:", {
-                 message: error.message,
-                 status: error.response?.status,
-                 details: error.response?.data || error,
-             });
-         }
-     };
- 
-     // Real-time save on every character typed
-     const handleChange = (e) => {
-         const { name, type, checked, value } = e.target;
- 
-         const updatedPerson = {
-             ...person,
-             [name]: type === "checkbox" ? (checked ? 1 : 0) : value,
-         };
- 
-         // If updating either mother_income or father_income, calculate total and set annual_income
-         if (name === "mother_income" || name === "father_income") {
-             const motherIncome = parseFloat(name === "mother_income" ? value : updatedPerson.mother_income) || 0;
-             const fatherIncome = parseFloat(name === "father_income" ? value : updatedPerson.father_income) || 0;
-             const totalIncome = motherIncome + fatherIncome;
- 
-             let annualIncomeBracket = "";
-             if (totalIncome <= 80000) {
-                 annualIncomeBracket = "80,000 and below";
-             } else if (totalIncome <= 135000) {
-                 annualIncomeBracket = "80,000 to 135,000";
-             } else if (totalIncome <= 250000) {
-                 annualIncomeBracket = "135,000 to 250,000";
-             } else if (totalIncome <= 500000) {
-                 annualIncomeBracket = "250,000 to 500,000";
-             } else if (totalIncome <= 1000000) {
-                 annualIncomeBracket = "500,000 to 1,000,000";
-             } else {
-                 annualIncomeBracket = "1,000,000 and above";
-             }
- 
-             updatedPerson.annual_income = annualIncomeBracket;
-         }
- 
-         setPerson(updatedPerson);
-         handleUpdate(updatedPerson); // No delay, real-time save
-     };
- 
- 
-     // ✅ Safe handleBlur for SuperAdmin — updates correct applicant only
-        const handleBlur = async () => {
-            try {
-                // ✅ Determine correct applicant/person_id
-                const targetId = selectedPerson?.person_id || queryPersonId || person.person_id;
-                if (!targetId) {
-                    console.warn("⚠️ No valid applicant ID found — skipping update.");
-                    return;
-                }
-    
-                const allowedFields = [
-                    "person_id", "profile_img", "campus", "academicProgram", "classifiedAs", "applyingAs",
-                    "program", "program2", "program3", "yearLevel",
-                    "last_name", "first_name", "middle_name", "extension", "nickname",
-                    "height", "weight", "lrnNumber", "nolrnNumber", "gender",
-                    "pwdMember", "pwdType", "pwdId",
-                    "birthOfDate", "age", "birthPlace", "languageDialectSpoken",
-                    "citizenship", "religion", "civilStatus", "tribeEthnicGroup",
-                    "cellphoneNumber", "emailAddress",
-                    "presentStreet", "presentBarangay", "presentZipCode", "presentRegion",
-                    "presentProvince", "presentMunicipality", "presentDswdHouseholdNumber",
-                    "sameAsPresentAddress",
-                    "permanentStreet", "permanentBarangay", "permanentZipCode",
-                    "permanentRegion", "permanentProvince", "permanentMunicipality",
-                    "permanentDswdHouseholdNumber",
-                    "solo_parent",
-                    "father_deceased", "father_family_name", "father_given_name", "father_middle_name",
-                    "father_ext", "father_nickname", "father_education", "father_education_level",
-                    "father_last_school", "father_course", "father_year_graduated", "father_school_address",
-                    "father_contact", "father_occupation", "father_employer", "father_income", "father_email",
-                    "mother_deceased", "mother_family_name", "mother_given_name", "mother_middle_name",
-                    "mother_ext", "mother_nickname", "mother_education", "mother_education_level",
-                    "mother_last_school", "mother_course", "mother_year_graduated", "mother_school_address",
-                    "mother_contact", "mother_occupation", "mother_employer", "mother_income", "mother_email",
-                    "guardian", "guardian_family_name", "guardian_given_name", "guardian_middle_name",
-                    "guardian_ext", "guardian_nickname", "guardian_address", "guardian_contact", "guardian_email",
-                    "annual_income",
-                    "schoolLevel", "schoolLastAttended", "schoolAddress", "courseProgram",
-                    "honor", "generalAverage", "yearGraduated",
-                    "schoolLevel1", "schoolLastAttended1", "schoolAddress1", "courseProgram1",
-                    "honor1", "generalAverage1", "yearGraduated1",
-                    "strand",
-                    // 🩺 Health and medical
-                    "cough", "colds", "fever", "asthma", "faintingSpells", "heartDisease",
-                    "tuberculosis", "frequentHeadaches", "hernia", "chronicCough", "headNeckInjury",
-                    "hiv", "highBloodPressure", "diabetesMellitus", "allergies", "cancer",
-                    "smokingCigarette", "alcoholDrinking", "hospitalized", "hospitalizationDetails",
-                    "medications",
-                    // 🧬 Covid / Vaccination
-                    "hadCovid", "covidDate",
-                    "vaccine1Brand", "vaccine1Date", "vaccine2Brand", "vaccine2Date",
-                    "booster1Brand", "booster1Date", "booster2Brand", "booster2Date",
-                    // 🧪 Lab results / medical findings
-                    "chestXray", "cbc", "urinalysis", "otherworkups",
-                    // 🧍 Additional fields
-                    "symptomsToday", "remarks",
-                    // ✅ Agreement / Meta
-                    "termsOfAgreement", "created_at", "current_step"
-                ];
-    
-                // ✅ Clean payload before sending
-                const cleanedData = Object.fromEntries(
-                    Object.entries(person).filter(([key]) => allowedFields.includes(key))
-                );
-    
-                if (Object.keys(cleanedData).length === 0) {
-                    console.warn("⚠️ No valid fields to update — skipping blur save.");
-                    return;
-                }
-    
-                // ✅ Execute safe update
-                await axios.put(`http://localhost:5000/api/person/${targetId}`, cleanedData);
-                console.log(`💾 Auto-saved (on blur) for person_id: ${targetId}`);
-            } catch (err) {
-                console.error("❌ Auto-save (on blur) failed:", {
-                    message: err.message,
-                    status: err.response?.status,
-                    details: err.response?.data || err,
-                });
-            }
-        };
-    
- 
+  const handleUpdate = async (updatedData) => {
+    if (!person) return;
+
+    try {
+      // ✅ Get correct applicant ID
+      const targetId = selectedPerson?.person_id || queryPersonId || person.person_id;
+      if (!targetId) {
+        console.warn("⚠️ No valid applicant ID found — skipping update.");
+        return;
+      }
+
+      const allowedFields = [
+        "person_id", "profile_img", "campus", "academicProgram", "classifiedAs", "applyingAs",
+        "program", "program2", "program3", "yearLevel",
+        "last_name", "first_name", "middle_name", "extension", "nickname",
+        "height", "weight", "lrnNumber", "nolrnNumber", "gender",
+        "pwdMember", "pwdType", "pwdId",
+        "birthOfDate", "age", "birthPlace", "languageDialectSpoken",
+        "citizenship", "religion", "civilStatus", "tribeEthnicGroup",
+        "cellphoneNumber", "emailAddress",
+        "presentStreet", "presentBarangay", "presentZipCode", "presentRegion",
+        "presentProvince", "presentMunicipality", "presentDswdHouseholdNumber",
+        "sameAsPresentAddress",
+        "permanentStreet", "permanentBarangay", "permanentZipCode",
+        "permanentRegion", "permanentProvince", "permanentMunicipality",
+        "permanentDswdHouseholdNumber",
+        "solo_parent",
+        "father_deceased", "father_family_name", "father_given_name", "father_middle_name",
+        "father_ext", "father_nickname", "father_education", "father_education_level",
+        "father_last_school", "father_course", "father_year_graduated", "father_school_address",
+        "father_contact", "father_occupation", "father_employer", "father_income", "father_email",
+        "mother_deceased", "mother_family_name", "mother_given_name", "mother_middle_name",
+        "mother_ext", "mother_nickname", "mother_education", "mother_education_level",
+        "mother_last_school", "mother_course", "mother_year_graduated", "mother_school_address",
+        "mother_contact", "mother_occupation", "mother_employer", "mother_income", "mother_email",
+        "guardian", "guardian_family_name", "guardian_given_name", "guardian_middle_name",
+        "guardian_ext", "guardian_nickname", "guardian_address", "guardian_contact", "guardian_email",
+        "annual_income",
+        "schoolLevel", "schoolLastAttended", "schoolAddress", "courseProgram",
+        "honor", "generalAverage", "yearGraduated",
+        "schoolLevel1", "schoolLastAttended1", "schoolAddress1", "courseProgram1",
+        "honor1", "generalAverage1", "yearGraduated1",
+        "strand",
+        // 🩺 Health and medical
+        "cough", "colds", "fever", "asthma", "faintingSpells", "heartDisease",
+        "tuberculosis", "frequentHeadaches", "hernia", "chronicCough", "headNeckInjury",
+        "hiv", "highBloodPressure", "diabetesMellitus", "allergies", "cancer",
+        "smokingCigarette", "alcoholDrinking", "hospitalized", "hospitalizationDetails",
+        "medications",
+        // 🧬 Covid / Vaccination
+        "hadCovid", "covidDate",
+        "vaccine1Brand", "vaccine1Date", "vaccine2Brand", "vaccine2Date",
+        "booster1Brand", "booster1Date", "booster2Brand", "booster2Date",
+        // 🧪 Lab results / medical findings
+        "chestXray", "cbc", "urinalysis", "otherworkups",
+        // 🧍 Additional fields
+        "symptomsToday", "remarks",
+        // ✅ Agreement / Meta
+        "termsOfAgreement", "created_at", "current_step"
+      ];
+      // ✅ Clean the payload
+      const cleanedData = Object.fromEntries(
+        Object.entries(updatedData).filter(([key]) => allowedFields.includes(key))
+      );
+
+      if (Object.keys(cleanedData).length === 0) {
+        console.warn("⚠️ No valid fields to update — skipping request.");
+        return;
+      }
+
+      // ✅ Send update request
+      await axios.put(`http://localhost:5000/api/person/${targetId}`, cleanedData);
+
+      console.log(`✅ SuperAdmin updated person_id: ${targetId} successfully.`);
+    } catch (error) {
+      console.error("❌ SuperAdmin update failed:", {
+        message: error.message,
+        status: error.response?.status,
+        details: error.response?.data || error,
+      });
+    }
+  };
+
+  // Real-time save on every character typed
+  const handleChange = (e) => {
+    const { name, type, checked, value } = e.target;
+
+    const updatedPerson = {
+      ...person,
+      [name]: type === "checkbox" ? (checked ? 1 : 0) : value,
+    };
+
+    // If updating either mother_income or father_income, calculate total and set annual_income
+    if (name === "mother_income" || name === "father_income") {
+      const motherIncome = parseFloat(name === "mother_income" ? value : updatedPerson.mother_income) || 0;
+      const fatherIncome = parseFloat(name === "father_income" ? value : updatedPerson.father_income) || 0;
+      const totalIncome = motherIncome + fatherIncome;
+
+      let annualIncomeBracket = "";
+      if (totalIncome <= 80000) {
+        annualIncomeBracket = "80,000 and below";
+      } else if (totalIncome <= 135000) {
+        annualIncomeBracket = "80,000 to 135,000";
+      } else if (totalIncome <= 250000) {
+        annualIncomeBracket = "135,000 to 250,000";
+      } else if (totalIncome <= 500000) {
+        annualIncomeBracket = "250,000 to 500,000";
+      } else if (totalIncome <= 1000000) {
+        annualIncomeBracket = "500,000 to 1,000,000";
+      } else {
+        annualIncomeBracket = "1,000,000 and above";
+      }
+
+      updatedPerson.annual_income = annualIncomeBracket;
+    }
+
+    setPerson(updatedPerson);
+    handleUpdate(updatedPerson); // No delay, real-time save
+  };
+
+
+  // ✅ Safe handleBlur for SuperAdmin — updates correct applicant only
+  const handleBlur = async () => {
+    try {
+      // ✅ Determine correct applicant/person_id
+      const targetId = selectedPerson?.person_id || queryPersonId || person.person_id;
+      if (!targetId) {
+        console.warn("⚠️ No valid applicant ID found — skipping update.");
+        return;
+      }
+
+      const allowedFields = [
+        "person_id", "profile_img", "campus", "academicProgram", "classifiedAs", "applyingAs",
+        "program", "program2", "program3", "yearLevel",
+        "last_name", "first_name", "middle_name", "extension", "nickname",
+        "height", "weight", "lrnNumber", "nolrnNumber", "gender",
+        "pwdMember", "pwdType", "pwdId",
+        "birthOfDate", "age", "birthPlace", "languageDialectSpoken",
+        "citizenship", "religion", "civilStatus", "tribeEthnicGroup",
+        "cellphoneNumber", "emailAddress",
+        "presentStreet", "presentBarangay", "presentZipCode", "presentRegion",
+        "presentProvince", "presentMunicipality", "presentDswdHouseholdNumber",
+        "sameAsPresentAddress",
+        "permanentStreet", "permanentBarangay", "permanentZipCode",
+        "permanentRegion", "permanentProvince", "permanentMunicipality",
+        "permanentDswdHouseholdNumber",
+        "solo_parent",
+        "father_deceased", "father_family_name", "father_given_name", "father_middle_name",
+        "father_ext", "father_nickname", "father_education", "father_education_level",
+        "father_last_school", "father_course", "father_year_graduated", "father_school_address",
+        "father_contact", "father_occupation", "father_employer", "father_income", "father_email",
+        "mother_deceased", "mother_family_name", "mother_given_name", "mother_middle_name",
+        "mother_ext", "mother_nickname", "mother_education", "mother_education_level",
+        "mother_last_school", "mother_course", "mother_year_graduated", "mother_school_address",
+        "mother_contact", "mother_occupation", "mother_employer", "mother_income", "mother_email",
+        "guardian", "guardian_family_name", "guardian_given_name", "guardian_middle_name",
+        "guardian_ext", "guardian_nickname", "guardian_address", "guardian_contact", "guardian_email",
+        "annual_income",
+        "schoolLevel", "schoolLastAttended", "schoolAddress", "courseProgram",
+        "honor", "generalAverage", "yearGraduated",
+        "schoolLevel1", "schoolLastAttended1", "schoolAddress1", "courseProgram1",
+        "honor1", "generalAverage1", "yearGraduated1",
+        "strand",
+        // 🩺 Health and medical
+        "cough", "colds", "fever", "asthma", "faintingSpells", "heartDisease",
+        "tuberculosis", "frequentHeadaches", "hernia", "chronicCough", "headNeckInjury",
+        "hiv", "highBloodPressure", "diabetesMellitus", "allergies", "cancer",
+        "smokingCigarette", "alcoholDrinking", "hospitalized", "hospitalizationDetails",
+        "medications",
+        // 🧬 Covid / Vaccination
+        "hadCovid", "covidDate",
+        "vaccine1Brand", "vaccine1Date", "vaccine2Brand", "vaccine2Date",
+        "booster1Brand", "booster1Date", "booster2Brand", "booster2Date",
+        // 🧪 Lab results / medical findings
+        "chestXray", "cbc", "urinalysis", "otherworkups",
+        // 🧍 Additional fields
+        "symptomsToday", "remarks",
+        // ✅ Agreement / Meta
+        "termsOfAgreement", "created_at", "current_step"
+      ];
+
+      // ✅ Clean payload before sending
+      const cleanedData = Object.fromEntries(
+        Object.entries(person).filter(([key]) => allowedFields.includes(key))
+      );
+
+      if (Object.keys(cleanedData).length === 0) {
+        console.warn("⚠️ No valid fields to update — skipping blur save.");
+        return;
+      }
+
+      // ✅ Execute safe update
+      await axios.put(`http://localhost:5000/api/person/${targetId}`, cleanedData);
+      console.log(`💾 Auto-saved (on blur) for person_id: ${targetId}`);
+    } catch (err) {
+      console.error("❌ Auto-save (on blur) failed:", {
+        message: err.message,
+        status: err.response?.status,
+        details: err.response?.data || err,
+      });
+    }
+  };
+
+
 
   const [soloParentChoice, setSoloParentChoice] = useState("");
   const [clickedSteps, setClickedSteps] = useState(Array(steps.length).fill(false));
@@ -563,13 +593,15 @@ const AdminDashboard2 = () => {
     }
   };
 
-
   const links = [
-    { to: `/admin_ecat_application_form`, label: "ECAT Application Form" },
-    { to: `/admission_form_process`, label: "Admission Form Process" },
-    { to: `/admin_personal_data_form`, label: "Personal Data Form" },
-    { to: `/admin_office_of_the_registrar`, label: "Application For EARIST College Admission" },
-    { to: `/admission_services`, label: "Application/Student Satisfactory Survey" },
+    { to: "/admin_ecat_application_form", label: "ECAT Application Form" },
+    { to: "/admission_form_process", label: "Admission Form Process" },
+    { to: "/admin_personal_data_form", label: "Personal Data Form" },
+    {
+      to: "/admin_office_of_the_registrar",
+      label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""} College Admission`,
+    },
+    { to: "/admission_services", label: "Application/Student Satisfactory Survey" },
     { label: "Examination Permit", onClick: handleExamPermitClick }, // ✅
   ];
 
@@ -891,7 +923,18 @@ const AdminDashboard2 = () => {
 
         <Container>
           <h1 style={{ fontSize: "50px", fontWeight: "bold", textAlign: "center", color: "maroon", marginTop: "25px" }}>APPLICANT FORM</h1>
-          <div style={{ textAlign: "center" }}>Complete the applicant form to secure your place for the upcoming academic year at EARIST.</div>
+          <div style={{ textAlign: "center" }}>
+            Complete the applicant form to secure your place for the upcoming academic year at{" "}
+            {shortTerm ? (
+              <>
+                <strong>{shortTerm.toUpperCase()}</strong> <br />
+                {companyName || ""}
+              </>
+            ) : (
+              companyName || ""
+            )}
+            .
+          </div>
         </Container>
         <br />
 
@@ -2082,7 +2125,7 @@ const AdminDashboard2 = () => {
               <Button
                 variant="contained"
                 onClick={() => {
-                 
+
                   navigate("/admin_dashboard3");
                 }}
                 endIcon={

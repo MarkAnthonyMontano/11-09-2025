@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
+
 import axios from "axios";
 import { Button, Box, TextField, Container, Card, Modal, TableContainer, Paper, Table, TableHead, TableRow, TableCell, Typography, FormControl, FormHelperText, InputLabel, Select, MenuItem, Checkbox, FormControlLabel } from "@mui/material";
 import { Link } from "react-router-dom";
@@ -25,6 +27,35 @@ import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 
 const RegistrarDashboard3 = () => {
+    const settings = useContext(SettingsContext);
+    const [fetchedLogo, setFetchedLogo] = useState(null);
+    const [companyName, setCompanyName] = useState("");
+    const [shortTerm, setShortTerm] = useState("");
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const response = await axios.get("http://localhost:5000/api/settings");
+                const data = response.data;
+
+                if (data.logo_url) {
+                    setFetchedLogo(`http://localhost:5000${data.logo_url}`);
+                } else {
+                    setFetchedLogo(EaristLogo);
+                }
+
+                // ✅ set company + short term + address
+                setCompanyName(data.company_name || "");
+                setShortTerm(data.short_term || "");
+                setCampusAddress(data.address || "");
+            } catch (err) {
+                console.error("Error fetching settings in ApplicantDashboard:", err);
+            }
+        };
+
+        fetchSettings();
+    }, []);
+
     const stepsData = [
         { label: "Admission Process For College", to: "/applicant_list", icon: <SchoolIcon fontSize="large" /> },
         { label: "Applicant Form", to: "/registrar_dashboard1", icon: <AssignmentIcon fontSize="large" /> },
@@ -228,111 +259,111 @@ const RegistrarDashboard3 = () => {
 
 
 
-   // Real-time save on every character typed
-  const handleChange = (e) => {
-    const { name, type, checked, value } = e.target;
-    const updatedPerson = {
-      ...person,
-      [name]: type === "checkbox" ? (checked ? 1 : 0) : value,
+    // Real-time save on every character typed
+    const handleChange = (e) => {
+        const { name, type, checked, value } = e.target;
+        const updatedPerson = {
+            ...person,
+            [name]: type === "checkbox" ? (checked ? 1 : 0) : value,
+        };
+        setPerson(updatedPerson);
+        handleUpdate(updatedPerson); // No delay, real-time save
     };
-    setPerson(updatedPerson);
-    handleUpdate(updatedPerson); // No delay, real-time save
-  };
 
 
-  // ✅ Safe handleBlur for SuperAdmin — updates correct applicant only
-  const handleBlur = async () => {
-    try {
-      // ✅ Determine correct applicant/person_id
-      const targetId = selectedPerson?.person_id || queryPersonId || person.person_id;
-      if (!targetId) {
-        console.warn("⚠️ No valid applicant ID found — skipping update.");
-        return;
-      }
+    // ✅ Safe handleBlur for SuperAdmin — updates correct applicant only
+    const handleBlur = async () => {
+        try {
+            // ✅ Determine correct applicant/person_id
+            const targetId = selectedPerson?.person_id || queryPersonId || person.person_id;
+            if (!targetId) {
+                console.warn("⚠️ No valid applicant ID found — skipping update.");
+                return;
+            }
 
-      const allowedFields = [
-        "person_id", "profile_img", "campus", "academicProgram", "classifiedAs", "applyingAs",
-        "program", "program2", "program3", "yearLevel",
-        "last_name", "first_name", "middle_name", "extension", "nickname",
-        "height", "weight", "lrnNumber", "nolrnNumber", "gender",
-        "pwdMember", "pwdType", "pwdId",
-        "birthOfDate", "age", "birthPlace", "languageDialectSpoken",
-        "citizenship", "religion", "civilStatus", "tribeEthnicGroup",
-        "cellphoneNumber", "emailAddress",
-        "presentStreet", "presentBarangay", "presentZipCode", "presentRegion",
-        "presentProvince", "presentMunicipality", "presentDswdHouseholdNumber",
-        "sameAsPresentAddress",
-        "permanentStreet", "permanentBarangay", "permanentZipCode",
-        "permanentRegion", "permanentProvince", "permanentMunicipality",
-        "permanentDswdHouseholdNumber",
-        "solo_parent",
-        "father_deceased", "father_family_name", "father_given_name", "father_middle_name",
-        "father_ext", "father_nickname", "father_education", "father_education_level",
-        "father_last_school", "father_course", "father_year_graduated", "father_school_address",
-        "father_contact", "father_occupation", "father_employer", "father_income", "father_email",
-        "mother_deceased", "mother_family_name", "mother_given_name", "mother_middle_name",
-        "mother_ext", "mother_nickname", "mother_education", "mother_education_level",
-        "mother_last_school", "mother_course", "mother_year_graduated", "mother_school_address",
-        "mother_contact", "mother_occupation", "mother_employer", "mother_income", "mother_email",
-        "guardian", "guardian_family_name", "guardian_given_name", "guardian_middle_name",
-        "guardian_ext", "guardian_nickname", "guardian_address", "guardian_contact", "guardian_email",
-        "annual_income",
-        "schoolLevel", "schoolLastAttended", "schoolAddress", "courseProgram",
-        "honor", "generalAverage", "yearGraduated",
-        "schoolLevel1", "schoolLastAttended1", "schoolAddress1", "courseProgram1",
-        "honor1", "generalAverage1", "yearGraduated1",
-        "strand",
-        // 🩺 Health and medical
-        "cough", "colds", "fever", "asthma", "faintingSpells", "heartDisease",
-        "tuberculosis", "frequentHeadaches", "hernia", "chronicCough", "headNeckInjury",
-        "hiv", "highBloodPressure", "diabetesMellitus", "allergies", "cancer",
-        "smokingCigarette", "alcoholDrinking", "hospitalized", "hospitalizationDetails",
-        "medications",
-        // 🧬 Covid / Vaccination
-        "hadCovid", "covidDate",
-        "vaccine1Brand", "vaccine1Date", "vaccine2Brand", "vaccine2Date",
-        "booster1Brand", "booster1Date", "booster2Brand", "booster2Date",
-        // 🧪 Lab results / medical findings
-        "chestXray", "cbc", "urinalysis", "otherworkups",
-        // 🧍 Additional fields
-        "symptomsToday", "remarks",
-        // ✅ Agreement / Meta
-        "termsOfAgreement", "created_at", "current_step"
-      ];
+            const allowedFields = [
+                "person_id", "profile_img", "campus", "academicProgram", "classifiedAs", "applyingAs",
+                "program", "program2", "program3", "yearLevel",
+                "last_name", "first_name", "middle_name", "extension", "nickname",
+                "height", "weight", "lrnNumber", "nolrnNumber", "gender",
+                "pwdMember", "pwdType", "pwdId",
+                "birthOfDate", "age", "birthPlace", "languageDialectSpoken",
+                "citizenship", "religion", "civilStatus", "tribeEthnicGroup",
+                "cellphoneNumber", "emailAddress",
+                "presentStreet", "presentBarangay", "presentZipCode", "presentRegion",
+                "presentProvince", "presentMunicipality", "presentDswdHouseholdNumber",
+                "sameAsPresentAddress",
+                "permanentStreet", "permanentBarangay", "permanentZipCode",
+                "permanentRegion", "permanentProvince", "permanentMunicipality",
+                "permanentDswdHouseholdNumber",
+                "solo_parent",
+                "father_deceased", "father_family_name", "father_given_name", "father_middle_name",
+                "father_ext", "father_nickname", "father_education", "father_education_level",
+                "father_last_school", "father_course", "father_year_graduated", "father_school_address",
+                "father_contact", "father_occupation", "father_employer", "father_income", "father_email",
+                "mother_deceased", "mother_family_name", "mother_given_name", "mother_middle_name",
+                "mother_ext", "mother_nickname", "mother_education", "mother_education_level",
+                "mother_last_school", "mother_course", "mother_year_graduated", "mother_school_address",
+                "mother_contact", "mother_occupation", "mother_employer", "mother_income", "mother_email",
+                "guardian", "guardian_family_name", "guardian_given_name", "guardian_middle_name",
+                "guardian_ext", "guardian_nickname", "guardian_address", "guardian_contact", "guardian_email",
+                "annual_income",
+                "schoolLevel", "schoolLastAttended", "schoolAddress", "courseProgram",
+                "honor", "generalAverage", "yearGraduated",
+                "schoolLevel1", "schoolLastAttended1", "schoolAddress1", "courseProgram1",
+                "honor1", "generalAverage1", "yearGraduated1",
+                "strand",
+                // 🩺 Health and medical
+                "cough", "colds", "fever", "asthma", "faintingSpells", "heartDisease",
+                "tuberculosis", "frequentHeadaches", "hernia", "chronicCough", "headNeckInjury",
+                "hiv", "highBloodPressure", "diabetesMellitus", "allergies", "cancer",
+                "smokingCigarette", "alcoholDrinking", "hospitalized", "hospitalizationDetails",
+                "medications",
+                // 🧬 Covid / Vaccination
+                "hadCovid", "covidDate",
+                "vaccine1Brand", "vaccine1Date", "vaccine2Brand", "vaccine2Date",
+                "booster1Brand", "booster1Date", "booster2Brand", "booster2Date",
+                // 🧪 Lab results / medical findings
+                "chestXray", "cbc", "urinalysis", "otherworkups",
+                // 🧍 Additional fields
+                "symptomsToday", "remarks",
+                // ✅ Agreement / Meta
+                "termsOfAgreement", "created_at", "current_step"
+            ];
 
-      // ✅ Clean payload before sending
-      const cleanedData = Object.fromEntries(
-        Object.entries(person).filter(([key]) => allowedFields.includes(key))
-      );
+            // ✅ Clean payload before sending
+            const cleanedData = Object.fromEntries(
+                Object.entries(person).filter(([key]) => allowedFields.includes(key))
+            );
 
-      if (Object.keys(cleanedData).length === 0) {
-        console.warn("⚠️ No valid fields to update — skipping blur save.");
-        return;
-      }
+            if (Object.keys(cleanedData).length === 0) {
+                console.warn("⚠️ No valid fields to update — skipping blur save.");
+                return;
+            }
 
-      // ✅ Execute safe update
-      await axios.put(`http://localhost:5000/api/person/${targetId}`, cleanedData);
-      console.log(`💾 Auto-saved (on blur) for person_id: ${targetId}`);
-    } catch (err) {
-      console.error("❌ Auto-save (on blur) failed:", {
-        message: err.message,
-        status: err.response?.status,
-        details: err.response?.data || err,
-      });
-    }
-  };
+            // ✅ Execute safe update
+            await axios.put(`http://localhost:5000/api/person/${targetId}`, cleanedData);
+            console.log(`💾 Auto-saved (on blur) for person_id: ${targetId}`);
+        } catch (err) {
+            console.error("❌ Auto-save (on blur) failed:", {
+                message: err.message,
+                status: err.response?.status,
+                details: err.response?.data || err,
+            });
+        }
+    };
 
-  // Do not alter
-  const handleUpdate = async (updatedData) => {
-    if (!person || !person.person_id) return;
+    // Do not alter
+    const handleUpdate = async (updatedData) => {
+        if (!person || !person.person_id) return;
 
-    try {
-      await axios.put(`http://localhost:5000/api/person/${person.person_id}`, updatedData);
-      console.log("✅ Auto-saved successfully");
-    } catch (error) {
-      console.error("❌ Auto-save failed:", error);
-    }
-  };
+        try {
+            await axios.put(`http://localhost:5000/api/person/${person.person_id}`, updatedData);
+            console.log("✅ Auto-saved successfully");
+        } catch (error) {
+            console.error("❌ Auto-save failed:", error);
+        }
+    };
 
 
 
@@ -467,11 +498,14 @@ const RegistrarDashboard3 = () => {
 
 
     const links = [
-        { to: `/admin_ecat_application_form`, label: "ECAT Application Form" },
-        { to: `/admission_form_process`, label: "Admission Form Process" },
-        { to: `/admin_personal_data_form`, label: "Personal Data Form" },
-        { to: `/admin_office_of_the_registrar`, label: "Application For EARIST College Admission" },
-        { to: `/admission_services`, label: "Application/Student Satisfactory Survey" },
+        { to: "/admin_ecat_application_form", label: "ECAT Application Form" },
+        { to: "/admission_form_process", label: "Admission Form Process" },
+        { to: "/admin_personal_data_form", label: "Personal Data Form" },
+        {
+            to: "/admin_office_of_the_registrar",
+            label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""} College Admission`,
+        },
+        { to: "/admission_services", label: "Application/Student Satisfactory Survey" },
         { label: "Examination Permit", onClick: handleExamPermitClick }, // ✅
     ];
 
@@ -517,9 +551,9 @@ const RegistrarDashboard3 = () => {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     flexWrap: 'wrap',
-                    
+
                     mb: 2,
-                    
+
                 }}
             >
                 <Typography
@@ -773,7 +807,18 @@ const RegistrarDashboard3 = () => {
 
                 <Container>
                     <h1 style={{ fontSize: "50px", fontWeight: "bold", textAlign: "center", color: "maroon", marginTop: "25px" }}>APPLICANT FORM</h1>
-                    <div style={{ textAlign: "center" }}>Complete the applicant form to secure your place for the upcoming academic year at EARIST.</div>
+                    <div style={{ textAlign: "center" }}>
+                        Complete the applicant form to secure your place for the upcoming academic year at{" "}
+                        {shortTerm ? (
+                            <>
+                                <strong>{shortTerm.toUpperCase()}</strong> <br />
+                                {companyName || ""}
+                            </>
+                        ) : (
+                            companyName || ""
+                        )}
+                        .
+                    </div>
                 </Container>
                 <br />
                 {person.person_id && (
@@ -933,7 +978,7 @@ const RegistrarDashboard3 = () => {
                                     School Address
                                 </Typography>
                                 <TextField
-                                              InputProps={{ readOnly: true }}
+                                    InputProps={{ readOnly: true }}
 
                                     fullWidth
                                     size="small"
@@ -953,7 +998,7 @@ const RegistrarDashboard3 = () => {
                                     Course Program
                                 </Typography>
                                 <TextField
-                                            InputProps={{ readOnly: true }}
+                                    InputProps={{ readOnly: true }}
 
                                     fullWidth
                                     size="small"
@@ -981,7 +1026,7 @@ const RegistrarDashboard3 = () => {
                                     Honor
                                 </Typography>
                                 <TextField
-                                             InputProps={{ readOnly: true }}
+                                    InputProps={{ readOnly: true }}
 
                                     fullWidth
                                     size="small"
@@ -1001,7 +1046,7 @@ const RegistrarDashboard3 = () => {
                                     General Average
                                 </Typography>
                                 <TextField
-                                            InputProps={{ readOnly: true }}
+                                    InputProps={{ readOnly: true }}
 
                                     fullWidth
                                     size="small"
@@ -1021,7 +1066,7 @@ const RegistrarDashboard3 = () => {
                                     Year Graduated
                                 </Typography>
                                 <TextField
-                                              InputProps={{ readOnly: true }}
+                                    InputProps={{ readOnly: true }}
 
                                     fullWidth
                                     size="small"
@@ -1089,7 +1134,7 @@ const RegistrarDashboard3 = () => {
                                     School Last Attended
                                 </Typography>
                                 <TextField
-                                             InputProps={{ readOnly: true }}
+                                    InputProps={{ readOnly: true }}
 
                                     fullWidth
                                     size="small"
@@ -1110,7 +1155,7 @@ const RegistrarDashboard3 = () => {
                                     School Address
                                 </Typography>
                                 <TextField
-                                             InputProps={{ readOnly: true }}
+                                    InputProps={{ readOnly: true }}
 
                                     fullWidth
                                     size="small"
@@ -1131,7 +1176,7 @@ const RegistrarDashboard3 = () => {
                                     Course Program
                                 </Typography>
                                 <TextField
-                                              InputProps={{ readOnly: true }}
+                                    InputProps={{ readOnly: true }}
 
                                     fullWidth
                                     size="small"
@@ -1160,7 +1205,7 @@ const RegistrarDashboard3 = () => {
                                     Honor
                                 </Typography>
                                 <TextField
-                                          InputProps={{ readOnly: true }}
+                                    InputProps={{ readOnly: true }}
 
                                     fullWidth
                                     size="small"
@@ -1181,7 +1226,7 @@ const RegistrarDashboard3 = () => {
                                     General Average
                                 </Typography>
                                 <TextField
-                                          InputProps={{ readOnly: true }}
+                                    InputProps={{ readOnly: true }}
 
                                     fullWidth
                                     size="small"
@@ -1202,7 +1247,7 @@ const RegistrarDashboard3 = () => {
                                     Year Graduated
                                 </Typography>
                                 <TextField
-                                              InputProps={{ readOnly: true }}
+                                    InputProps={{ readOnly: true }}
 
                                     fullWidth
                                     size="small"
@@ -1341,7 +1386,7 @@ const RegistrarDashboard3 = () => {
                             <Button
                                 variant="contained"
                                 onClick={() => {
-                                  
+
                                     navigate("/registrar_dashboard4");
                                 }}
                                 endIcon={

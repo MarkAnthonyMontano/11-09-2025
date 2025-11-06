@@ -77,8 +77,8 @@ const RegistrarForgotPassword = () => {
     }
   };
 
-  
- 
+
+
 
   const handleClose = (_, reason) => {
     if (reason === "clickaway") return;
@@ -116,7 +116,15 @@ const RegistrarForgotPassword = () => {
       >
         <div style={{ border: "5px solid white" }} className="Container">
           {/* Header */}
-          <div className="Header">
+          <div
+            className="Header"
+            style={{
+              backgroundColor: settings?.header_color || "#1976d2", // ✅ default blue
+              padding: "1rem 0",
+              borderBottom: "3px solid black",
+            }}
+          >
+
             <div className="HeaderTitle">
               <div className="CircleCon">
                 <img src={logoSrc} alt="EARIST Logo" />

@@ -1,4 +1,6 @@
-import React, { useState, useEffect, } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
+
 import axios from "axios";
 import { Button, Box, TextField, Container, Card, TableContainer, Paper, Table, TableHead, TableRow, TableCell, Typography, FormControl, FormHelperText, InputLabel, Select, MenuItem, Checkbox, FormControlLabel } from "@mui/material";
 import { Link } from "react-router-dom";
@@ -22,6 +24,35 @@ import FactCheckIcon from '@mui/icons-material/FactCheck';
 
 
 const StudentDashboard5 = () => {
+    const settings = useContext(SettingsContext);
+    const [fetchedLogo, setFetchedLogo] = useState(null);
+    const [companyName, setCompanyName] = useState("");
+    const [shortTerm, setShortTerm] = useState("");
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const response = await axios.get("http://localhost:5000/api/settings");
+                const data = response.data;
+
+                if (data.logo_url) {
+                    setFetchedLogo(`http://localhost:5000${data.logo_url}`);
+                } else {
+                    setFetchedLogo(EaristLogo);
+                }
+
+                // ✅ set company + short term + address
+                setCompanyName(data.company_name || "");
+                setShortTerm(data.short_term || "");
+                setCampusAddress(data.address || "");
+            } catch (err) {
+                console.error("Error fetching settings in ApplicantDashboard:", err);
+            }
+        };
+
+        fetchSettings();
+    }, []);
+
     const location = useLocation();
 
 
@@ -239,12 +270,12 @@ const StudentDashboard5 = () => {
         setActiveStep(index);
         navigate(to);
     };
-    
-  const links = [
+
+    const links = [
         { to: `/student_ecat_application_form`, label: "ECAT Application Form" },
         { to: `/student_form_process`, label: "Admission Form Process" },
         { to: `/student_personal_data_form`, label: "Personal Data Form" },
-        { to: `/student_office_of_the_registrar`, label: "Application For EARIST College Admission" },
+        { to: `/student_office_of_the_registrar`, label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""}  College Admission" ` },
         { to: `/student_admission_services`, label: "Admission Services" },
 
     ];
@@ -421,7 +452,16 @@ const StudentDashboard5 = () => {
                         APPLICANT FORM
                     </h1>
                     <div style={{ textAlign: "center" }}>
-                        Complete the applicant form to secure your place for the upcoming academic year at EARIST.
+                        Complete the applicant form to secure your place for the upcoming academic year at{" "}
+                        {shortTerm ? (
+                            <>
+                                <strong>{shortTerm.toUpperCase()}</strong> <br />
+                                {companyName || ""}
+                            </>
+                        ) : (
+                            companyName || ""
+                        )}
+                        .
                     </div>
                 </Container>
                 <br />
@@ -501,15 +541,31 @@ const StudentDashboard5 = () => {
                             In accordance with RA 10173 or Data Privacy Act of 2012, I give my consent to the following terms and conditions on the collection, use, processing, and disclosure of my personal data:
                         </Typography>
                         < br />
-                        <Typography style={{ fontSize: "12px", fontFamily: "Arial", textAlign: "Left" }}>
-                            1. I am aware that the Eulogio "Amang" Rodriguez Institute of Science and Technology (EARIST) has collected and stored my personal data during my admission/enrollment at EARIST. This data includes my demographic profile, contact details like home address, email address, landline numbers, and mobile numbers.
+                        <Typography
+                            style={{ fontSize: "12px", fontFamily: "Arial", textAlign: "left" }}
+                        >
+                            1. I am aware that the{" "}
+                            {companyName || "Your School Name"}{" "}
+                            {shortTerm ? `(${shortTerm.toUpperCase()})` : ""}{" "}
+                            has collected and stored my personal data during my admission/enrollment at{" "}
+                            {shortTerm ? shortTerm.toUpperCase() : companyName || "the institution"}.
+                            This data includes my demographic profile, contact details like home address,
+                            email address, landline numbers, and mobile numbers.
                         </Typography>
+
                         <Typography style={{ fontSize: "12px", fontFamily: "Arial", textAlign: "Left" }}>
                             2. I agree to personally update these data through personal request from the Office of the registrar.
                         </Typography>
-                        <Typography style={{ fontSize: "12px", fontFamily: "Arial", textAlign: "Left" }}>
-                            3. In consonance with the above stated Act, I am aware that the University will protect my school records related to my being a student/graduated of EARIST. However, I have the right to authorize a representative to claim the same subject to the policy of the University.
+                        <Typography
+                            style={{ fontSize: "12px", fontFamily: "Arial", textAlign: "left" }}
+                        >
+                            3. In consonance with the above stated Act, I am aware that the University will
+                            protect my school records related to my being a student/graduate of{" "}
+                            {shortTerm ? shortTerm.toUpperCase() : "the University"}. However, I have the
+                            right to authorize a representative to claim the same subject to the policy of
+                            the University.
                         </Typography>
+
 
                         <Typography style={{ fontSize: "12px", fontFamily: "Arial", textAlign: "Left" }}>
                             4. In order to promote efficient management of the organization’s records, I authorize the University to manage my data for data sharing with industry partners, government agencies/embassies, other educational institutions, and other offices for the university for employment, statistics, immigration, transfer credentials, and other legal purposes that may serve me best.

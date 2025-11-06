@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
+
 import axios from "axios";
 import { Button, Box, TextField, Container, Typography, Card, TableContainer, Paper, Table, TableHead, TableRow, TableCell, FormHelperText, FormControl, InputLabel, Select, MenuItem, Modal, FormControlLabel, Checkbox, IconButton } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
@@ -32,6 +34,35 @@ import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import GradeIcon from "@mui/icons-material/Grade";
 
 const ReadmissionDashboard1 = () => {
+  const settings = useContext(SettingsContext);
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/settings");
+        const data = response.data;
+
+        if (data.logo_url) {
+          setFetchedLogo(`http://localhost:5000${data.logo_url}`);
+        } else {
+          setFetchedLogo(EaristLogo);
+        }
+
+        // ✅ set company + short term + address
+        setCompanyName(data.company_name || "");
+        setShortTerm(data.short_term || "");
+        setCampusAddress(data.address || "");
+      } catch (err) {
+        console.error("Error fetching settings in ApplicantDashboard:", err);
+      }
+    };
+
+    fetchSettings();
+  }, []);
+
   const stepsData = [
     { label: "Applicant List", to: "/super_admin_applicant_list", icon: <ListAltIcon /> },
     { label: "Applicant Form", to: "/readmission_dashboard1", icon: <PersonAddIcon /> },
@@ -101,16 +132,16 @@ const ReadmissionDashboard1 = () => {
     permanentDswdHouseholdNumber: "",
   });
 
- const handleNavigateStep = (index, to) => {
-        setCurrentStep(index);
+  const handleNavigateStep = (index, to) => {
+    setCurrentStep(index);
 
-        const pid = sessionStorage.getItem("admin_edit_person_id");
-        if (pid) {
-            navigate(`${to}?person_id=${pid}`);
-        } else {
-            navigate(to);
-        }
-    };
+    const pid = sessionStorage.getItem("admin_edit_person_id");
+    if (pid) {
+      navigate(`${to}?person_id=${pid}`);
+    } else {
+      navigate(to);
+    }
+  };
 
   const [hasAccess, setHasAccess] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -248,7 +279,7 @@ const ReadmissionDashboard1 = () => {
   };
 
 
-  
+
   // ✅ Safe handleUpdate function (no DB errors, correct applicant update)
   const handleUpdate = async (updatedData) => {
     if (!person) return;
@@ -979,7 +1010,7 @@ const ReadmissionDashboard1 = () => {
     { to: `/admin_ecat_application_form`, label: "ECAT Application Form" },
     { to: `/admission_form_process`, label: "Admission Form Process" },
     { to: `/admin_personal_data_form`, label: "Personal Data Form" },
-    { to: `/admin_office_of_the_registrar`, label: "Application For EARIST College Admission" },
+    { to: `/admin_office_of_the_registrar`, label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""} College Admission" ` },
     { to: `/admission_services`, label: "Application/Student Satisfactory Survey" },
 
   ];
@@ -1301,7 +1332,18 @@ const ReadmissionDashboard1 = () => {
 
         <Container>
           <h1 style={{ fontSize: "50px", fontWeight: "bold", textAlign: "center", color: "maroon", marginTop: "25px" }}>APPLICANT FORM</h1>
-          <div style={{ textAlign: "center" }}>Complete the applicant form to secure your place for the upcoming academic year at EARIST.</div>
+          <div style={{ textAlign: "center" }}>
+            Complete the applicant form to secure your place for the upcoming academic year at{" "}
+            {shortTerm ? (
+              <>
+                <strong>{shortTerm.toUpperCase()}</strong> <br />
+                {companyName || ""}
+              </>
+            ) : (
+              companyName || ""
+            )}
+            .
+          </div>
         </Container>
 
         <br />
@@ -1861,7 +1903,7 @@ const ReadmissionDashboard1 = () => {
                 Learning Reference Number:
               </Typography>
 
-               {/* LRN Input */}
+              {/* LRN Input */}
               <TextField
                 id="lrnNumber"
                 name="lrnNumber"
@@ -1914,7 +1956,7 @@ const ReadmissionDashboard1 = () => {
 
 
 
-       {/* Gender */}
+              {/* Gender */}
               <TextField
                 select
                 size="small"
@@ -2045,11 +2087,11 @@ const ReadmissionDashboard1 = () => {
 
             <Box display="flex" gap={2} mb={2}>
               {/* 🎂 Birth Date */}
-           
 
 
 
-<Box flex={1}>
+
+              <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">
                   Birth of Date
                 </Typography>
@@ -2579,7 +2621,7 @@ const ReadmissionDashboard1 = () => {
               <FormControl fullWidth size="small" required error={!!errors.presentMunicipality}>
                 <InputLabel id="present-municipality-label">Municipality</InputLabel>
                 <Select
-                readOnly
+                  readOnly
                   labelId="present-municipality-label"
                   name="presentMunicipality"
                   value={person.presentMunicipality ?? ""}
@@ -2612,7 +2654,7 @@ const ReadmissionDashboard1 = () => {
               <FormControl fullWidth size="small" required error={!!errors.presentBarangay}>
                 <InputLabel id="present-barangay-label">Barangay</InputLabel>
                 <Select
-                readOnly
+                  readOnly
                   labelId="present-barangay-label"
                   name="presentBarangay"
                   value={person.presentBarangay ?? ""}
@@ -3165,7 +3207,7 @@ const ReadmissionDashboard1 = () => {
               <Button
                 variant="contained"
                 onClick={() => {
-                  
+
                   navigate("/readmission_dashboard2");
                 }}
                 endIcon={
