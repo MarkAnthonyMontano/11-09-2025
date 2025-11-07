@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
 import axios from "axios";
 import {
   Box,
@@ -27,7 +28,7 @@ const ProgramPanel = () => {
   const [loading, setLoading] = useState(false);
 
 
-  const pageId = 42;
+  const pageId = 38;
 
   //Put this After putting the code of the past code
   useEffect(() => {
@@ -337,7 +338,7 @@ const ProgramPanel = () => {
         open={snackbar.open}
         autoHideDuration={3000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert
           onClose={handleCloseSnackbar}

@@ -21,6 +21,23 @@ const socket = io("http://localhost:5000");
 
 const ApplicantForgotPassword = () => {
   const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+
+
+  useEffect(() => {
+    if (settings) {
+      if (settings.title_color) setTitleColor(settings.title_color);
+      if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+      if (settings.border_color) setBorderColor(settings.border_color);
+      if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+
+    }
+  }, [settings]);
+
   const [capVal, setCapVal] = useState(null);
   const [email, setEmail] = useState("");
   const [snack, setSnack] = useState({ open: false, message: "", severity: "info" });
@@ -113,7 +130,9 @@ const ApplicantForgotPassword = () => {
               </div>
             </div>
             <div className="HeaderBody">
-              <strong>{settings?.company_name || "EARIST"}</strong>
+              <strong style={{
+                color: titleColor,
+              }}>{settings?.company_name || "Company Name"}</strong>
               <p>Student Information System</p>
             </div>
           </div>
@@ -126,7 +145,7 @@ const ApplicantForgotPassword = () => {
               type="email"
               placeholder="Enter your Email Address (e.g., username@gmail.com)"
               variant="outlined"
-              style={{ border: "2px solid maroon", borderRadius: "5px" }}
+              style={{ border: `2px solid ${borderColor}`, borderRadius: "5px" }}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               InputProps={{
@@ -163,9 +182,10 @@ const ApplicantForgotPassword = () => {
                 sx={{
                   width: "100%",
                   py: 1.5,
-                  backgroundColor: "#6D2323",
+                  backgroundColor: mainButtonColor,
                   color: "white",
-                  "&:hover": { backgroundColor: "#6D2323" },
+                 height: "50px",
+                 borderRadius: "10px"
                 }}
               >
                 Reset Password

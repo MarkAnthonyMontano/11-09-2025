@@ -257,7 +257,7 @@ const ApplicantList = () => {
     const [hasAccess, setHasAccess] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    const pageId = 9;
+    const pageId = 6;
 
     useEffect(() => {
 

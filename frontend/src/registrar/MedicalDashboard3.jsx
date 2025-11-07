@@ -110,7 +110,7 @@ const MedicalDashboard3 = () => {
     const [hasAccess, setHasAccess] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    const pageId = 34;
+    const pageId = 31;
 
     //Put this After putting the code of the past code
     useEffect(() => {
@@ -404,13 +404,12 @@ const MedicalDashboard3 = () => {
 
 
     const links = [
-        { to: `/admin_ecat_application_form`, label: "ECAT Application Form" },
-        { to: `/admission_form_process`, label: "Admission Form Process" },
-        { to: `/admin_personal_data_form`, label: "Personal Data Form" },
-        { to: `/admin_office_of_the_registrar`, label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""} College Admission" ` },
-        { to: `/admission_services`, label: "Application/Student Satisfactory Survey" },
-
-    ];
+    { to: "/admin_ecat_application_form", label: "ECAT Application Form" },
+    { to: "/admin_admission_form_process", label: "Admission Form Process" },
+    { to: "/admin_personal_data_form", label: "Personal Data Form" },
+    { to: "/admin_office_of_the_registrar", label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""} College Admission` },
+    { to: "/admission_services", label: "Application/Student Satisfactory Survey" },
+  ];
 
     const [canPrintPermit, setCanPrintPermit] = useState(false);
 
@@ -842,9 +841,6 @@ const MedicalDashboard3 = () => {
                                                 <em>Select School Level</em>
                                             </MenuItem>
                                             <MenuItem value="High School/Junior High School">High School/Junior High School</MenuItem>
-                                            <MenuItem value="Senior High School">Senior High School</MenuItem>
-                                            <MenuItem value="Undergraduate">Undergraduate</MenuItem>
-                                            <MenuItem value="Graduate">Graduate</MenuItem>
                                             <MenuItem value="ALS">ALS</MenuItem>
                                             <MenuItem value="Vocational/Trade Course">Vocational/Trade Course</MenuItem>
                                         </Select>
@@ -927,7 +923,7 @@ const MedicalDashboard3 = () => {
                         >
                             <Box sx={{ flex: "1 1 33%" }}>
                                 <Typography variant="subtitle1" mb={1}>
-                                    Honor
+                                    Recognition / Awards
                                 </Typography>
                                 <TextField
                                     InputProps={{ readOnly: true }}
@@ -937,7 +933,7 @@ const MedicalDashboard3 = () => {
                                     name="honor"
                                     required
                                     value={person.honor ?? ""}
-                                    placeholder="Enter your Honor"
+                                    placeholder="Enter your Recognition / Awards"
                                     onChange={handleChange}
                                     onBlur={handleBlur}
                                     error={errors.honor}
@@ -1004,10 +1000,10 @@ const MedicalDashboard3 = () => {
                             {/* School Level 1 */}
                             <Box sx={{ flex: "1 1 25%" }}>
                                 <Typography variant="subtitle1" mb={1}>
-                                    School Level
+                                    Educational Attainment
                                 </Typography>
                                 <FormControl fullWidth size="small" required error={!!errors.schoolLevel1}>
-                                    <InputLabel id="schoolLevel1-label">School Level</InputLabel>
+                                    <InputLabel id="schoolLevel1-label">Educational Attainment</InputLabel>
                                     <Select
                                         readOnly
                                         labelId="schoolLevel1-label"
@@ -1018,8 +1014,6 @@ const MedicalDashboard3 = () => {
                                         onChange={handleChange}
                                         onBlur={handleBlur}
                                     >
-                                        <MenuItem value=""><em>Select School Level</em></MenuItem>
-                                        <MenuItem value="High School/Junior High School">High School/Junior High School</MenuItem>
                                         <MenuItem value="Senior High School">Senior High School</MenuItem>
                                         <MenuItem value="Undergraduate">Undergraduate</MenuItem>
                                         <MenuItem value="Graduate">Graduate</MenuItem>
@@ -1106,7 +1100,7 @@ const MedicalDashboard3 = () => {
                             {/* Honor 1 */}
                             <Box sx={{ flex: "1 1 33%" }}>
                                 <Typography variant="subtitle1" mb={1}>
-                                    Honor
+                                    Recognition / Awards
                                 </Typography>
                                 <TextField
                                     InputProps={{ readOnly: true }}
@@ -1115,7 +1109,7 @@ const MedicalDashboard3 = () => {
                                     size="small"
                                     required
                                     name="honor1"
-                                    placeholder="Enter your Honor"
+                                    placeholder="Enter your Recognition / Awards"
                                     value={person.honor1 ?? ""}
                                     onChange={handleChange}
                                     onBlur={handleBlur}

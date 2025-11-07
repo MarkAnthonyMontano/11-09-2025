@@ -5,14 +5,14 @@ import { Box, Container, Typography } from "@mui/material";
 import EaristLogo from "../assets/EaristLogo.png";
 import { FcPrint } from "react-icons/fc";
 import { useLocation } from "react-router-dom";
-import Unauthorized from "../components/Unauthorized";
-import LoadingOverlay from "../components/LoadingOverlay";
 
 
 const OfficeOfTheRegistrar = () => {
     const settings = useContext(SettingsContext);
     const [fetchedLogo, setFetchedLogo] = useState(null);
     const [companyName, setCompanyName] = useState("");
+    const [shortTerm, setShortTerm] = useState("");
+
 
     useEffect(() => {
         if (settings) {
@@ -89,51 +89,8 @@ const OfficeOfTheRegistrar = () => {
 
     const [campusAddress, setCampusAddress] = useState("");
 
-    const [hasAccess, setHasAccess] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const pageId = 7;
-
-    useEffect(() => {
-
-        const storedUser = localStorage.getItem("email");
-        const storedRole = localStorage.getItem("role");
-        const storedID = localStorage.getItem("person_id");
-
-        if (storedUser && storedRole && storedID) {
-            setUser(storedUser);
-            setUserRole(storedRole);
-            setUserID(storedID);
-
-            if (storedRole === "registrar") {
-                checkAccess(storedID);
-            } else {
-                window.location.href = "/login";
-            }
-        } else {
-            window.location.href = "/login";
-        }
-    }, []);
-
-    const checkAccess = async (userID) => {
-        try {
-            const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
-            if (response.data && response.data.page_privilege === 1) {
-                setHasAccess(true);
-            } else {
-                setHasAccess(false);
-            }
-        } catch (error) {
-            console.error('Error checking access:', error);
-            setHasAccess(false);
-            if (error.response && error.response.data.message) {
-                console.log(error.response.data.message);
-            } else {
-                console.log("An unexpected error occurred.");
-            }
-            setLoading(false);
-        }
-    };
-
+    
+ 
     useEffect(() => {
         if (settings && settings.address) {
             setCampusAddress(settings.address);
@@ -279,34 +236,6 @@ const OfficeOfTheRegistrar = () => {
     }
 
 
-    // 🔒 Disable right-click
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
-
-    // 🔒 Block DevTools shortcuts silently
-    document.addEventListener('keydown', (e) => {
-        const isBlockedKey =
-            e.key === 'F12' ||
-            e.key === 'F11' ||
-            (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
-            (e.ctrlKey && e.key === 'U');
-
-        if (isBlockedKey) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-    });
-
-  
-// Put this at the very bottom before the return 
-if (loading || hasAccess === null) {
-   return <LoadingOverlay open={loading} message="Check Access"/>;
-}
-
-  if (!hasAccess) {
-    return (
-      <Unauthorized />
-    );
-  }
 
     return (
         <Box

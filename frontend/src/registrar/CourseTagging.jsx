@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
 import axios from "axios";
 import { Box, Button, Grid, Typography, Table, TableBody, TableCell, TableHead, TableRow, Paper, TextField, MenuItem, Container } from "@mui/material";
 import LinearWithValueLabel from "../components/LinearWithValueLabel";
@@ -21,7 +22,7 @@ const CourseTagging = () => {
   const [userRole, setUserRole] = useState("");
   
   ///////////
-  const pageId = 20;
+  const pageId = 17;
 
   // do not alter
   useEffect(() => {

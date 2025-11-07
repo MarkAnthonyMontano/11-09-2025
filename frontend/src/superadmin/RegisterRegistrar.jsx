@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
 import axios from "axios";
 import {
     Box,
@@ -44,7 +45,7 @@ const RegisterRegistrar = () => {
     const [loading, setLoading] = useState(false);
 
 
-    const pageId = 79;
+    const pageId = 74;
 
     //Put this After putting the code of the past code
     useEffect(() => {

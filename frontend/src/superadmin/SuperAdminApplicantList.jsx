@@ -152,7 +152,7 @@ const SuperAdminApplicantList = () => {
     const [loading, setLoading] = useState(false);
 
 
-    const pageId = 86;
+    const pageId = 83;
 
     //Put this After putting the code of the past code
     useEffect(() => {

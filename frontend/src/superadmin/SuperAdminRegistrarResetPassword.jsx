@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
 import axios from "axios";
 import {
   Box,
@@ -22,7 +23,7 @@ const SuperAdminRegistrarResetPassword = () => {
   const [loading, setLoading] = useState(false);
   const [resetMsg, setResetMsg] = useState("");
   const [searchError, setSearchError] = useState("");
-  const pageId = 89;
+  const pageId = 86;
 
   // ✅ User Authentication + Access Control
   useEffect(() => {

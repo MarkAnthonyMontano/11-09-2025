@@ -83,7 +83,7 @@ const ProctorApplicantList = () => {
   const [loading, setLoading] = useState(false);
 
 
-  const pageId = 41;
+  const pageId = 37;
 
   //Put this After putting the code of the past code
   useEffect(() => {
@@ -235,7 +235,7 @@ const ProctorApplicantList = () => {
           height: 120px;
           border-radius: 50%;
           object-fit: cover;
-          border: 2px solid black;
+          
         }
         table {
           border-collapse: collapse;

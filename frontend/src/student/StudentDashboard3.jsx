@@ -568,11 +568,11 @@ const StudentDashboard3 = () => {
                             {/* Each Box here is one input container */}
                             <Box sx={{ flex: "1 1 25%" }}>
                                 <Typography variant="subtitle1" mb={1}>
-                                    School Level
+                                    Educational Attainment
                                 </Typography>
                                 <Box sx={{ flex: "1 1 25%" }}>
                                     <FormControl fullWidth size="small" required error={!!errors.schoolLevel}>
-                                        <InputLabel id="schoolLevel-label">School Level</InputLabel>
+                                        <InputLabel id="schoolLevel-label">  Educational Attainment</InputLabel>
                                         <Select
                                             labelId="schoolLevel-label"
                                             id="schoolLevel"
@@ -586,9 +586,6 @@ const StudentDashboard3 = () => {
                                                 <em>Select School Level</em>
                                             </MenuItem>
                                             <MenuItem value="High School/Junior High School">High School/Junior High School</MenuItem>
-                                            <MenuItem value="Senior High School">Senior High School</MenuItem>
-                                            <MenuItem value="Undergraduate">Undergraduate</MenuItem>
-                                            <MenuItem value="Graduate">Graduate</MenuItem>
                                             <MenuItem value="ALS">ALS</MenuItem>
                                             <MenuItem value="Vocational/Trade Course">Vocational/Trade Course</MenuItem>
                                         </Select>
@@ -669,7 +666,7 @@ const StudentDashboard3 = () => {
                         >
                             <Box sx={{ flex: "1 1 33%" }}>
                                 <Typography variant="subtitle1" mb={1}>
-                                    Honor
+                                    Recognition / Awards
                                 </Typography>
                                 <TextField
                                     fullWidth
@@ -679,7 +676,7 @@ const StudentDashboard3 = () => {
                                     name="honor"
                                     required
                                     value={person.honor}
-                                    placeholder="Enter your Honor"
+                                    placeholder="Enter your Recognition / Awards"
 
                                     error={errors.honor}
                                     helperText={errors.honor ? "This field is required." : ""}
@@ -743,10 +740,10 @@ const StudentDashboard3 = () => {
                             {/* School Level 1 */}
                             <Box sx={{ flex: "1 1 25%" }}>
                                 <Typography variant="subtitle1" mb={1}>
-                                    School Level
+                                    Educational Attainment
                                 </Typography>
                                 <FormControl fullWidth size="small" required error={!!errors.schoolLevel1}>
-                                    <InputLabel id="schoolLevel1-label">School Level</InputLabel>
+                                    <InputLabel id="schoolLevel1-label">  Educational Attainment</InputLabel>
                                     <Select
                                         labelId="schoolLevel1-label"
                                         id="schoolLevel1"
@@ -756,8 +753,6 @@ const StudentDashboard3 = () => {
                                         label="School Level"
 
                                     >
-                                        <MenuItem value=""><em>Select School Level</em></MenuItem>
-                                        <MenuItem value="High School/Junior High School">High School/Junior High School</MenuItem>
                                         <MenuItem value="Senior High School">Senior High School</MenuItem>
                                         <MenuItem value="Undergraduate">Undergraduate</MenuItem>
                                         <MenuItem value="Graduate">Graduate</MenuItem>
@@ -841,7 +836,7 @@ const StudentDashboard3 = () => {
                             {/* Honor 1 */}
                             <Box sx={{ flex: "1 1 33%" }}>
                                 <Typography variant="subtitle1" mb={1}>
-                                    Honor
+                                    Recognition / Awards
                                 </Typography>
                                 <TextField
                                     fullWidth
@@ -850,7 +845,7 @@ const StudentDashboard3 = () => {
                                     name="honor1"
                                     InputProps={{ readOnly: true }}
 
-                                    placeholder="Enter your Honor"
+                                    placeholder="Enter your Recognition / Awards"
                                     value={person.honor1}
 
                                     error={errors.honor1}

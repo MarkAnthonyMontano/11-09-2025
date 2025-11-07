@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
 import axios from "axios";
 import {
     Box,
@@ -69,7 +70,7 @@ const DentalAssessment = () => {
 
     const [hasAccess, setHasAccess] = useState(null);
     const [loading, setLoading] = useState(false);
-    const pageId = 22;
+    const pageId = 19;
 
     //
     useEffect(() => {

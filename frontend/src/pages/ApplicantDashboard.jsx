@@ -30,34 +30,45 @@ import { Dialog } from "@mui/material";
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 
 const ApplicantDashboard = (props) => {
+
+
   const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [stepperColor, setStepperColor] = useState("#000000");   // ✅ NEW
+
   const [fetchedLogo, setFetchedLogo] = useState(null);
   const [companyName, setCompanyName] = useState("");
   const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/settings");
-        const data = response.data;
+    if (!settings) return;
 
-        if (data.logo_url) {
-          setFetchedLogo(`http://localhost:5000${data.logo_url}`);
-        } else {
-          setFetchedLogo(EaristLogo);
-        }
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);   // ✅ NEW
 
-        // ✅ set company + short term + address
-        setCompanyName(data.company_name || "");
-        setShortTerm(data.short_term || "");
-        setCampusAddress(data.address || "");
-      } catch (err) {
-        console.error("Error fetching settings in ApplicantDashboard:", err);
-      }
-    };
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
 
-    fetchSettings();
-  }, []);
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]);
+
 
 
 
@@ -462,43 +473,12 @@ const ApplicantDashboard = (props) => {
     5: <PersonIcon />,
   };
 
-  const [hasStudentNumber, setHasStudentNumber] = useState(false);
-  const [studentNumber, setStudentNumber] = useState(null);
-
-  const checkStudentNumber = async (personId) => {
-    try {
-      const res = await axios.get(`http://localhost:5000/api/student_status/${personId}`);
-      if (res.data.hasStudentNumber) {
-        setHasStudentNumber(true);
-        setStudentNumber(res.data.student_number);
-      } else {
-        setHasStudentNumber(false);
-      }
-    } catch (err) {
-      console.error("❌ Failed to check student number:", err);
-    }
-  };
-
-  useEffect(() => {
-    const storedID = localStorage.getItem("person_id");
-    if (storedID) {
-      fetchPersonData(storedID);
-      fetchApplicantNumber(storedID);
-      checkStudentNumber(storedID); // 👈 ADD THIS LINE
-    }
-  }, []);
-
   const getCurrentStep = () => {
-    // ✅ Step 6 – Final status reached OR student number issued
-    if (
-      person?.final_status === "Accepted" ||
-      person?.final_status === "Rejected" ||
-      hasStudentNumber
-    )
-      return 5;
+    // ✅ Step 6 – Final status reached
+    if (person?.final_status === "Accepted" || person?.final_status === "Rejected") return 5;
 
-    // ✅ Step 5 – Display only (no automatic advancement)
-    // — intentionally skipped in logic
+    // ✅ Step 5 – Medical submitted
+    if (medicalUploads.length > 0) return 4;
 
     // ✅ Step 4 – College approval received
     if (collegeApproval === "Accepted" || collegeApproval === "Rejected") return 3;
@@ -625,6 +605,31 @@ const ApplicantDashboard = (props) => {
     }
   };
 
+  const [hasStudentNumber, setHasStudentNumber] = useState(false);
+  const [studentNumber, setStudentNumber] = useState(null);
+
+  const checkStudentNumber = async (personId) => {
+    try {
+      const res = await axios.get(`http://localhost:5000/api/student_status/${personId}`);
+      if (res.data.hasStudentNumber) {
+        setHasStudentNumber(true);
+        setStudentNumber(res.data.student_number);
+      } else {
+        setHasStudentNumber(false);
+      }
+    } catch (err) {
+      console.error("❌ Failed to check student number:", err);
+    }
+  };
+
+  useEffect(() => {
+    const storedID = localStorage.getItem("person_id");
+    if (storedID) {
+      fetchPersonData(storedID);
+      fetchApplicantNumber(storedID);
+      checkStudentNumber(storedID); // 👈 ADD THIS LINE
+    }
+  }, []);
 
 
 
@@ -646,7 +651,7 @@ const ApplicantDashboard = (props) => {
         <Grid item xs={12}>
           <Card
             sx={{
-              border: "2px solid maroon",
+              border: `2px solid ${borderColor}`,
               boxShadow: 3,
               height: "135px",
               width: "1485px",
@@ -684,7 +689,7 @@ const ApplicantDashboard = (props) => {
                         sx={{
                           width: 90,
                           height: 90,
-                          border: "2px solid maroon",
+                          border: `2px solid ${borderColor}`,
                           cursor: "pointer",
                           mt: -1.5,
                         }}
@@ -723,7 +728,7 @@ const ApplicantDashboard = (props) => {
                   )}
 
                   <Box>
-                    <Typography variant="h4" fontWeight="bold" color="maroon">
+                    <Typography variant="h4" fontWeight="bold" style={{color: titleColor}}>
                       Welcome,&nbsp;
                       {person.last_name}, {person.first_name}{" "}
                       {person.middle_name} {person.extension}
@@ -772,7 +777,7 @@ const ApplicantDashboard = (props) => {
                           display: "flex",
                           justifyContent: "center",
                           alignItems: "center",
-                          border: "2px solid #800000",
+                         border: `2px solid ${borderColor}`,
                           marginLeft: idx === 0 ? "35px" : 0, // only first card has left margin
                         }}
                       >
@@ -785,7 +790,7 @@ const ApplicantDashboard = (props) => {
                             <button
                               style={{
                                 padding: "10px 20px",
-                                backgroundColor: "maroon",
+                              backgroundColor: mainButtonColor, 
                                 color: "white",
                                 border: "none",
                                 borderRadius: "8px",
@@ -822,7 +827,7 @@ const ApplicantDashboard = (props) => {
                             <button
                               style={{
                                 padding: "10px 20px",
-                                backgroundColor: "maroon",
+                                backgroundColor: mainButtonColor, 
                                 color: "white",
                                 border: "none",
                                 borderRadius: "8px",
@@ -860,7 +865,7 @@ const ApplicantDashboard = (props) => {
 
                     borderRadius: "10px",
                     backgroundColor: "#fffaf5",
-                    border: "2px solid #6D2323",
+                    border: `2px solid ${borderColor}`,
                     boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
                     width: "510px", // same width as the two cards together
                   }}
@@ -907,7 +912,7 @@ const ApplicantDashboard = (props) => {
                 width: "490px",
                 height: "375px",
                 display: "flex",
-                border: "2px solid #800000",
+                border: `2px solid ${borderColor}`,
                 flexDirection: "column",
                 justifyContent: "center",
                 alignItems: "center",
@@ -1063,7 +1068,7 @@ const ApplicantDashboard = (props) => {
           <Grid item xs="auto">
             <Card
               sx={{
-                border: "2px solid maroon",
+                border: `2px solid ${borderColor}`,
                 marginLeft: "10px",
                 boxShadow: 3,
                 p: 2,
@@ -1085,7 +1090,8 @@ const ApplicantDashboard = (props) => {
                   alignItems="center"
                   justifyContent="space-between"
                   sx={{
-                    backgroundColor: "maroon",
+                    backgroundColor: settings?.header_color || "#1976d2",
+
                     color: "white",
                     borderRadius: "6px 6px 0 0",
                     padding: "4px 8px",
@@ -1185,7 +1191,7 @@ const ApplicantDashboard = (props) => {
 
             }}
           >
-            <Typography sx={{ fontSize: "32px", fontWeight: "bold", color: "maroon" }}>
+            <Typography sx={{ fontSize: "32px", fontWeight: "bold", color: subtitleColor }}>
               APPLICATION STATUS
             </Typography>
           </Box>
@@ -1231,7 +1237,7 @@ const ApplicantDashboard = (props) => {
                           borderRadius: "50%",
                           backgroundColor: isActive ? "#800000" : isCompleted ? "#800000" : "#E8C999",
 
-                          border: "2px solid #6D2323",
+                         border: `2px solid ${borderColor}`,
                           display: "flex",
 
                           alignItems: "center",
@@ -1277,7 +1283,7 @@ const ApplicantDashboard = (props) => {
                     height: 360,
                     width: "100%",        // let it stretch with grid
                     maxWidth: 205,        // same size as before
-                    border: "2px solid maroon",
+                    border: `2px solid ${borderColor}`,
                     borderRadius: 2,
                     p: 2,
                     overflowY: "auto",
@@ -1425,24 +1431,15 @@ const ApplicantDashboard = (props) => {
                         "❌ Unfortunately, you were not accepted."
                       ) : hasStudentNumber ? (
                         <>
-                          🎉 <strong>Congratulations!</strong> You are now accepted at{" "}
-                          <strong>
-                            {shortTerm
-                              ? `${shortTerm.toUpperCase()} - ${companyName || ""}`
-                              : companyName || ""}
-                          </strong>.
+                          🎉 <strong>Congratulations!</strong> You are now accepted at <strong>EARIST</strong>.
+                          Please follow the steps below:
 
                           <div style={{ marginTop: "6px", lineHeight: "1.6" }}>
-                            1. Proceed to your <strong>College</strong> for your Subjects tagging <br />
+                            1. Proceed to your <strong>College</strong> to tag your subjects. <br />
                             2. Get your <strong>Class Schedule</strong> from your department. <br />
+
                             {studentNumber && (
-                              <span
-                                style={{
-                                  display: "block",
-                                  fontWeight: "bold",
-                                  marginTop: "5px",
-                                }}
-                              >
+                              <span style={{ display: "block", fontWeight: "bold", marginTop: "5px" }}>
                                 Your Student Number: {studentNumber}
                               </span>
                             )}

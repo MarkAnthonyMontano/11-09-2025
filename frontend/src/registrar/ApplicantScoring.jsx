@@ -97,7 +97,7 @@ const ApplicantScoring = () => {
     const [hasAccess, setHasAccess] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    const pageId = 11;
+    const pageId = 8;
 
     //
     useEffect(() => {
@@ -704,6 +704,7 @@ th, td {
 
             const formData = new FormData();
             formData.append("file", selectedFile);
+            formData.append("userID", userID);
 
             const res = await axios.post("http://localhost:5000/api/exam/import", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
@@ -1604,10 +1605,8 @@ th, td {
                                         }}
                                     >
                                         {person.registrar_user_email
-                                            ? person.registrar_user_email // ✅ only email, no (registrar)
-                                            : person.exam_user_email
-                                                ? person.exam_user_email // ✅ only email, no (exam)
-                                                : "N/A"}
+                                        ? person.registrar_user_email
+                                        : "N/A"}
                                     </TableCell>
 
                                 </TableRow>

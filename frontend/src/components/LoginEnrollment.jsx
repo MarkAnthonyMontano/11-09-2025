@@ -28,6 +28,22 @@ import { flatMap, set } from "lodash";
 const LoginEnrollment = ({ setIsAuthenticated }) => {
   const settings = useContext(SettingsContext);
 
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+
+
+  useEffect(() => {
+    if (settings) {
+      if (settings.title_color) setTitleColor(settings.title_color);
+      if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+      if (settings.border_color) setBorderColor(settings.border_color);
+      if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+
+    }
+  }, [settings]);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -260,7 +276,9 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
                 </div>
               </div>
               <div className="HeaderBody">
-                <strong>{settings?.company_name || "EARIST"}</strong>
+                <strong style={{
+                  color: titleColor,
+                }}>{settings?.company_name || "Company Name"}</strong>
                 <p>Student Information System</p>
               </div>
             </div>
@@ -285,7 +303,7 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
                     width: "100%",
                     padding: "0.8rem 2.5rem 0.8rem 2.5rem",
                     borderRadius: "6px",
-                    border: "2px solid maroon", // warm brown-gray
+                    border: `2px solid ${borderColor}`,
 
                     fontSize: "1rem",
                     backgroundColor: "white",
@@ -334,7 +352,7 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
                     className="border"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    style={{ paddingLeft: "2.5rem", border: "2px solid maroon" }}
+                    style={{ paddingLeft: "2.5rem", border: `2px solid ${borderColor}`, }}
                     autoFocus
                   />
                   <EmailIcon
@@ -357,7 +375,7 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="border"
-                    style={{ paddingLeft: "2.5rem", border: "2px solid maroon" }}
+                    style={{ paddingLeft: "2.5rem", border: `2px solid ${borderColor}`, }}
                   />
                   <LockIcon
                     style={{
@@ -379,6 +397,7 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
                       background: "none",
                       border: "none",
                       cursor: "pointer",
+                      marginBottom: "30px"
                     }}
                   >
                     {showPassword ? <Visibility /> : <VisibilityOff />}
@@ -386,7 +405,7 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
                 </div>
 
                 <div
-                  className="Button"
+
                   style={{
                     cursor: lockout || loading ? "not-allowed" : "pointer",
                   }}
@@ -396,8 +415,10 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
                     disabled={lockout || loading} // ✅ disable while loading or locked
                     style={{
                       width: "100%",
-                      backgroundColor: "#6D2323", // ✅ always stays the same
+                      backgroundColor: mainButtonColor,
                       color: "white",
+                      height: "50px",
+                      borderRadius: "10px",
                       border: "none",
                       padding: "0.5rem 0",
                       fontSize: "16px",
@@ -424,7 +445,7 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
                 </span>
               </div>
 
-         
+
             </div>
 
             <div className="Footer">

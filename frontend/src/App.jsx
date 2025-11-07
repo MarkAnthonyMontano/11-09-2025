@@ -57,6 +57,7 @@ import SearchCertificateOfRegistration from './registrar/SearchCertificateOfRegi
 import AdminECATApplicationForm from './registrar/AdminECATApplicationForm';
 import AdminPersonalDataForm from './registrar/AdminPersonalDataForm';
 import AdminOfficeOfTheRegistrar from './registrar/AdminOfficeOfTheRegistrar';
+import AdminAdmissionFormProcess from "./registrar/AdminAdmissionFormProcess";
 import AdminDashboard1 from './registrar/AdminDashboard1';
 import AdminDashboard2 from './registrar/AdminDashboard2';
 import AdminDashboard3 from './registrar/AdminDashboard3';
@@ -186,6 +187,7 @@ import RegisterStudent from './superadmin/RegisterStudent';
 import PageCRUD from './superadmin/PageCRUD';
 import UserPageAccess from './superadmin/UserPageAccess';
 import Settings from './superadmin/Settings';
+
 
 
 
@@ -472,8 +474,9 @@ function App() {
                     <Route path="/requirements_uploader" element={<ProtectedRoute allowedRoles={['applicant']}><RequirementUploader /></ProtectedRoute>} />
                     <Route path="/student_requirements" element={<ProtectedRoute><StudentRequirements /></ProtectedRoute>} />
                     <Route path="/registrar_requirements" element={<ProtectedRoute><RegistrarRequirements /></ProtectedRoute>} />
-                    <Route path="/admin_ecat_application_form" element={<ProtectedRoute allowedRoles={['registrar', 'applicant']}><AdminECATApplicationForm /></ProtectedRoute>} />
+                    <Route path="/admin_ecat_application_form" element={<ProtectedRoute allowedRoles={['registrar']}><AdminECATApplicationForm /></ProtectedRoute>} />
                     <Route path="/admin_personal_data_form" element={<ProtectedRoute allowedRoles={['registrar']}><AdminPersonalDataForm /></ProtectedRoute>} />
+                                        <Route path="/admin_admission_form_process" element={<ProtectedRoute allowedRoles={['registrar']}><AdminAdmissionFormProcess /></ProtectedRoute>} />
                     <Route path="/admin_office_of_the_registrar" element={<ProtectedRoute allowedRoles={['registrar']}><AdminOfficeOfTheRegistrar /></ProtectedRoute>} />
                     <Route path="/personal_data_form" element={<ProtectedRoute allowedRoles={['applicant']}><PersonalDataForm /></ProtectedRoute>} />
                     <Route path="/ecat_application_form" element={<ProtectedRoute allowedRoles={['applicant']}><ECATApplicationForm /></ProtectedRoute>} />

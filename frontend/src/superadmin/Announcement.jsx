@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
 import axios from "axios";
 import {
     Container,
@@ -39,7 +40,7 @@ function Announcement() {
     const [loading, setLoading] = useState(false);
 
 
-    const pageId = 74;
+    const pageId = 69;
 
     //Put this After putting the code of the past code
     useEffect(() => {

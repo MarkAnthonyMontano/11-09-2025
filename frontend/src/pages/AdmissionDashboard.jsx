@@ -56,7 +56,7 @@ const AdmissionDashboardPanel = () => {
   const [hasAccess, setHasAccess] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const pageId = 96;
+  const pageId = 93;
 
   useEffect(() => {
     const storedUser = localStorage.getItem("email");
@@ -135,8 +135,8 @@ const AdmissionDashboardPanel = () => {
         { title: "INTERVIEW ROOM MANAGEMENT", link: "/assign_interview_exam", icon: <MeetingRoom className="text-maroon-500 text-2xl" /> },
         { title: "INTERVIEW SCHEDULE MANAGEMENT", link: "/assign_schedule_applicants_interview", icon: <EditCalendar className="text-maroon-500 text-2xl" /> },
         { title: "INTERVIEWER APPLICANT LIST", link: "/interviewer_applicant_list", icon: <People className="text-maroon-500 text-2xl" /> },
-        { title: "QUALIFYING / INTERVIEW EXAM SCORES", link: "/qualying_exam_scores", icon: <Assessment className="text-maroon-500 text-2xl" /> },
-        { title: "STUDENT NUMBERING FOR COLLEGE", link: "/qualifying_exam_scores", icon: <FormatListNumbered className="text-maroon-500 text-2xl" /> },
+        { title: "QUALIFYING / INTERVIEW EXAM SCORES", link: "/qualifying_exam_scores", icon: <Assessment className="text-maroon-500 text-2xl" /> },
+        { title: "STUDENT NUMBERING FOR COLLEGE", link: "/student_numbering_per_college", icon: <FormatListNumbered className="text-maroon-500 text-2xl" /> },
         { title: "COURSE TAGGING", link: "/course_tagging", icon: <Class className="text-maroon-500 text-2xl" /> },
       ],
     },

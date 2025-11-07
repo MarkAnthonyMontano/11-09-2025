@@ -102,7 +102,7 @@ const MedicalDashboard4 = () => {
     const [loading, setLoading] = useState(false);
 
 
-    const pageId = 35;
+    const pageId = 32;
 
     //Put this After putting the code of the past code
     useEffect(() => {
@@ -394,13 +394,15 @@ const MedicalDashboard4 = () => {
 
 
     const links = [
-        { to: `/admin_ecat_application_form`, label: "ECAT Application Form" },
-        { to: `/admission_form_process`, label: "Admission Form Process" },
-        { to: `/admin_personal_data_form`, label: "Personal Data Form" },
-        { to: `/admin_office_of_the_registrar`, label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""} College Admission" ` },
-        { to: `/admission_services`, label: "Application/Student Satisfactory Survey" },
+    { to: "/admin_ecat_application_form", label: "ECAT Application Form" },
+    { to: "/admin_admission_form_process", label: "Admission Form Process" },
+    { to: "/admin_personal_data_form", label: "Personal Data Form" },
+    { to: "/admin_office_of_the_registrar", label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""} College Admission` },
+    { to: "/admission_services", label: "Application/Student Satisfactory Survey" },
+  ];
 
-    ];
+
+
     const [canPrintPermit, setCanPrintPermit] = useState(false);
 
     useEffect(() => {

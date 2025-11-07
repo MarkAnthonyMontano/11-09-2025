@@ -125,7 +125,7 @@ const AdminApplicantList = () => {
 
     const [hasAccess, setHasAccess] = useState(null);
     const [loading, setLoading] = useState(false);
-    const pageId = 10;
+    const pageId = 7;
 
     useEffect(() => {
 
@@ -683,16 +683,6 @@ const AdminApplicantList = () => {
             });
     }, []);
 
-
-
-    useEffect(() => {
-        if (department.length > 0 && !selectedDepartmentFilter) {
-            const firstDept = department[0].dprtmnt_name;
-            setSelectedDepartmentFilter(firstDept);
-            handleDepartmentChange(firstDept); // if you also want to trigger it
-        }
-    }, [department, selectedDepartmentFilter]);
-
     const handleDepartmentChange = (selectedDept) => {
         setSelectedDepartmentFilter(selectedDept);
         if (!selectedDept) {
@@ -961,6 +951,7 @@ const AdminApplicantList = () => {
                         placeholder="Search Applicant Name / Email / Applicant ID"
                         size="small"
                         value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}   // ✅ THIS WAS MISSING
                         sx={{
                             width: 450,
                             backgroundColor: "#fff",
@@ -973,6 +964,7 @@ const AdminApplicantList = () => {
                             startAdornment: <SearchIcon sx={{ mr: 1, color: "gray" }} />,
                         }}
                     />
+
                 </Box>
             </Box>
 
@@ -1438,6 +1430,7 @@ const AdminApplicantList = () => {
                                     }}
                                     displayEmpty
                                 >
+                                    <MenuItem value="">Select College</MenuItem>
                                     {department.map((dep) => (
                                         <MenuItem key={dep.dprtmnt_id} value={dep.dprtmnt_name}>
                                             {dep.dprtmnt_name} ({dep.dprtmnt_code})
@@ -1612,10 +1605,7 @@ const AdminApplicantList = () => {
 
                                 {/* Program */}
                                 <TableCell sx={{ textAlign: "center", border: "2px solid maroon" }}>
-                                    {curriculumOptions.find(
-                                        (item) =>
-                                            item.curriculum_id?.toString() === person.program?.toString()
-                                    )?.program_code ?? "N/A"}
+                                    {person.program_code || "N/A"}
                                 </TableCell>
 
                                 {/* SHS GWA */}

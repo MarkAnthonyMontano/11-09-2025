@@ -107,7 +107,7 @@ const CertificateOfRegistration = forwardRef(({ student_number }, divToPrintRef)
   const [hasAccess, setHasAccess] = useState(null);
   
   
-  const pageId = 16;
+  const pageId = 13;
 
   //
   useEffect(() => {

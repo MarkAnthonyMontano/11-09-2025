@@ -251,19 +251,14 @@ const settingsStorage = multer.diskStorage({
       return cb(new Error("Invalid file type. Only PNG, JPG, JPEG, or PDF allowed."));
     }
 
-    if (file.fieldname === "logo") {
-      cb(null, "Logo" + ext);
-    } else if (file.fieldname === "bg_image") {
-      cb(null, "Background" + ext);
-    } else {
-      cb(null, Date.now() + ext);
-    }
+    if (file.fieldname === "logo") cb(null, "Logo" + ext);
+    else if (file.fieldname === "bg_image") cb(null, "Background" + ext);
+    else cb(null, Date.now() + ext);
   },
 });
 
 const settingsUpload = multer({ storage: settingsStorage });
 
-// ✅ Delete old image safely
 const deleteOldFile = (fileUrl) => {
   if (!fileUrl) return;
   const filePath = path.join(__dirname, fileUrl.replace(/^\//, ""));
@@ -277,6 +272,7 @@ const deleteOldFile = (fileUrl) => {
 app.get("/api/settings", async (req, res) => {
   try {
     const [rows] = await db.query("SELECT * FROM company_settings WHERE id = 1");
+
     if (rows.length === 0) {
       return res.json({
         company_name: "",
@@ -287,9 +283,21 @@ app.get("/api/settings", async (req, res) => {
         footer_color: "#ffffff",
         logo_url: null,
         bg_image: null,
+
+        main_button_color: "#ffffff",
+        sub_button_color: "#ffffff",
+        border_color: "#000000",
+        stepper_color: "#000000",
+        sidebar_button_color: "#000000",
+        font_theme_color: "#000000",
+
+        title_color: "#000000",
+        subtitle_color: "#555555",
       });
     }
+
     res.json(rows[0]);
+
   } catch (err) {
     console.error("❌ Error fetching settings:", err);
     res.status(500).json({ error: err.message });
@@ -305,15 +313,32 @@ app.post(
   ]),
   async (req, res) => {
     try {
-      const companyName = req.body.company_name || "";
-      const shortTerm = req.body.short_term || ""; // <-- new field
-      const address = req.body.address || "";
-      const headerColor = req.body.header_color || "#ffffff";
-      const footerText = req.body.footer_text || "";
-      const footerColor = req.body.footer_color || "#ffffff";
+      const {
+        company_name,
+        short_term,
+        address,
+        header_color,
+        footer_text,
+        footer_color,
 
-      const logoUrl = req.files["logo"] ? `/uploads/${req.files["logo"][0].filename}` : null;
-      const bgImageUrl = req.files["bg_image"] ? `/uploads/${req.files["bg_image"][0].filename}` : null;
+        main_button_color,
+        sub_button_color,
+        border_color,
+        stepper_color,
+        sidebar_button_color,
+        font_theme_color,
+
+        title_color,
+        subtitle_color,
+      } = req.body;
+
+      const logoUrl = req.files["logo"]
+        ? `/uploads/${req.files["logo"][0].filename}`
+        : null;
+
+      const bgImageUrl = req.files["bg_image"]
+        ? `/uploads/${req.files["bg_image"][0].filename}`
+        : null;
 
       const [rows] = await db.query("SELECT * FROM company_settings WHERE id = 1");
 
@@ -323,49 +348,106 @@ app.post(
 
         let query = `
           UPDATE company_settings 
-          SET company_name=?, short_term=?, address=?, header_color=?, footer_text=?, footer_color=?`;
-        const params = [companyName, shortTerm, address, headerColor, footerText, footerColor];
+          SET 
+            company_name=?,
+            short_term=?,
+            address=?,
+            header_color=?,
+            footer_text=?,
+            footer_color=?,
+
+            main_button_color=?,
+            sub_button_color=?,
+            border_color=?,
+            stepper_color=?,
+            sidebar_button_color=?,
+            font_theme_color=?,
+
+            title_color=?,
+            subtitle_color=?`;
+
+        const params = [
+          company_name || "",
+          short_term || "",
+          address || "",
+          header_color || "#ffffff",
+          footer_text || "",
+          footer_color || "#ffffff",
+
+          main_button_color || "#ffffff",
+          sub_button_color || "#ffffff",
+          border_color || "#000000",
+          stepper_color || "#000000",
+          sidebar_button_color || "#000000",
+          font_theme_color || "#000000",
+
+          title_color || "#000000",
+          subtitle_color || "#555555",
+        ];
 
         if (logoUrl) {
           query += ", logo_url=?";
           params.push(logoUrl);
         }
+
         if (bgImageUrl) {
           query += ", bg_image=?";
           params.push(bgImageUrl);
         }
 
-        query += " WHERE id=1";
+        query += " WHERE id = 1";
+
         await db.query(query, params);
 
         if (logoUrl && oldLogo && oldLogo !== logoUrl) deleteOldFile(oldLogo);
         if (bgImageUrl && oldBg && oldBg !== bgImageUrl) deleteOldFile(oldBg);
 
         return res.json({ success: true, message: "Settings updated successfully." });
+
       } else {
         const insertQuery = `
           INSERT INTO company_settings 
-          (company_name, short_term, address, header_color, footer_text, footer_color, logo_url, bg_image)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+          (
+            company_name, short_term, address, header_color, footer_text, footer_color,
+            logo_url, bg_image,
+            main_button_color, sub_button_color, border_color, stepper_color, sidebar_button_color, font_theme_color,
+            title_color, subtitle_color
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
         await db.query(insertQuery, [
-          companyName,
-          shortTerm,
-          address,
-          headerColor,
-          footerText,
-          footerColor,
+          company_name || "",
+          short_term || "",
+          address || "",
+          header_color || "#ffffff",
+          footer_text || "",
+          footer_color || "#ffffff",
           logoUrl,
           bgImageUrl,
+
+          main_button_color || "#ffffff",
+          sub_button_color || "#ffffff",
+          border_color || "#000000",
+          stepper_color || "#000000",
+          sidebar_button_color || "#000000",
+          font_theme_color || "#000000",
+
+          title_color || "#000000",
+          subtitle_color || "#555555",
         ]);
+
         res.json({ success: true, message: "Settings created successfully." });
       }
+
     } catch (err) {
       console.error("❌ Error in /api/settings:", err);
       res.status(500).json({ error: err.message });
     }
   }
 );
+
 //----------------------------End Settings----------------------------//
+
 
 /*---------------------------------START---------------------------------------*/
 // ----------------- REGISTER -----------------
@@ -2119,6 +2201,7 @@ app.get("/api/all-applicants", async (req, res) => {
         p.middle_name,
         p.extension,
         p.program,
+        pgt.program_code,
         p.emailAddress,
         p.generalAverage1,
         p.campus,
@@ -2158,6 +2241,7 @@ app.get("/api/all-applicants", async (req, res) => {
         ON a.applicant_number = ea.applicant_id
       LEFT JOIN admission.entrance_exam_schedule AS ees
         ON ea.schedule_id = ees.schedule_id
+       LEFT JOIN enrollment.program_table AS pgt ON p.program = pgt.program_id      
       LEFT JOIN enrollment.student_numbering_table AS snt
         ON p.person_id = snt.person_id
 
@@ -2409,11 +2493,10 @@ app.post("/api/qualifying_exam/import", async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-
 app.get("/api-applicant-scoring", async (req, res) => {
   try {
     const [rows] = await db.execute(`
-      SELECT 
+     SELECT 
         p.person_id,
         p.campus,
         p.first_name,
@@ -2435,15 +2518,8 @@ app.get("/api-applicant-scoring", async (req, res) => {
           e.final_rating,
           (COALESCE(e.English,0) + COALESCE(e.Science,0) + COALESCE(e.Filipino,0) + COALESCE(e.Math,0) + COALESCE(e.Abstract,0))
         ) AS final_rating,
-
-        -- Exam encoder (admission DB)
-        e.user AS exam_user_id,
-        ue.email AS exam_user_email,
-
-        -- Registrar (enrollment DB, db3)
-        ur.id AS registrar_user_id,
-        ur.email AS registrar_user_email,
-        ur.role AS registrar_role,
+		e.user,
+      	ue.email as registrar_user_email,
 
         -- From person_status_table
         COALESCE(ps.exam_result, 0)        AS total_ave,
@@ -2459,15 +2535,13 @@ app.get("/api-applicant-scoring", async (req, res) => {
       LEFT JOIN admission.admission_exam e
         ON p.person_id = e.person_id
       LEFT JOIN enrollment.user_accounts ue   -- exam encoder
-        ON e.user = ue.id
+        ON e.user = ue.person_id
       LEFT JOIN admission.person_status_table ps
         ON p.person_id = ps.person_id
-      LEFT JOIN enrollment.user_accounts ur   -- registrar
-        ON ur.role = 'registrar'
       LEFT JOIN admission.interview_applicants ia   -- 👈 add join here
         ON ia.applicant_id = a.applicant_number
 
-      ORDER BY p.person_id ASC
+      ORDER BY p.person_id ASC;
     `);
 
     res.json(rows);
@@ -5521,7 +5595,8 @@ WHERE proctor LIKE ?
         });
       }
 
-      const { first_name, middle_name, last_name, emailAddress } = rows[0];
+      const person_data = rows[0];
+      const { emailAddress, first_name, middle_name, last_name } = person_data;
       const student_number = `${new Date().getFullYear()}${String(person_id).padStart(5, "0")}`;
       const tempPassword = Math.random().toString(36).slice(-8).toUpperCase();
       const hashedPassword = await bcrypt.hash(tempPassword, 10);
@@ -5578,6 +5653,13 @@ WHERE proctor LIKE ?
         [person_id]
       );
 
+      await db3.query(`
+      INSERT INTO person_table (person_id, student_number, profile_img, campus, academicProgram, classifiedAs, applyingAs, program, program2, program3, yearLevel, last_name, first_name, middle_name, extension, nickname, height, weight, lrnNumber, nolrnNumber, gender, pwdMember, pwdType, pwdId, birthOfDate, age, birthPlace, languageDialectSpoken, citizenship, religion, civilStatus, tribeEthnicGroup, cellphoneNumber, emailAddress, presentStreet, presentBarangay, presentZipCode, presentRegion, presentProvince, presentMunicipality, presentDswdHouseholdNumber, sameAsPresentAddress, permanentStreet, permanentBarangay, permanentZipCode, permanentRegion, permanentProvince, permanentMunicipality, permanentDswdHouseholdNumber, solo_parent, father_deceased, father_family_name, father_given_name, father_middle_name, father_ext, father_nickname, father_education, father_education_level, father_last_school, father_course, father_year_graduated, father_school_address, father_contact, father_occupation, father_employer, father_income, father_email, mother_deceased, mother_family_name, mother_given_name, mother_middle_name, mother_ext, mother_nickname, mother_education, mother_education_level, mother_last_school, mother_course, mother_year_graduated, mother_school_address, mother_contact, mother_occupation, mother_employer, mother_income, mother_email, guardian, guardian_family_name, guardian_given_name, guardian_middle_name, guardian_ext, guardian_nickname, guardian_address, guardian_contact, guardian_email, annual_income, schoolLevel, schoolLastAttended, schoolAddress, courseProgram, honor, generalAverage, yearGraduated, schoolLevel1, schoolLastAttended1, schoolAddress1, courseProgram1, honor1, generalAverage1, yearGraduated1, strand, cough, colds, fever, asthma, faintingSpells, heartDisease, tuberculosis, frequentHeadaches, hernia, chronicCough, headNeckInjury, hiv, highBloodPressure, diabetesMellitus, allergies, cancer, smokingCigarette, alcoholDrinking, hospitalized, hospitalizationDetails, medications, hadCovid, covidDate, vaccine1Brand, vaccine1Date, vaccine2Brand, vaccine2Date, booster1Brand, booster1Date, booster2Brand, booster2Date, chestXray, cbc, urinalysis, otherworkups, symptomsToday, remarks, termsOfAgreement, created_at, current_step)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [person_data.person_id, person_data.student_number, person_data.profile_img, person_data.campus, person_data.academicProgram, person_data.classifiedAs, person_data.applyingAs, person_data.program, person_data.program2, person_data.program3, person_data.yearLevel, person_data.last_name, person_data.first_name, person_data.middle_name, person_data.extension, person_data.nickname, person_data.height, person_data.weight, person_data.lrnNumber, person_data.nolrnNumber, person_data.gender, person_data.pwdMember, person_data.pwdType, person_data.pwdId, person_data.birthOfDate, person_data.age, person_data.birthPlace, person_data.languageDialectSpoken, person_data.citizenship, person_data.religion, person_data.civilStatus, person_data.tribeEthnicGroup, person_data.cellphoneNumber, person_data.emailAddress, person_data.presentStreet, person_data.presentBarangay, person_data.presentZipCode, person_data.presentRegion, person_data.presentProvince, person_data.presentMunicipality, person_data.presentDswdHouseholdNumber, person_data.sameAsPresentAddress, person_data.permanentStreet, person_data.permanentBarangay, person_data.permanentZipCode, person_data.permanentRegion, person_data.permanentProvince, person_data.permanentMunicipality, person_data.permanentDswdHouseholdNumber, person_data.solo_parent, person_data.father_deceased, person_data.father_family_name, person_data.father_given_name, person_data.father_middle_name, person_data.father_ext, person_data.father_nickname, person_data.father_education, person_data.father_education_level, person_data.father_last_school, person_data.father_course, person_data.father_year_graduated, person_data.father_school_address, person_data.father_contact, person_data.father_occupation, person_data.father_employer, person_data.father_income, person_data.father_email, person_data.mother_deceased, person_data.mother_family_name, person_data.mother_given_name, person_data.mother_middle_name, person_data.mother_ext, person_data.mother_nickname, person_data.mother_education, person_data.mother_education_level, person_data.mother_last_school, person_data.mother_course, person_data.mother_year_graduated, person_data.mother_school_address, person_data.mother_contact, person_data.mother_occupation, person_data.mother_employer, person_data.mother_income, person_data.mother_email, person_data.guardian, person_data.guardian_family_name, person_data.guardian_given_name,
+        person_data.guardian_middle_name, person_data.guardian_ext, person_data.guardian_nickname, person_data.guardian_address, person_data.guardian_contact, person_data.guardian_email, person_data.annual_income, person_data.schoolLevel, person_data.schoolLastAttended, person_data.schoolAddress, person_data.courseProgram, person_data.honor, person_data.generalAverage, person_data.yearGraduated, person_data.schoolLevel1, person_data.schoolLastAttended1, person_data.schoolAddress1, person_data.courseProgram1, person_data.honor1, person_data.generalAverage1, person_data.yearGraduated1, person_data.strand, person_data.cough, person_data.colds, person_data.fever, person_data.asthma, person_data.faintingSpells, person_data.heartDisease, person_data.tuberculosis, person_data.frequentHeadaches, person_data.hernia, person_data.chronicCough, person_data.headNeckInjury, person_data.hiv, person_data.highBloodPressure, person_data.diabetesMellitus, person_data.allergies, person_data.cancer, person_data.smokingCigarette, person_data.alcoholDrinking, person_data.hospitalized, person_data.hospitalizationDetails, person_data.medications, person_data.hadCovid, person_data.covidDate, person_data.vaccine1Brand, person_data.vaccine1Date, person_data.vaccine2Brand, person_data.vaccine2Date, person_data.booster1Brand, person_data.booster1Date, person_data.booster2Brand, person_data.booster2Date, person_data.chestXray, person_data.cbc, person_data.urinalysis, person_data.otherworkups, person_data.symptomsToday, person_data.remarks, person_data.termsOfAgreement, person_data.created_at, person_data.current_step
+      ])
+
       // ✅ Insert login credentials (or update if existing)
       const [existingUser] = await db3.query(
         `SELECT * FROM user_accounts WHERE person_id = ?`,
@@ -5587,12 +5669,12 @@ WHERE proctor LIKE ?
       if (existingUser.length === 0) {
         await db3.query(
           `INSERT INTO user_accounts (person_id, email, password, role) VALUES (?, ?, ?, 'student')`,
-          [person_id, emailAddress, hashedPassword]
+          [person_id, person_data.emailAddress, hashedPassword]
         );
       } else {
         await db3.query(
           `UPDATE user_accounts SET email = ?, password = ?, role = 'student' WHERE person_id = ?`,
-          [emailAddress, hashedPassword, person_id]
+          [person_data.emailAddress, hashedPassword, person_id]
         );
       }
 
@@ -5652,7 +5734,6 @@ http://localhost:5173/login
       });
     }
   });
-
 });
 
 
@@ -6552,7 +6633,7 @@ io.on("connection", (socket) => {
           from: `"${officeName}" <${process.env.EMAIL_USER}>`,
           to: row.emailAddress,
           subject: "Your Entrance Exam Schedule",
-          text: `Hello ${row.first_name} ${row.last_name},
+          text: `Hello, ${row.first_name} ${row.last_name},
 
 You have been assigned to the following entrance exam schedule:
 

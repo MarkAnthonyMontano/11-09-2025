@@ -1162,7 +1162,7 @@ const StudentDashboard1 = () => {
                                                 <MenuItem value=""><em>Select Program</em></MenuItem>
                                                 {curriculumOptions.map((item, index) => (
                                                     <MenuItem key={index} value={item.curriculum_id}>
-                                                        {item.program_description}
+                                                       ({item.program_code}) - {item.program_description} {item.major}
                                                     </MenuItem>
                                                 ))}
                                             </Select>
@@ -1188,7 +1188,7 @@ const StudentDashboard1 = () => {
                                                 <MenuItem value=""><em>Select Program</em></MenuItem>
                                                 {curriculumOptions.map((item, index) => (
                                                     <MenuItem key={index} value={item.curriculum_id}>
-                                                        {item.program_description}
+                                                       ({item.program_code}) - {item.program_description} {item.major}
                                                     </MenuItem>
                                                 ))}
                                             </Select>
@@ -1214,7 +1214,7 @@ const StudentDashboard1 = () => {
                                                 <MenuItem value=""><em>Select Program</em></MenuItem>
                                                 {curriculumOptions.map((item, index) => (
                                                     <MenuItem key={index} value={item.curriculum_id}>
-                                                        {item.program_description}
+                                                       ({item.program_code}) - {item.program_description} {item.major}
                                                     </MenuItem>
                                                 ))}
                                             </Select>

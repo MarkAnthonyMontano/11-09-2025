@@ -152,7 +152,7 @@ const QualifyingExamScore = () => {
     const [hasAccess, setHasAccess] = useState(null);
 
 
-    const pageId = 44;
+    const pageId = 40;
 
     //Put this After putting the code of the past code
     useEffect(() => {

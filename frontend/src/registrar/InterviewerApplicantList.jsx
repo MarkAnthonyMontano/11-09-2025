@@ -42,7 +42,7 @@ const InterviewerApplicantList = () => {
   const [userRole, setUserRole] = useState("");
   const [hasAccess, setHasAccess] = useState(null);
   const [loading, setLoading] = useState(false);
-  const pageId = 29;
+  const pageId = 26;
 
   //
   useEffect(() => {

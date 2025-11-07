@@ -18,33 +18,44 @@ import ExamPermit from "../applicant/ExamPermit";
 
 const Dashboard5 = (props) => {
   const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
   const [fetchedLogo, setFetchedLogo] = useState(null);
   const [companyName, setCompanyName] = useState("");
   const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/settings");
-        const data = response.data;
+    if (!settings) return;
 
-        if (data.logo_url) {
-          setFetchedLogo(`http://localhost:5000${data.logo_url}`);
-        } else {
-          setFetchedLogo(EaristLogo);
-        }
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
 
-        // ✅ set company + short term + address
-        setCompanyName(data.company_name || "");
-        setShortTerm(data.short_term || "");
-        setCampusAddress(data.address || "");
-      } catch (err) {
-        console.error("Error fetching settings in ApplicantDashboard:", err);
-      }
-    };
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
 
-    fetchSettings();
-  }, []);
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]);
+
 
   const navigate = useNavigate();
   const [userID, setUserID] = useState("");
@@ -330,7 +341,7 @@ const Dashboard5 = (props) => {
           variant="h4"
           sx={{
             fontWeight: 'bold',
-            color: 'maroon',
+            color: titleColor,
             fontSize: '36px',
           }}
         >
@@ -477,7 +488,7 @@ const Dashboard5 = (props) => {
       <Container maxWidth="lg">
 
         <Container>
-          <h1 style={{ fontSize: "50px", fontWeight: "bold", textAlign: "center", color: "maroon", marginTop: "25px" }}>
+          <h1 style={{ fontSize: "50px", fontWeight: "bold", textAlign: "center", color: subtitleColor, marginTop: "25px" }}>
             APPLICANT FORM
           </h1>
           <div style={{ textAlign: "center" }}>
@@ -551,12 +562,12 @@ const Dashboard5 = (props) => {
 
         <br />
         <form>
-          <Container maxWidth="100%" sx={{ backgroundColor: "#6D2323", border: "2px solid black", color: "white", borderRadius: 2, boxShadow: 3, padding: "4px" }}>
+          <Container maxWidth="100%" sx={{ backgroundColor: settings?.header_color || "#1976d2", border: "2px solid black", color: "white", borderRadius: 2, boxShadow: 3, padding: "4px" }}>
             <Box sx={{ width: "100%" }}>
               <Typography style={{ fontSize: "20px", padding: "10px", fontFamily: "Arial Black" }}>Step 5: Other Information</Typography>
             </Box>
           </Container>
-          <Container maxWidth="100%" sx={{ backgroundColor: "#f1f1f1", border: "2px solid black", padding: 4, borderRadius: 2, boxShadow: 3 }}>
+          <Container maxWidth="100%" sx={{ backgroundColor: "#f1f1f1", border: `2px solid ${borderColor}`, padding: 4, borderRadius: 2, boxShadow: 3 }}>
             <Typography style={{ fontSize: "20px", color: "#6D2323", fontWeight: "bold" }}>
               Other Information:
             </Typography>
@@ -735,7 +746,7 @@ const Dashboard5 = (props) => {
                   />
                 }
                 sx={{
-                  backgroundColor: "#6D2323",
+                  backgroundColor: mainButtonColor,
                   color: "#fff",
                   "&:hover": {
                     backgroundColor: "#E8C999",

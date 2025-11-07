@@ -108,7 +108,7 @@ const ReadmissionDashboard3 = () => {
   const [loading, setLoading] = useState(false);
 
 
-  const pageId = 47;
+  const pageId = 43;
 
   //Put this After putting the code of the past code
   useEffect(() => {
@@ -393,15 +393,16 @@ const ReadmissionDashboard3 = () => {
   };
 
 
-
-  const links = [
-    { to: `/admin_ecat_application_form`, label: "ECAT Application Form" },
-    { to: `/admission_form_process`, label: "Admission Form Process" },
-    { to: `/admin_personal_data_form`, label: "Personal Data Form" },
-    { to: `/admin_office_of_the_registrar`, label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""} College Admission" ` },
-    { to: `/admission_services`, label: "Application/Student Satisfactory Survey" },
-
+    const links = [
+    { to: "/admin_ecat_application_form", label: "ECAT Application Form" },
+    { to: "/admin_admission_form_process", label: "Admission Form Process" },
+    { to: "/admin_personal_data_form", label: "Personal Data Form" },
+    { to: "/admin_office_of_the_registrar", label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""} College Admission` },
+    { to: "/admission_services", label: "Application/Student Satisfactory Survey" },
   ];
+
+
+
   const [canPrintPermit, setCanPrintPermit] = useState(false);
 
   useEffect(() => {
@@ -811,11 +812,11 @@ const ReadmissionDashboard3 = () => {
               {/* Each Box here is one input container */}
               <Box sx={{ flex: "1 1 25%" }}>
                 <Typography variant="subtitle1" mb={1}>
-                  School Level
+                 Educational Attainment
                 </Typography>
                 <Box sx={{ flex: "1 1 25%" }}>
                   <FormControl fullWidth size="small" required error={!!errors.schoolLevel}>
-                    <InputLabel id="schoolLevel-label">School Level</InputLabel>
+                    <InputLabel id="schoolLevel-label">Educational Attainment</InputLabel>
                     <Select
                       readOnly
                       labelId="schoolLevel-label"
@@ -915,7 +916,7 @@ const ReadmissionDashboard3 = () => {
             >
               <Box sx={{ flex: "1 1 33%" }}>
                 <Typography variant="subtitle1" mb={1}>
-                  Honor
+                   Recognition / Awards
                 </Typography>
                 <TextField
                   InputProps={{ readOnly: true }}
@@ -925,7 +926,7 @@ const ReadmissionDashboard3 = () => {
                   name="honor"
                   required
                   value={person.honor ?? ""}
-                  placeholder="Enter your Honor"
+                  placeholder="Enter your Recognition / Awards"
                   onChange={handleChange}
                   onBlur={handleBlur}
                   error={errors.honor}
@@ -992,10 +993,10 @@ const ReadmissionDashboard3 = () => {
               {/* School Level 1 */}
               <Box sx={{ flex: "1 1 25%" }}>
                 <Typography variant="subtitle1" mb={1}>
-                  School Level
+                Educational Attainment
                 </Typography>
                 <FormControl fullWidth size="small" required error={!!errors.schoolLevel1}>
-                  <InputLabel id="schoolLevel1-label">School Level</InputLabel>
+                  <InputLabel id="schoolLevel1-label">Educational Attainment</InputLabel>
                   <Select
                     readOnly
                     labelId="schoolLevel1-label"
@@ -1006,13 +1007,11 @@ const ReadmissionDashboard3 = () => {
                     onChange={handleChange}
                     onBlur={handleBlur}
                   >
-                    <MenuItem value=""><em>Select School Level</em></MenuItem>
-                    <MenuItem value="High School/Junior High School">High School/Junior High School</MenuItem>
-                    <MenuItem value="Senior High School">Senior High School</MenuItem>
-                    <MenuItem value="Undergraduate">Undergraduate</MenuItem>
-                    <MenuItem value="Graduate">Graduate</MenuItem>
-                    <MenuItem value="ALS">ALS</MenuItem>
-                    <MenuItem value="Vocational/Trade Course">Vocational/Trade Course</MenuItem>
+                     <MenuItem value="Senior High School">Senior High School</MenuItem>
+                                       <MenuItem value="Undergraduate">Undergraduate</MenuItem>
+                                       <MenuItem value="Graduate">Graduate</MenuItem>
+                                       <MenuItem value="ALS">ALS</MenuItem>
+                                       <MenuItem value="Vocational/Trade Course">Vocational/Trade Course</MenuItem>
                   </Select>
                   {errors.schoolLevel1 && (
                     <FormHelperText>This field is required.</FormHelperText>
@@ -1094,7 +1093,7 @@ const ReadmissionDashboard3 = () => {
               {/* Honor 1 */}
               <Box sx={{ flex: "1 1 33%" }}>
                 <Typography variant="subtitle1" mb={1}>
-                  Honor
+                   Recognition / Awards
                 </Typography>
                 <TextField
                   InputProps={{ readOnly: true }}
@@ -1103,7 +1102,7 @@ const ReadmissionDashboard3 = () => {
                   size="small"
                   required
                   name="honor1"
-                  placeholder="Enter your Honor"
+                  placeholder="Enter your Recognition / Awards"
                   value={person.honor1 ?? ""}
                   onChange={handleChange}
                   onBlur={handleBlur}

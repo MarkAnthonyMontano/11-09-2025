@@ -44,7 +44,7 @@ const RegisterStudents = () => {
     const [loading, setLoading] = useState(false);
 
 
-    const pageId = 80;
+    const pageId = 75;
 
     //Put this After putting the code of the past code
     useEffect(() => {

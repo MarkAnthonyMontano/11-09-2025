@@ -1,26 +1,27 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
 import axios from "axios";
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography, Button, Snackbar, Alert } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 
-
 const ProgramTagging = () => {
-  // Also put it at the very top
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
   const [userRole, setUserRole] = useState("");
   const [hasAccess, setHasAccess] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
+  const pageId = 39;
 
-  const pageId = 43;
-
-  //Put this After putting the code of the past code
   useEffect(() => {
-
     const storedUser = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
     const storedID = localStorage.getItem("person_id");
@@ -42,26 +43,20 @@ const ProgramTagging = () => {
 
   const checkAccess = async (userID) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+      const response = await axios.get(
+        `http://localhost:5000/api/page_access/${userID}/${pageId}`
+      );
       if (response.data && response.data.page_privilege === 1) {
         setHasAccess(true);
       } else {
         setHasAccess(false);
       }
     } catch (error) {
-      console.error('Error checking access:', error);
+      console.error("Error checking access:", error);
       setHasAccess(false);
-      if (error.response && error.response.data.message) {
-        console.log(error.response.data.message);
-      } else {
-        console.log("An unexpected error occurred.");
-      }
       setLoading(false);
     }
   };
-
-
-
 
   const [progTag, setProgTag] = useState({
     curriculum_id: "",
@@ -69,7 +64,6 @@ const ProgramTagging = () => {
     semester_id: "",
     course_id: "",
   });
-
   const [courseList, setCourseList] = useState([]);
   const [yearLevelList, setYearlevelList] = useState([]);
   const [semesterList, setSemesterList] = useState([]);
@@ -141,19 +135,32 @@ const ProgramTagging = () => {
   const handleInsertingProgTag = async () => {
     const { curriculum_id, year_level_id, semester_id, course_id } = progTag;
     if (!curriculum_id || !year_level_id || !semester_id || !course_id) {
-      alert("Please fill all fields");
+      setSnackbar({
+        open: true,
+        message: "Please fill all fields",
+        severity: "error",
+      });
       return;
     }
 
     try {
       if (editingId) {
-        // 🟡 Update existing record
-        await axios.put(`http://localhost:5000/program_tagging/${editingId}`, progTag);
-        alert("Program tag updated successfully!");
+        await axios.put(
+          `http://localhost:5000/program_tagging/${editingId}`,
+          progTag
+        );
+        setSnackbar({
+          open: true,
+          message: "Program tag updated successfully!",
+          severity: "success",
+        });
       } else {
-        // 🟢 Insert new record
-        await axios.post("http://localhost:5000/program_tagging", progTag);
-        alert("Program tag inserted successfully!");
+        await axios.post(`http://localhost:5000/program_tagging`, progTag);
+        setSnackbar({
+          open: true,
+          message: "Program tag inserted successfully!",
+          severity: "success",
+        });
       }
 
       fetchTaggedPrograms();
@@ -166,7 +173,11 @@ const ProgramTagging = () => {
       setEditingId(null);
     } catch (err) {
       console.error(err);
-      alert("Error saving data.");
+      setSnackbar({
+        open: true,
+        message: "Error saving data.",
+        severity: "error",
+      });
     }
   };
 
@@ -180,21 +191,27 @@ const ProgramTagging = () => {
     });
   };
 
-
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this tag?")) return;
 
     try {
       await axios.delete(`http://localhost:5000/program_tagging/${id}`);
-      alert("Program tag deleted successfully!");
+      setSnackbar({
+        open: true,
+        message: "Program tag deleted successfully!",
+        severity: "success",
+      });
       fetchTaggedPrograms();
     } catch (err) {
       console.error(err);
-      alert("Error deleting program tag.");
+      setSnackbar({
+        open: true,
+        message: "Error deleting program tag.",
+        severity: "error",
+      });
     }
   };
 
-  // 🔒 Disable right-click & blocked keys
   document.addEventListener("contextmenu", (e) => e.preventDefault());
   document.addEventListener("keydown", (e) => {
     const blocked =
@@ -208,19 +225,12 @@ const ProgramTagging = () => {
     }
   });
 
-
-
-
-
-  // Put this at the very bottom before the return 
   if (loading || hasAccess === null) {
     return <LoadingOverlay open={loading} message="Check Access" />;
   }
 
   if (!hasAccess) {
-    return (
-      <Unauthorized />
-    );
+    return <Unauthorized />;
   }
 
   return (
@@ -230,12 +240,13 @@ const ProgramTagging = () => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-         
           mb: 2,
-      
         }}
       >
-        <Typography variant="h4" sx={{ fontWeight: "bold", color: "maroon", fontSize: "36px" }}>
+        <Typography
+          variant="h4"
+          sx={{ fontWeight: "bold", color: "maroon", fontSize: "36px" }}
+        >
           PROGRAM AND COURSE MANAGEMENT
         </Typography>
       </Box>
@@ -355,18 +366,15 @@ const ProgramTagging = () => {
                         <button
                           onClick={() => handleEdit(program)}
                           style={{
-                            backgroundColor: "#2E7D32", // success (green)
+                            backgroundColor: "#2E7D32",
                             color: "white",
                             border: "none",
                             borderRadius: "5px",
                             padding: "8px 14px",
                             marginRight: "6px",
                             cursor: "pointer",
-                            position: "relative",
-                            zIndex: 2,
-                            pointerEvents: "auto",
-                            width: "100px", // 👈 consistent width
-                            height: "40px", // 👈 consistent height
+                            width: "100px",
+                            height: "40px",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -379,17 +387,14 @@ const ProgramTagging = () => {
                         <button
                           onClick={() => handleDelete(program.program_tagging_id)}
                           style={{
-                            backgroundColor: "#800000", // maroon
+                            backgroundColor: "#800000",
                             color: "white",
                             border: "none",
                             borderRadius: "5px",
                             padding: "8px 14px",
                             cursor: "pointer",
-                            position: "relative",
-                            zIndex: 2,
-                            pointerEvents: "auto",
-                            width: "100px", // 👈 same width
-                            height: "40px", // 👈 same height
+                            width: "100px",
+                            height: "40px",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -408,14 +413,27 @@ const ProgramTagging = () => {
             )}
           </div>
         </div>
-
-
       </div>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
 
-// 💅 Styles
 const styles = {
   container: {
     display: "flex",
@@ -425,9 +443,7 @@ const styles = {
     width: "95%",
     margin: "30px auto",
     maxHeight: "600px",
-    flexWrap: "nowrap", // 👈 prevent stacking
   },
-
   formSection: {
     flex: "1",
     background: "#f8f8f8",
@@ -436,9 +452,8 @@ const styles = {
     borderRadius: "10px",
     boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
     maxHeight: "600px",
-    minWidth: "48%", // 👈 slightly wider
+    minWidth: "48%",
   },
-
   displaySection: {
     flex: "1",
     background: "#f8f8f8",
@@ -447,20 +462,17 @@ const styles = {
     borderRadius: "10px",
     boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
     maxHeight: "600px",
-    minWidth: "48%", // 👈 slightly wider
+    minWidth: "48%",
     overflowY: "auto",
   },
-
   formGroup: {
     marginBottom: "20px",
   },
-
   label: {
     fontWeight: "bold",
     display: "block",
     marginBottom: "8px",
   },
-
   select: {
     width: "100%",
     padding: "12px",
@@ -468,19 +480,16 @@ const styles = {
     borderRadius: "5px",
     border: "1px solid #ccc",
   },
-
   taggedProgramsContainer: {
     overflowY: "auto",
     maxHeight: "500px",
     marginTop: "10px",
   },
-
   table: {
     width: "100%",
     borderCollapse: "collapse",
     textAlign: "left",
   },
-
   th: {
     padding: "12px",
     borderBottom: "2px solid #ccc",
@@ -489,7 +498,6 @@ const styles = {
     fontSize: "15px",
     color: "#333",
   },
-
   td: {
     padding: "10px",
     borderBottom: "1px solid #ddd",
@@ -497,7 +505,5 @@ const styles = {
     color: "#333",
   },
 };
-
-
 
 export default ProgramTagging;

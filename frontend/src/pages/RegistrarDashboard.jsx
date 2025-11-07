@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
+
 import axios from "axios";
 import {
   Box,
@@ -26,6 +28,45 @@ import ExaminationProfile from "../registrar/ExaminationProfile";
 
 
 const Dashboard = ({ profileImage, setProfileImage }) => {
+  
+ const settings = useContext(SettingsContext);
+
+const [titleColor, setTitleColor] = useState("#000000");
+const [subtitleColor, setSubtitleColor] = useState("#555555");
+const [borderColor, setBorderColor] = useState("#000000");
+const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+const [stepperColor, setStepperColor] = useState("#000000");   // ✅ NEW
+
+const [fetchedLogo, setFetchedLogo] = useState(null);
+const [companyName, setCompanyName] = useState("");
+const [shortTerm, setShortTerm] = useState("");
+const [campusAddress, setCampusAddress] = useState("");
+
+useEffect(() => {
+  if (!settings) return;
+
+  // 🎨 Colors
+  if (settings.title_color) setTitleColor(settings.title_color);
+  if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+  if (settings.border_color) setBorderColor(settings.border_color);
+  if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+  if (settings.stepper_color) setStepperColor(settings.stepper_color);   // ✅ NEW
+
+  // 🏫 Logo
+  if (settings.logo_url) {
+    setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+  } else {
+    setFetchedLogo(EaristLogo);
+  }
+
+  // 🏷️ School Information
+  if (settings.company_name) setCompanyName(settings.company_name);
+  if (settings.short_term) setShortTerm(settings.short_term);
+  if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+}, [settings]);
+
+
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
   const [userRole, setUserRole] = useState("");
@@ -280,7 +321,7 @@ const Dashboard = ({ profileImage, setProfileImage }) => {
         <Grid item xs={12}>
           <Card
             sx={{
-              border: "2px solid maroon",
+              border: `2px solid ${borderColor}`,
               boxShadow: 3,
               height: "140px",
               marginLeft: "10px",
@@ -312,7 +353,7 @@ const Dashboard = ({ profileImage, setProfileImage }) => {
                       sx={{
                         width: 90,
                         height: 90,
-                        border: "2px solid maroon",
+                        border: `2px solid ${borderColor}`,
                         cursor: "pointer",
                         mt: -1.5,
                       }}
@@ -350,7 +391,7 @@ const Dashboard = ({ profileImage, setProfileImage }) => {
                   </Box>
 
                   {/* Welcome text and Employee info */}
-                  <Box sx={{ color: "maroon" }}>
+                  <Box sx={{ color: titleColor, }}>
                     <Typography variant="h4" fontWeight="bold" mt={-1}>
                       Welcome back!  {personData
                         ? `${personData.lname}, ${personData.fname} ${personData.mname || ""}`
@@ -386,7 +427,7 @@ const Dashboard = ({ profileImage, setProfileImage }) => {
             <Card
               sx={{
                 display: "flex",
-                border: "2px solid maroon",
+                border: `2px solid ${borderColor}`,
                 alignItems: "center",
                 marginLeft: "10px",
                 backgroundColor: "#fef9e1",
@@ -433,7 +474,7 @@ const Dashboard = ({ profileImage, setProfileImage }) => {
           <Typography
             variant="h5"
             mb={2}
-            sx={{ color: "maroon", fontWeight: "bold", textAlign: "center", marginLeft: "-210px", marginTop: "-50px" }}
+            sx={{ color: subtitleColor,  fontWeight: "bold", textAlign: "center", marginLeft: "-210px", marginTop: "-50px" }}
           >
             Department Overview
           </Typography>
@@ -443,7 +484,7 @@ const Dashboard = ({ profileImage, setProfileImage }) => {
         <Grid item xs={12} md={4}>
           <Card
             sx={{
-              border: "2px solid maroon",
+              border: `2px solid ${borderColor}`,
               marginLeft: "10px",
               boxShadow: 3,
               p: 2,
@@ -554,7 +595,7 @@ const Dashboard = ({ profileImage, setProfileImage }) => {
                 borderRadius: 3,
                 width: 480,
                 height: 290,
-                border: "2px solid maroon",
+                border: `2px solid ${borderColor}`,
                 transition: "transform 0.2s ease",
                 boxShadow: 3,
                 "&:hover": { transform: "scale(1.03)" },
@@ -621,7 +662,7 @@ const Dashboard = ({ profileImage, setProfileImage }) => {
             sx={{
               p: 1,
               borderRadius: 3,
-              border: "2px solid maroon",
+              border: `2px solid ${borderColor}`,
               height: 600,
               backgroundColor: "#f1f1f1",
               marginTop: "-30px",
@@ -635,7 +676,7 @@ const Dashboard = ({ profileImage, setProfileImage }) => {
                 Select Department
               </Typography>
               <FormControl
-                style={{ border: "2px solid maroon", borderRadius: "5px", backgroundColor: "white" }}
+                style={{ border: `2px solid ${borderColor}`, borderRadius: "5px", backgroundColor: "white" }}
                 fullWidth
               >
                 <InputLabel>Select Department</InputLabel>
@@ -665,7 +706,7 @@ const Dashboard = ({ profileImage, setProfileImage }) => {
             sx={{
               p: 1,
               borderRadius: 3,
-              border: "2px solid maroon",
+              border: `2px solid ${borderColor}`,
               height: 600,
               backgroundColor: "#f1f1f1",
               marginTop: "-30px",
@@ -682,7 +723,7 @@ const Dashboard = ({ profileImage, setProfileImage }) => {
               {/* Styled like a TextField */}
               <Box
                 sx={{
-                  border: "2px solid maroon",
+                  border: `2px solid ${borderColor}`,
                   borderRadius: "5px",
                   height: "58px",
                   display: "flex",              // flexbox for alignment

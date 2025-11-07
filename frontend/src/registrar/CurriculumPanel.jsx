@@ -1,365 +1,409 @@
-import React, { useState, useEffect } from "react";
-import axios from 'axios';
-import { Box, Typography } from "@mui/material";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
+import axios from "axios";
+import { Box, Typography, Snackbar, Alert } from "@mui/material";
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 
 const CurriculumPanel = () => {
-    const [curriculum, setCurriculum] = useState({ year_id: '', program_id: '' });
-    const [yearList, setYearList] = useState([]);
-    const [programList, setProgramList] = useState([]);
-    const [curriculumList, setCurriculumList] = useState([]);
-    const [successMsg, setSuccessMsg] = useState('');
+  const [curriculum, setCurriculum] = useState({ year_id: "", program_id: "" });
+  const [yearList, setYearList] = useState([]);
+  const [programList, setProgramList] = useState([]);
+  const [curriculumList, setCurriculumList] = useState([]);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
-    const [userID, setUserID] = useState("");
-    const [user, setUser] = useState("");
-    const [userRole, setUserRole] = useState("");
-    const [hasAccess, setHasAccess] = useState(null);
-    const [loading, setLoading] = useState(false);
-    
-    const pageId = 21;
+  const [userID, setUserID] = useState("");
+  const [user, setUser] = useState("");
+  const [userRole, setUserRole] = useState("");
+  const [hasAccess, setHasAccess] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-    //
-    useEffect(() => {
+  const pageId = 18;
 
-        const storedUser = localStorage.getItem("email");
-        const storedRole = localStorage.getItem("role");
-        const storedID = localStorage.getItem("person_id");
+  useEffect(() => {
+    const storedUser = localStorage.getItem("email");
+    const storedRole = localStorage.getItem("role");
+    const storedID = localStorage.getItem("person_id");
 
-        if (storedUser && storedRole && storedID) {
-            setUser(storedUser);
-            setUserRole(storedRole);
-            setUserID(storedID);
+    if (storedUser && storedRole && storedID) {
+      setUser(storedUser);
+      setUserRole(storedRole);
+      setUserID(storedID);
 
-            if (storedRole === "registrar") {
-                checkAccess(storedID);
-            } else {
-                window.location.href = "/login";
-            }
-        } else {
-            window.location.href = "/login";
-        }
-    }, []);
+      if (storedRole === "registrar") {
+        checkAccess(storedID);
+      } else {
+        window.location.href = "/login";
+      }
+    } else {
+      window.location.href = "/login";
+    }
+  }, []);
 
-    const checkAccess = async (userID) => {
-        try {
-            const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
-            if (response.data && response.data.page_privilege === 1) {
-                setHasAccess(true);
-            } else {
-                setHasAccess(false);
-            }
-        } catch (error) {
-            console.error('Error checking access:', error);
-            setHasAccess(false);
-            if (error.response && error.response.data.message) {
-                console.log(error.response.data.message);
-            } else {
-                console.log("An unexpected error occurred.");
-            }
-            setLoading(false);
-        }
-    };
+  const checkAccess = async (userID) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/api/page_access/${userID}/${pageId}`
+      );
+      if (response.data && response.data.page_privilege === 1) {
+        setHasAccess(true);
+      } else {
+        setHasAccess(false);
+      }
+    } catch (error) {
+      console.error("Error checking access:", error);
+      setHasAccess(false);
+      setLoading(false);
+    }
+  };
 
-    useEffect(() => {
-        fetchYear();
-        fetchProgram();
-        fetchCurriculum();
-    }, []);
+  useEffect(() => {
+    fetchYear();
+    fetchProgram();
+    fetchCurriculum();
+  }, []);
 
-    const fetchYear = async () => {
-        try {
-            const res = await axios.get('http://localhost:5000/year_table');
-            setYearList(res.data);
-        } catch (err) {
-            console.error(err);
-        }
-    };
+  const fetchYear = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/year_table");
+      setYearList(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-    const fetchProgram = async () => {
-        try {
-            const res = await axios.get('http://localhost:5000/get_program');
-            setProgramList(res.data);
-        } catch (err) {
-            console.error(err);
-        }
-    };
+  const fetchProgram = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/get_program");
+      setProgramList(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-    const fetchCurriculum = async () => {
-        try {
-            const res = await axios.get('http://localhost:5000/get_curriculum');
-            setCurriculumList(res.data);
-        } catch (err) {
-            console.error(err);
-        }
-    };
+  const fetchCurriculum = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/get_curriculum");
+      setCurriculumList(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setCurriculum(prev => ({ ...prev, [name]: value }));
-    };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setCurriculum((prev) => ({ ...prev, [name]: value }));
+  };
 
-    const handleAddCurriculum = async () => {
-        if (!curriculum.year_id || !curriculum.program_id) {
-            alert("Please fill all fields");
-            return;
-        }
+  const handleAddCurriculum = async () => {
+    if (!curriculum.year_id || !curriculum.program_id) {
+      setSnackbar({
+        open: true,
+        message: "Please fill all fields",
+        severity: "error",
+      });
+      return;
+    }
+    try {
+      await axios.post("http://localhost:5000/curriculum", curriculum);
+      setCurriculum({ year_id: "", program_id: "" });
+      setSnackbar({
+        open: true,
+        message: "Curriculum successfully added!",
+        severity: "success",
+      });
+      fetchCurriculum();
+    } catch (err) {
+      console.error(err);
+      setSnackbar({
+        open: true,
+        message: "Error adding curriculum!",
+        severity: "error",
+      });
+    }
+  };
 
-        try {
-            await axios.post('http://localhost:5000/curriculum', curriculum);
-            setCurriculum({ year_id: '', program_id: '' });
-            setSuccessMsg("Curriculum successfully added!");
-            fetchCurriculum();
-            setTimeout(() => setSuccessMsg(''), 3000);
-        } catch (err) {
-            console.error(err);
-        }
-    };
+  // ✅ Updated with instant UI response
+  const handleUpdateStatus = async (id, currentStatus) => {
+    const newStatus = currentStatus === 1 ? 0 : 1;
 
-    const handleUpdateStatus = async (id, currentStatus) => {
-        try {
-            const newStatus = currentStatus === 1 ? 0 : 1;
-            await axios.put(`http://localhost:5000/update_curriculum/${id}`, {
-                lock_status: newStatus,
-            });
-            fetchCurriculum(); // Refresh list
-            setSuccessMsg(`Curriculum #${id} is now ${newStatus === 1 ? "Active" : "Inactive"}`);
-            setTimeout(() => setSuccessMsg(""), 3000);
-        } catch (err) {
-            console.error("Error updating status:", err);
-            alert("Failed to update curriculum status");
-        }
-    };
+    // Instantly update UI
+    setCurriculumList((prevList) =>
+      prevList.map((item) =>
+        item.curriculum_id === id ? { ...item, lock_status: newStatus } : item
+      )
+    );
 
-
-    //🔒 Disable right-click
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
-
-    //🔒 Block DevTools shortcuts + Ctrl+P silently
-    document.addEventListener('keydown', (e) => {
-        const isBlockedKey =
-            e.key === 'F12' || // DevTools
-            e.key === 'F11' || // Fullscreen
-            (e.ctrlKey && e.shiftKey && (e.key.toLowerCase() === 'i' || e.key.toLowerCase() === 'j')) || // Ctrl+Shift+I/J
-            (e.ctrlKey && e.key.toLowerCase() === 'u') || // Ctrl+U (View Source)
-            (e.ctrlKey && e.key.toLowerCase() === 'p');   // Ctrl+P (Print)
-
-        if (isBlockedKey) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
+    // Show instant feedback
+    setSnackbar({
+      open: true,
+      message: `Curriculum #${id} is now ${
+        newStatus === 1 ? "Active" : "Inactive"
+      }`,
+      severity: "info",
     });
 
+    try {
+      await axios.put(`http://localhost:5000/update_curriculum/${id}`, {
+        lock_status: newStatus,
+      });
 
+      // Confirm success
+      setSnackbar({
+        open: true,
+        message: `Curriculum #${id} successfully set to ${
+          newStatus === 1 ? "Active" : "Inactive"
+        }`,
+        severity: "success",
+      });
+    } catch (err) {
+      console.error("Error updating status:", err);
 
-    // Put this at the very bottom before the return 
-    if (loading || hasAccess === null) {
-        return <LoadingOverlay open={loading} message="Check Access" />;
+      // Revert UI if failed
+      setCurriculumList((prevList) =>
+        prevList.map((item) =>
+          item.curriculum_id === id
+            ? { ...item, lock_status: currentStatus }
+            : item
+        )
+      );
+
+      setSnackbar({
+        open: true,
+        message: "Failed to update curriculum status. Please try again.",
+        severity: "error",
+      });
     }
+  };
 
-    if (!hasAccess) {
-        return (
-            <Unauthorized />
-        );
+  document.addEventListener("contextmenu", (e) => e.preventDefault());
+  document.addEventListener("keydown", (e) => {
+    const blocked =
+      e.key === "F12" ||
+      e.key === "F11" ||
+      (e.ctrlKey && e.shiftKey && ["i", "j"].includes(e.key.toLowerCase())) ||
+      (e.ctrlKey && ["u", "p"].includes(e.key.toLowerCase()));
+    if (blocked) {
+      e.preventDefault();
+      e.stopPropagation();
     }
+  });
 
-    return (
-        <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
+  if (loading || hasAccess === null) {
+    return <LoadingOverlay open={loading} message="Check Access" />;
+  }
 
-            <Box
-                sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
+  if (!hasAccess) {
+    return <Unauthorized />;
+  }
 
+  return (
+    <Box
+      sx={{
+        height: "calc(100vh - 150px)",
+        overflowY: "auto",
+        paddingRight: 1,
+        backgroundColor: "transparent",
+      }}
+    >
+      <Typography
+        variant="h4"
+        sx={{ fontWeight: "bold", color: "maroon", fontSize: "36px", mb: 2 }}
+      >
+        CURRICULUM PANEL
+      </Typography>
 
-                    mb: 2,
+      <hr style={{ border: "1px solid #ccc", width: "100%" }} />
+      <br />
 
-                }}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          gap: "20px",
+          padding: "30px",
+        }}
+      >
+        {/* LEFT SECTION */}
+        <div
+          style={{
+            flex: 1,
+            padding: "20px",
+            borderRadius: "8px",
+            backgroundColor: "#fff",
+            border: "2px solid maroon",
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+          }}
+        >
+          <h2 style={{ color: "maroon", fontWeight: "bold" }}>
+            Add Curriculum
+          </h2>
+
+          <div style={{ marginBottom: "15px" }}>
+            <label style={{ fontWeight: "bold" }}>Curriculum Year:</label>
+            <select
+              name="year_id"
+              value={curriculum.year_id}
+              onChange={handleChange}
+              style={{
+                width: "100%",
+                padding: "8px",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+              }}
             >
-                <Typography
-                    variant="h4"
-                    sx={{
-                        fontWeight: 'bold',
-                        color: 'maroon',
-                        fontSize: '36px',
+              <option value="">Choose Year</option>
+              {yearList.map((year) => (
+                <option key={year.year_id} value={year.year_id}>
+                  {year.year_description}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ marginBottom: "15px" }}>
+            <label style={{ fontWeight: "bold" }}>Program:</label>
+            <select
+              name="program_id"
+              value={curriculum.program_id}
+              onChange={handleChange}
+              style={{
+                width: "100%",
+                padding: "8px",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+              }}
+            >
+              <option value="">Choose Program</option>
+              {programList.map((program) => (
+                <option key={program.program_id} value={program.program_id}>
+                  {program.program_description} | {program.program_code}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button
+            onClick={handleAddCurriculum}
+            style={{
+              width: "100%",
+              padding: "10px",
+              backgroundColor: "maroon",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
+          >
+            Insert
+          </button>
+        </div>
+
+        {/* RIGHT SECTION */}
+        <div
+          style={{
+            flex: 2,
+            padding: "20px",
+            borderRadius: "8px",
+            border: "2px solid maroon",
+            backgroundColor: "#f9f9f9",
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+          }}
+        >
+          <h3 style={{ color: "maroon", fontWeight: "bold" }}>
+            Curriculum List
+          </h3>
+
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr>
+                <th style={{ border: "2px solid maroon" }}>ID</th>
+                <th style={{ border: "2px solid maroon" }}>Year</th>
+                <th style={{ border: "2px solid maroon" }}>Program</th>
+                <th style={{ border: "2px solid maroon" }}>Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {curriculumList.map((item) => (
+                <tr key={item.curriculum_id}>
+                  <td
+                    style={{
+                      border: "2px solid maroon",
+                      textAlign: "center",
                     }}
-                >
-                    CURRICULUM PANEL
-                </Typography>
+                  >
+                    {item.curriculum_id}
+                  </td>
+                  <td
+                    style={{
+                      border: "2px solid maroon",
+                      textAlign: "center",
+                    }}
+                  >
+                    {item.year_description}
+                  </td>
+                  <td
+                    style={{
+                      border: "2px solid maroon",
+                      textAlign: "left",
+                    }}
+                  >
+                    {item.program_description} ({item.program_code})
+                  </td>
+                  <td
+                    style={{
+                      border: "2px solid maroon",
+                      textAlign: "center",
+                    }}
+                  >
+                    <button
+                      onClick={() =>
+                        handleUpdateStatus(item.curriculum_id, item.lock_status)
+                      }
+                      style={{
+                        backgroundColor:
+                          item.lock_status === 1 ? "green" : "maroon",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "6px",
+                        width: "100px",
+                        height: "36px",
+                        fontWeight: "bold",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {item.lock_status === 1 ? "Active" : "Inactive"}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-
-
-
-            </Box>
-            <hr style={{ border: "1px solid #ccc", width: "100%" }} />
-
-            <br />
-
-
-            <div style={styles.container}>
-                {/* Left side: Form */}
-                <div style={styles.panel}>
-                    <h2 style={{ ...styles.header, color: "maroon", fontWeight: "bold" }}>Add Curriculum</h2>
-
-                    <div style={styles.inputGroup}>
-                        <label style={styles.label}>Curriculum Year:</label>
-                        <select name="year_id" value={curriculum.year_id} onChange={handleChange} style={styles.select}>
-                            <option value="">Choose Year</option>
-                            {yearList.map(year => (
-                                <option key={year.year_id} value={year.year_id}>
-                                    {year.year_description}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div style={styles.inputGroup}>
-                        <label style={styles.label}>Program:</label>
-                        <select name="program_id" value={curriculum.program_id} onChange={handleChange} style={styles.select}>
-                            <option value="">Choose Program</option>
-                            {programList.map(program => (
-                                <option key={program.program_id} value={program.program_id}>
-                                    {program.program_description} | {program.program_code}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <button style={styles.button} onClick={handleAddCurriculum}>Insert</button>
-                    {successMsg && <p style={styles.success}>{successMsg}</p>}
-                </div>
-
-                {/* Right side: Curriculum List */}
-                <div style={styles.listPanel}>
-                    <h3 style={{ ...styles.listHeader, color: "maroon", fontWeight: "bold" }}>Curriculum List</h3>
-
-                    <table style={styles.table}>
-                        <thead>
-                            <tr>
-                                <th style={{ border: "2px solid maroon" }}>ID</th>
-                                <th style={{ border: "2px solid maroon" }}>Year</th>
-                                <th style={{ border: "2px solid maroon" }}>Program</th>
-                                <th style={{ border: "2px solid maroon" }}>Status</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            {curriculumList.map(item => (
-                                <tr key={item.curriculum_id}>
-                                    <td style={{ border: "2px solid maroon", textAlign: "center", width: "50px" }}>{item.curriculum_id}</td>
-                                    <td style={{ border: "2px solid maroon", textAlign: "center", width: "50px" }}>{item.year_description}</td>
-                                    <td style={{ border: "2px solid maroon", textAlign: "left", width: "700px" }}>{item.program_description} ({item.program_code})</td>
-                                    <td style={{ border: "2px solid maroon", textAlign: "center", width: "50px" }}>
-                                        <button
-                                            onClick={() => handleUpdateStatus(item.curriculum_id, item.lock_status)}
-                                            style={{
-                                                backgroundColor: item.lock_status === 1 ? "green" : "maroon", // ✅ Maroon for inactive
-                                                color: "white",
-                                                border: "none",
-                                                borderRadius: "6px",
-                                                width: "100px",        // ✅ Same width
-                                                height: "36px",        // ✅ Same height
-                                                fontWeight: "bold",
-                                                fontSize: "14px",
-                                                cursor: "pointer",
-                                                transition: "0.3s ease",
-                                            }}
-                                            onMouseOver={e => e.target.style.opacity = "0.85"}
-                                            onMouseOut={e => e.target.style.opacity = "1"}
-                                        >
-                                            {item.lock_status === 1 ? "Active" : "Inactive"}
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-
-                    </table>
-                </div>
-            </div>
-        </Box>
-    );
-};
-
-const styles = {
-    container: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        gap: '20px',
-        padding: '30px',
-        fontFamily: 'Arial, sans-serif'
-    },
-    panel: {
-        flex: 1,
-        padding: '20px',
-
-        borderRadius: '8px',
-        backgroundColor: '#fff',
-        border: "2px solid maroon",
-        boxShadow: '0 0 10px rgba(0,0,0,0.1)'
-    },
-    listPanel: {
-        flex: 2,
-        padding: '20px',
-        borderRadius: '8px',
-        border: "2px solid maroon",
-        backgroundColor: '#f9f9f9',
-        boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-
-    },
-    header: {
-        marginBottom: '20px',
-        color: '#800000'
-    },
-    inputGroup: {
-        marginBottom: '15px'
-    },
-    label: {
-        display: 'block',
-        marginBottom: '5px',
-        fontWeight: 'bold'
-    },
-    select: {
-        width: '100%',
-        padding: '8px',
-        border: "2px solid maroon",
-        borderRadius: '4px',
-        border: '1px solid #ccc'
-    },
-    button: {
-        width: '100%',
-        padding: '10px',
-        backgroundColor: 'maroon',
-        color: 'white',
-        border: 'none',
-        borderRadius: '4px',
-        cursor: 'pointer'
-    },
-    success: {
-        marginTop: '15px',
-        color: 'green',
-        fontWeight: 'bold',
-        textAlign: 'center'
-    },
-    listHeader: {
-        marginBottom: '10px'
-    },
-    table: {
-        width: '100%',
-        borderCollapse: 'collapse'
-
-    },
-    tableHeader: {
-        backgroundColor: '#eee',
-
-    },
-    tableCell: {
-        border: "2px solid maroon",
-        padding: '8px',
-        textAlign: 'left'
-    }
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </Box>
+  );
 };
 
 export default CurriculumPanel;

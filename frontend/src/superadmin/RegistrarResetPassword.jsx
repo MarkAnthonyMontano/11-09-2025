@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
 import axios from "axios";
 import {
   Box,
@@ -57,7 +58,7 @@ const RegistrarResetPassword = () => {
     severity: "success",
   });
 
-  const pageId = 79;
+  const pageId = 76;
 
   useEffect(() => {
     const storedUser = localStorage.getItem("email");

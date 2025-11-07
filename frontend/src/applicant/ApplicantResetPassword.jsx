@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
 import axios from "axios";
 import {
   Button,
@@ -34,6 +35,24 @@ const passwordRules = [
 ];
 
 const ApplicantResetPassword = () => {
+  const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+
+
+  useEffect(() => {
+    if (settings) {
+      if (settings.title_color) setTitleColor(settings.title_color);
+      if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+      if (settings.border_color) setBorderColor(settings.border_color);
+      if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+
+    }
+  }, [settings]);
+
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -97,28 +116,6 @@ const ApplicantResetPassword = () => {
     setShowPassword((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
-  // 🔒 Disable right-click and DevTools
-  useEffect(() => {
-    const prevent = (e) => e.preventDefault();
-    const blockKeys = (e) => {
-      const isBlockedKey =
-        e.key === "F12" ||
-        e.key === "F11" ||
-        (e.ctrlKey && e.shiftKey && (e.key.toLowerCase() === "i" || e.key.toLowerCase() === "j")) ||
-        (e.ctrlKey && e.key.toLowerCase() === "u") ||
-        (e.ctrlKey && e.key.toLowerCase() === "p");
-      if (isBlockedKey) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    };
-    document.addEventListener("contextmenu", prevent);
-    document.addEventListener("keydown", blockKeys);
-    return () => {
-      document.removeEventListener("contextmenu", prevent);
-      document.removeEventListener("keydown", blockKeys);
-    };
-  }, []);
 
   return (
     <Box
@@ -126,7 +123,7 @@ const ApplicantResetPassword = () => {
         height: "calc(100vh - 150px)",
         overflowY: "auto",
         backgroundColor: "transparent",
-      
+
       }}
     >
       {/* 🔝 Header Section */}
@@ -143,12 +140,13 @@ const ApplicantResetPassword = () => {
           variant="h4"
           sx={{
             fontWeight: "bold",
-            color: "maroon",
+            color: titleColor,
             fontSize: "36px",
           }}
         >
           APPLICANT RESET PASSWORD
         </Typography>
+
       </Box>
 
       <hr style={{ border: "1px solid #ccc", width: "100%" }} />
@@ -164,25 +162,34 @@ const ApplicantResetPassword = () => {
             maxWidth: "540px",
             borderRadius: 4,
             backgroundColor: "#fff",
-            border: "2px solid maroon",
+            border: `2px solid ${borderColor}`,   // ✅ APPLY DYNAMIC BORDER COLOR
             boxShadow: "0px 4px 20px rgba(0,0,0,0.1)",
             mb: 12,
           }}
         >
+
           {/* Lock Icon Header */}
           <Box textAlign="center" mb={2}>
             <LockReset
               sx={{
                 fontSize: 80,
-                color: "#800000",
+                color: "#000000",
                 backgroundColor: "#f0f0f0",
                 borderRadius: "50%",
                 p: 1,
               }}
             />
-            <Typography variant="h5" fontWeight="bold" sx={{ mt: 1, color: "#800000" }}>
+            <Typography
+              variant="h5"
+              fontWeight="bold"
+              sx={{
+                mt: 1,
+                color: subtitleColor,   // ✅ apply subtitle color here
+              }}
+            >
               Reset Your Password
             </Typography>
+
             <Typography fontSize={13} color="text.secondary">
               Update your password to keep your account secure.
             </Typography>
@@ -292,14 +299,18 @@ const ApplicantResetPassword = () => {
               sx={{
                 py: 1.2,
                 borderRadius: 2,
-                backgroundColor: "#1976d2",
+                backgroundColor: mainButtonColor,   // ✅ dynamic
                 textTransform: "none",
                 fontWeight: "bold",
-                "&:hover": { backgroundColor: "#1565c0" },
+                "&:hover": {
+                  backgroundColor: mainButtonColor,  // ✅ same color (prevents mismatch)
+                  opacity: 0.9,                      // ✅ subtle hover effect
+                },
               }}
             >
               Update Password
             </Button>
+
           </form>
         </Paper>
       </Box>

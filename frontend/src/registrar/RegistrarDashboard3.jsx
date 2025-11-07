@@ -127,7 +127,7 @@ const RegistrarDashboard3 = () => {
     const [loading, setLoading] = useState(false);
 
 
-    const pageId = 52;
+    const pageId = 48;
 
     //Put this After putting the code of the past code
     useEffect(() => {
@@ -919,11 +919,11 @@ const RegistrarDashboard3 = () => {
                             {/* Each Box here is one input container */}
                             <Box sx={{ flex: "1 1 25%" }}>
                                 <Typography variant="subtitle1" mb={1}>
-                                    School Level
+                                    Educational Attainment
                                 </Typography>
                                 <Box sx={{ flex: "1 1 25%" }}>
                                     <FormControl fullWidth size="small" required error={!!errors.schoolLevel}>
-                                        <InputLabel id="schoolLevel-label">School Level</InputLabel>
+                                        <InputLabel id="schoolLevel-label">Educational Attainment</InputLabel>
                                         <Select
                                             readOnly
                                             labelId="schoolLevel-label"
@@ -938,9 +938,6 @@ const RegistrarDashboard3 = () => {
                                                 <em>Select School Level</em>
                                             </MenuItem>
                                             <MenuItem value="High School/Junior High School">High School/Junior High School</MenuItem>
-                                            <MenuItem value="Senior High School">Senior High School</MenuItem>
-                                            <MenuItem value="Undergraduate">Undergraduate</MenuItem>
-                                            <MenuItem value="Graduate">Graduate</MenuItem>
                                             <MenuItem value="ALS">ALS</MenuItem>
                                             <MenuItem value="Vocational/Trade Course">Vocational/Trade Course</MenuItem>
                                         </Select>
@@ -1023,7 +1020,7 @@ const RegistrarDashboard3 = () => {
                         >
                             <Box sx={{ flex: "1 1 33%" }}>
                                 <Typography variant="subtitle1" mb={1}>
-                                    Honor
+                                    Recognition / Awards
                                 </Typography>
                                 <TextField
                                     InputProps={{ readOnly: true }}
@@ -1033,7 +1030,7 @@ const RegistrarDashboard3 = () => {
                                     name="honor"
                                     required
                                     value={person.honor ?? ""}
-                                    placeholder="Enter your Honor"
+                                    placeholder="Enter your Recognition / Awards"
                                     onChange={handleChange}
                                     onBlur={handleBlur}
                                     error={errors.honor}
@@ -1100,10 +1097,10 @@ const RegistrarDashboard3 = () => {
                             {/* School Level 1 */}
                             <Box sx={{ flex: "1 1 25%" }}>
                                 <Typography variant="subtitle1" mb={1}>
-                                    School Level
+                                    Educational Attainment
                                 </Typography>
                                 <FormControl fullWidth size="small" required error={!!errors.schoolLevel1}>
-                                    <InputLabel id="schoolLevel1-label">School Level</InputLabel>
+                                    <InputLabel id="schoolLevel1-label">Educational Attainment</InputLabel>
                                     <Select
                                         readOnly
                                         labelId="schoolLevel1-label"
@@ -1114,8 +1111,6 @@ const RegistrarDashboard3 = () => {
                                         onChange={handleChange}
                                         onBlur={handleBlur}
                                     >
-                                        <MenuItem value=""><em>Select School Level</em></MenuItem>
-                                        <MenuItem value="High School/Junior High School">High School/Junior High School</MenuItem>
                                         <MenuItem value="Senior High School">Senior High School</MenuItem>
                                         <MenuItem value="Undergraduate">Undergraduate</MenuItem>
                                         <MenuItem value="Graduate">Graduate</MenuItem>
@@ -1202,7 +1197,7 @@ const RegistrarDashboard3 = () => {
                             {/* Honor 1 */}
                             <Box sx={{ flex: "1 1 33%" }}>
                                 <Typography variant="subtitle1" mb={1}>
-                                    Honor
+                                    Recognition / Awards
                                 </Typography>
                                 <TextField
                                     InputProps={{ readOnly: true }}
@@ -1211,7 +1206,7 @@ const RegistrarDashboard3 = () => {
                                     size="small"
                                     required
                                     name="honor1"
-                                    placeholder="Enter your Honor"
+                                    placeholder="Enter your Recognition / Awards"
                                     value={person.honor1 ?? ""}
                                     onChange={handleChange}
                                     onBlur={handleBlur}

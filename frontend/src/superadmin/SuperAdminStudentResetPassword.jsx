@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
 import axios from "axios";
 import {
   Box,
@@ -18,7 +19,7 @@ const SuperAdminStudentResetPassword = () => {
   const [userRole, setUserRole] = useState("");
   const [hasAccess, setHasAccess] = useState(null);
 
-  const pageId = 95;
+  const pageId = 92;
 
   useEffect(() => {
     const storedUser = localStorage.getItem("email");

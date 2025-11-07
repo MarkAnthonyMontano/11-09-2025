@@ -35,7 +35,7 @@ const SystemDashboardPanel = () => {
   const [loading, setLoading] = useState(false);
 
 
-  const pageId = 99;
+  const pageId = 96;
 
   //Put this After putting the code of the past code
   useEffect(() => {

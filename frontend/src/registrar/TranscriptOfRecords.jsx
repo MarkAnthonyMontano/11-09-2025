@@ -180,7 +180,7 @@ const TOR = () => {
     const [loading, setLoading] = useState(false);
 
 
-    const pageId = 70;
+    const pageId = 65;
 
     //Put this After putting the code of the past code
     useEffect(() => {

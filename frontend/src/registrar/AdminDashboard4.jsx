@@ -46,7 +46,6 @@ const AdminDashboard4 = () => {
         // ✅ set company + short term + address
         setCompanyName(data.company_name || "");
         setShortTerm(data.short_term || "");
-        setCampusAddress(data.address || "");
       } catch (err) {
         console.error("Error fetching settings in ApplicantDashboard:", err);
       }
@@ -449,17 +448,16 @@ const AdminDashboard4 = () => {
     }
   };
 
-  const links = [
+    const links = [
     { to: "/admin_ecat_application_form", label: "ECAT Application Form" },
-    { to: "/admission_form_process", label: "Admission Form Process" },
+    { to: "/admin_admission_form_process", label: "Admission Form Process" },
     { to: "/admin_personal_data_form", label: "Personal Data Form" },
-    {
-      to: "/admin_office_of_the_registrar",
-      label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""} College Admission`,
-    },
+    { to: "/admin_office_of_the_registrar", label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""} College Admission` },
     { to: "/admission_services", label: "Application/Student Satisfactory Survey" },
     { label: "Examination Permit", onClick: handleExamPermitClick }, // ✅
   ];
+
+
 
 
 

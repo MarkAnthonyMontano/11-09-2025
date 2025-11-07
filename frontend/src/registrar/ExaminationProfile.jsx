@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import ExamPermit from "../applicant/ExamPermit";
@@ -21,7 +22,7 @@ const ExaminationProfile = () => {
     const [userRole, setUserRole] = useState("");
     const [hasAccess, setHasAccess] = useState(null);
     const [loading, setLoading] = useState(false);
-    const pageId = 27;
+    const pageId = 24;
 
     //
     useEffect(() => {

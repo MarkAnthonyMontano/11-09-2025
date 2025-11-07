@@ -22,7 +22,7 @@ const [hasAccess, setHasAccess] = useState(null);
 const [loading, setLoading] = useState(false);
 
 
-const pageId = 97;
+const pageId = 94;
 
 //Put this After putting the code of the past code
 useEffect(() => {

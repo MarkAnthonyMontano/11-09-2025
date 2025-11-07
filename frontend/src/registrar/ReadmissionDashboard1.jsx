@@ -147,7 +147,7 @@ const ReadmissionDashboard1 = () => {
   const [loading, setLoading] = useState(false);
 
 
-  const pageId = 45;
+  const pageId = 41;
 
   //Put this After putting the code of the past code
   useEffect(() => {
@@ -887,7 +887,7 @@ const ReadmissionDashboard1 = () => {
         setSearchError("");
       } catch (err) {
         console.error("Search failed:", err);
-        setSearchError("Applicant not found");
+        setSearchError("Student not found");
       }
     }, 500);
 
@@ -1006,14 +1006,14 @@ const ReadmissionDashboard1 = () => {
 
 
 
-  const links = [
-    { to: `/admin_ecat_application_form`, label: "ECAT Application Form" },
-    { to: `/admission_form_process`, label: "Admission Form Process" },
-    { to: `/admin_personal_data_form`, label: "Personal Data Form" },
-    { to: `/admin_office_of_the_registrar`, label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""} College Admission" ` },
-    { to: `/admission_services`, label: "Application/Student Satisfactory Survey" },
-
+    const links = [
+    { to: "/admin_ecat_application_form", label: "ECAT Application Form" },
+    { to: "/admin_admission_form_process", label: "Admission Form Process" },
+    { to: "/admin_personal_data_form", label: "Personal Data Form" },
+    { to: "/admin_office_of_the_registrar", label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""} College Admission` },
+    { to: "/admission_services", label: "Application/Student Satisfactory Survey" },
   ];
+
 
 
   const [canPrintPermit, setCanPrintPermit] = useState(false);
@@ -1594,7 +1594,7 @@ const ReadmissionDashboard1 = () => {
                         <MenuItem value=""><em>Select Program</em></MenuItem>
                         {curriculumOptions.map((item, index) => (
                           <MenuItem key={index} value={item.curriculum_id}>
-                            {item.program_description}
+                          ({item.program_code}) - {item.program_description} {item.major}
                           </MenuItem>
                         ))}
                       </Select>
@@ -1620,7 +1620,7 @@ const ReadmissionDashboard1 = () => {
                         <MenuItem value=""><em>Select Program</em></MenuItem>
                         {curriculumOptions.map((item, index) => (
                           <MenuItem key={index} value={item.curriculum_id}>
-                            {item.program_description}
+                          ({item.program_code}) - {item.program_description} {item.major}
                           </MenuItem>
                         ))}
                       </Select>
@@ -1646,7 +1646,7 @@ const ReadmissionDashboard1 = () => {
                         <MenuItem value=""><em>Select Program</em></MenuItem>
                         {curriculumOptions.map((item, index) => (
                           <MenuItem key={index} value={item.curriculum_id}>
-                            {item.program_description}
+                           ({item.program_code}) - {item.program_description} {item.major}
                           </MenuItem>
                         ))}
                       </Select>

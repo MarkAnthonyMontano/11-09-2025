@@ -21,7 +21,7 @@ const HistoryLogs = () => {
   const [loading, setLoading] = useState(false);
 
 
-  const pageId = 101;
+  const pageId = 98;
 
   //Put this After putting the code of the past code
   useEffect(() => {

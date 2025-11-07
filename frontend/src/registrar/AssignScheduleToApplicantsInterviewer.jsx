@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
 import axios from "axios";
 import { io } from "socket.io-client";
 import {
@@ -63,7 +64,7 @@ const AssignScheduleToApplicantsInterviewer = () => {
     const [userRole, setUserRole] = useState("");
     const [hasAccess, setHasAccess] = useState(null);
 
-    const pageId = 15;
+    const pageId = 12;
 
     //
     useEffect(() => {
@@ -170,6 +171,7 @@ const AssignScheduleToApplicantsInterviewer = () => {
     const [persons, setPersons] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(false);
+    const [loading2, setLoading2] = useState(false);
     const [person, setPerson] = useState({
         campus: "",
         last_name: "",
@@ -533,6 +535,14 @@ const AssignScheduleToApplicantsInterviewer = () => {
     };
 
     const handleSendEmails = () => {
+        if (!person || !person.first_name) {
+            setSnack({
+                open: true,
+                message: "Applicant information is missing.",
+                severity: "error",
+            });
+            return;
+        }
         if (!selectedSchedule) {
             setSnack({ open: true, message: "Please select a schedule first.", severity: "warning" });
             return;
@@ -557,7 +567,7 @@ const AssignScheduleToApplicantsInterviewer = () => {
 
         // 📝 Pre-fill the message before opening the dialog
         setEmailMessage(
-            `Dear ${first_name} ${middle_name} ${last_name},
+            `Dear ${person.first_name} ${person.middle_name || ""} ${person.last_name},
 
 You are scheduled for an interview on:
 
@@ -584,7 +594,7 @@ Thank you and good luck on your Qualifying / Interview Exam!
 
     const confirmSendEmails = () => {
         setConfirmOpen(false);
-        setLoading(true);
+        setLoading2(true);
         const assignedApplicants = Array.from(selectedApplicants);
 
         socket.emit("send_interview_emails", {
@@ -608,7 +618,7 @@ Thank you and good luck on your Qualifying / Interview Exam!
             }
 
 
-            setLoading(false);
+            setLoading2(false);
         });
     };
 
@@ -852,23 +862,7 @@ Thank you and good luck on your Qualifying / Interview Exam!
         }
     }, [filteredPersons.length, totalPages]);
 
-    // 🔒 Disable right-click
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-    // 🔒 Block DevTools shortcuts + Ctrl+P silently
-    document.addEventListener('keydown', (e) => {
-        const isBlockedKey =
-            e.key === 'F12' || // DevTools
-            e.key === 'F11' || // Fullscreen
-            (e.ctrlKey && e.shiftKey && (e.key.toLowerCase() === 'i' || e.key.toLowerCase() === 'j')) || // Ctrl+Shift+I/J
-            (e.ctrlKey && e.key.toLowerCase() === 'u') || // Ctrl+U (View Source)
-            (e.ctrlKey && e.key.toLowerCase() === 'p');   // Ctrl+P (Print)
-
-        if (isBlockedKey) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-    });
 
 
 
@@ -1214,6 +1208,7 @@ Thank you and good luck on your Qualifying / Interview Exam!
 
                             sx={{ minWidth: 150 }}
                             onClick={() => {
+                                setPerson(a);
                                 setSelectedApplicants(new Set([id])); // pick only this applicant
                                 handleSendEmails();                   // 🟢 pre-fill message & open dialog
                             }}
@@ -1655,6 +1650,7 @@ Thank you and good luck on your Qualifying / Interview Exam!
                                                         color="primary"
                                                         size="small"
                                                         onClick={() => {
+                                                            setPerson(a);
                                                             setSelectedApplicants(new Set([applicantId])); // ✅ use applicantId
                                                             handleSendEmails();
                                                         }}
@@ -1770,7 +1766,7 @@ Thank you and good luck on your Qualifying / Interview Exam!
 
 
 
-            <LoadingOverlay open={loading} message="Sending emails, please wait..." />
+            <LoadingOverlay open={loading2} message="Sending emails, please wait..." />
         </Box>
     );
 };

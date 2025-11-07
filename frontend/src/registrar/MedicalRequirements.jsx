@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from 'react';
-import React from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
 import axios from 'axios';
 import {
     Box,
@@ -223,7 +223,7 @@ const MedicalRequirements = () => {
     const [loading, setLoading] = useState(false);
 
 
-    const pageId = 37;
+    const pageId = 34;
 
     //Put this After putting the code of the past code
     useEffect(() => {

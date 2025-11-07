@@ -97,7 +97,7 @@ const MedicalDashboard5 = () => {
   const [hasAccess, setHasAccess] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const pageId = 36;
+  const pageId = 33;
 
   //Put this After putting the code of the past code
   useEffect(() => {
@@ -403,15 +403,14 @@ const MedicalDashboard5 = () => {
     setExamPermitError("");
   };
 
-
-  const links = [
-    { to: `/admin_ecat_application_form`, label: "ECAT Application Form" },
-    { to: `/admission_form_process`, label: "Admission Form Process" },
-    { to: `/admin_personal_data_form`, label: "Personal Data Form" },
-    { to: `/admin_office_of_the_registrar`, label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""} College Admission" ` },
-    { to: `/admission_services`, label: "Application/Student Satisfactory Survey" },
-
+    const links = [
+    { to: "/admin_ecat_application_form", label: "ECAT Application Form" },
+    { to: "/admin_admission_form_process", label: "Admission Form Process" },
+    { to: "/admin_personal_data_form", label: "Personal Data Form" },
+    { to: "/admin_office_of_the_registrar", label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""} College Admission` },
+    { to: "/admission_services", label: "Application/Student Satisfactory Survey" },
   ];
+
 
   const [canPrintPermit, setCanPrintPermit] = useState(false);
 

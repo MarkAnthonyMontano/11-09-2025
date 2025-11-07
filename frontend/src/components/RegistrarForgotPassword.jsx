@@ -17,7 +17,24 @@ import ReCAPTCHA from "react-google-recaptcha";
 import { SettingsContext } from "../App"; // ✅ import context for bg_image and logo
 
 const RegistrarForgotPassword = () => {
-  const settings = useContext(SettingsContext); // ✅ get settings data
+  const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+
+
+  useEffect(() => {
+    if (settings) {
+      if (settings.title_color) setTitleColor(settings.title_color);
+      if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+      if (settings.border_color) setBorderColor(settings.border_color);
+      if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+
+    }
+  }, [settings]);
+
   const [capVal, setCapVal] = useState(null);
   const [email, setEmail] = useState("");
   const [snack, setSnack] = useState({
@@ -114,7 +131,7 @@ const RegistrarForgotPassword = () => {
         style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
         maxWidth={false}
       >
-        <div style={{ border: "5px solid white" }} className="Container">
+        <div style={{ border: "5px solid black" }} className="Container">
           {/* Header */}
           <div
             className="Header"
@@ -130,8 +147,10 @@ const RegistrarForgotPassword = () => {
                 <img src={logoSrc} alt="EARIST Logo" />
               </div>
             </div>
-            <div className="HeaderBody">
-              <strong>{settings?.company_name || "EARIST"}</strong>
+              <div className="HeaderBody">
+              <strong style={{
+                color: titleColor,
+              }}>{settings?.company_name || "Company Name"}</strong>
               <p>Student Information System</p>
             </div>
           </div>
@@ -142,6 +161,7 @@ const RegistrarForgotPassword = () => {
             <TextField
               fullWidth
               type="email"
+          style={{border: `2px solid ${borderColor}`, borderRadius: "5px"}}
               placeholder="Enter your Email Address (e.g., username@gmail.com)"
               variant="outlined"
               value={email}
@@ -158,6 +178,7 @@ const RegistrarForgotPassword = () => {
                     height: "50px",
                     padding: "0 10px",
                     boxSizing: "border-box",
+                    
                   },
                 },
               }}
@@ -180,11 +201,11 @@ const RegistrarForgotPassword = () => {
                 sx={{
                   width: "100%",
                   py: 1.5,
-                  backgroundColor: "#6D2323",
+                  backgroundColor: mainButtonColor, 
                   color: "white",
-                  "&:hover": {
-                    backgroundColor: "#6D2323",
-                  },
+                  height: "50px",
+                  borderRadius: "10px"
+                 
                 }}
               >
                 {loading ? "Sending..." : "Reset Password"}

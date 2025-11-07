@@ -110,7 +110,7 @@ const ExaminationProfile = ({ personId }) => {
     const [loading, setLoading] = useState(false);
 
 
-    const pageId = 55;
+    const pageId = 51;
 
     //Put this After putting the code of the past code
     useEffect(() => {

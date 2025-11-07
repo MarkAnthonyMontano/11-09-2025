@@ -16,7 +16,7 @@ const HealthRecord = () => {
     const [hasAccess, setHasAccess] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    const pageId = 28;
+    const pageId = 25;
 
     //
     useEffect(() => {

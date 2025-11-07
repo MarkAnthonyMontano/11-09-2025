@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
 import axios from "axios";
 import {
     Button,
@@ -25,7 +26,7 @@ function Settings({ onUpdate }) {
     const [hasAccess, setHasAccess] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    const pageId = 80;
+    const pageId = 77;
 
     // ✅ New state for short term
     const [shortTerm, setShortTerm] = useState("");
@@ -76,6 +77,21 @@ function Settings({ onUpdate }) {
     const [footerText, setFooterText] = useState("");
     const [footerColor, setFooterColor] = useState("#ffffff");
 
+
+    // ✅ NEW COLOR STATES
+    const [mainButtonColor, setMainButtonColor] = useState("#ffffff");
+    const [subButtonColor, setSubButtonColor] = useState("#ffffff");
+
+    const [borderColor, setBorderColor] = useState("#000000");
+    const [stepperColor, setStepperColor] = useState("#000000");
+    const [sidebarButtonColor, setSidebarButtonColor] = useState("#000000");
+    const [fontThemeColor, setFontThemeColor] = useState("#000000");
+
+    const [titleColor, setTitleColor] = useState("#000000");
+    const [subtitleColor, setSubtitleColor] = useState("#555555");
+
+
+
     const [snack, setSnack] = useState({
         open: false,
         message: "",
@@ -101,7 +117,17 @@ function Settings({ onUpdate }) {
                     header_color,
                     footer_text,
                     footer_color,
+                    main_button_color,
+                    sub_button_color,
+                    border_color,
+                    stepper_color,
+                    sidebar_button_color,
+                    font_theme_color,
+                    title_color,
+                    subtitle_color
                 } = response.data;
+
+
                 setCompanyName(company_name || "");
                 setShortTerm(short_term || "");
                 setAddress(address || "");
@@ -110,6 +136,19 @@ function Settings({ onUpdate }) {
                 setHeaderColor(header_color || "#ffffff");
                 setFooterText(footer_text || "");
                 setFooterColor(footer_color || "#ffffff");
+                setMainButtonColor(main_button_color || "#ffffff");
+                setSubButtonColor(sub_button_color || "#ffffff");
+
+
+                setBorderColor(border_color || "#000000");
+                setStepperColor(stepper_color || "#000000");
+                setSidebarButtonColor(sidebar_button_color || "#000000");
+                setFontThemeColor(font_theme_color || "#000000");
+
+                setTitleColor(title_color || "#000000");
+                setSubtitleColor(subtitle_color || "#555555");
+
+
             })
             .catch((error) => {
                 console.error("Error fetching settings:", error);
@@ -133,6 +172,18 @@ function Settings({ onUpdate }) {
         formData.append("header_color", headerColor || "#ffffff");
         formData.append("footer_text", footerText || "");
         formData.append("footer_color", footerColor || "#ffffff");
+        formData.append("main_button_color", mainButtonColor);
+        formData.append("sub_button_color", subButtonColor);
+
+        formData.append("border_color", borderColor);
+        formData.append("stepper_color", stepperColor);
+        formData.append("sidebar_button_color", sidebarButtonColor);
+        formData.append("font_theme_color", fontThemeColor);
+
+        formData.append("title_color", titleColor);
+        formData.append("subtitle_color", subtitleColor);
+
+
 
         try {
             await axios.post("http://localhost:5000/api/settings", formData, {
@@ -177,7 +228,7 @@ function Settings({ onUpdate }) {
                 backgroundColor: "transparent",
                 overflowY: "auto",
                 overflowX: "hidden",
-                
+
             }}
         >
             {/* ✅ Header Section */}
@@ -379,6 +430,99 @@ function Settings({ onUpdate }) {
                             sx={{ height: "40px", cursor: "pointer" }}
                         />
                     </Box>
+
+                    <Box mb={2}>
+                        <InputLabel>Title Color</InputLabel>
+                        <Input
+                            type="color"
+                            value={titleColor}
+                            onChange={(e) => setTitleColor(e.target.value)}
+                            fullWidth
+                            sx={{ height: "40px", cursor: "pointer" }}
+                        />
+                    </Box>
+
+                    <Box mb={2}>
+                        <InputLabel>Subtitle Color</InputLabel>
+                        <Input
+                            type="color"
+                            value={subtitleColor}
+                            onChange={(e) => setSubtitleColor(e.target.value)}
+                            fullWidth
+                            sx={{ height: "40px", cursor: "pointer" }}
+                        />
+                    </Box>
+
+
+
+                    <Box mb={2}>
+                        <InputLabel>Main Button Color</InputLabel>
+                        <Input
+                            type="color"
+                            value={mainButtonColor}
+                            onChange={(e) => setMainButtonColor(e.target.value)}
+                            fullWidth
+                            sx={{ height: "40px", cursor: "pointer" }}
+                        />
+                    </Box>
+
+                    <Box mb={2}>
+                        <InputLabel>Sub Button Color</InputLabel>
+                        <Input
+                            type="color"
+                            value={subButtonColor}
+                            onChange={(e) => setSubButtonColor(e.target.value)}
+                            fullWidth
+                            sx={{ height: "40px", cursor: "pointer" }}
+                        />
+                    </Box>
+
+
+                    <Box mb={2}>
+                        <InputLabel>Border Color</InputLabel>
+                        <Input
+                            type="color"
+                            value={borderColor}
+                            onChange={(e) => setBorderColor(e.target.value)}
+                            fullWidth
+                            sx={{ height: "40px", cursor: "pointer" }}
+                        />
+                    </Box>
+
+                    <Box mb={2}>
+                        <InputLabel>Stepper Color</InputLabel>
+                        <Input
+                            type="color"
+                            value={stepperColor}
+                            onChange={(e) => setStepperColor(e.target.value)}
+                            fullWidth
+                            sx={{ height: "40px", cursor: "pointer" }}
+                        />
+                    </Box>
+
+                    <Box mb={2}>
+                        <InputLabel>Sidebar Button Color</InputLabel>
+                        <Input
+                            type="color"
+                            value={sidebarButtonColor}
+                            onChange={(e) => setSidebarButtonColor(e.target.value)}
+                            fullWidth
+                            sx={{ height: "40px", cursor: "pointer" }}
+                        />
+                    </Box>
+
+                    <Box mb={2}>
+                        <InputLabel>Font Theme Color</InputLabel>
+                        <Input
+                            type="color"
+                            value={fontThemeColor}
+                            onChange={(e) => setFontThemeColor(e.target.value)}
+                            fullWidth
+                            sx={{ height: "40px", cursor: "pointer" }}
+                        />
+                    </Box>
+
+
 
                     {/* ✅ Save Button */}
                     <Button

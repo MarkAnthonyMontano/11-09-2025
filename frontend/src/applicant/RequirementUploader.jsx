@@ -24,22 +24,37 @@ import ErrorIcon from "@mui/icons-material/Error";
 
 const RequirementUploader = () => {
   const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+
   const [fetchedLogo, setFetchedLogo] = useState(null);
   const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
 
   useEffect(() => {
-    if (settings) {
-      // ✅ load dynamic logo
-      if (settings.logo_url) {
-        setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
-      } else {
-        setFetchedLogo(EaristLogo);
-      }
+    if (!settings) return;
 
-      // ✅ load dynamic name + address
-      if (settings.company_name) setCompanyName(settings.company_name);
-      if (settings.campus_address) setCampusAddress(settings.campus_address);
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
     }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
   }, [settings]);
 
   const [requirements, setRequirements] = useState([]); // ✅ dynamic requirements
@@ -202,8 +217,8 @@ const RequirementUploader = () => {
 
     return (
       <TableRow key={doc.id}>
-        <TableCell sx={{ fontWeight: 'bold', width: '25%', border: "2px solid maroon" }}>{doc.label}</TableCell>
-        <TableCell sx={{ width: '25%', border: "2px solid maroon", textAlign: "Center" }}>
+        <TableCell sx={{ fontWeight: 'bold', width: '25%', border: `2px solid ${borderColor}` }}>{doc.label}</TableCell>
+        <TableCell sx={{ width: '25%', border: `2px solid ${borderColor}`, textAlign: "Center" }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
             <Box sx={{ width: '220px', flexShrink: 0, textAlign: "center" }}>
               {selectedFiles[doc.id] ? (
@@ -259,7 +274,7 @@ const RequirementUploader = () => {
           </Box>
         </TableCell>
 
-        <TableCell sx={{ width: "25%", border: "2px solid maroon" }}>
+        <TableCell sx={{ width: "25%", border: `2px solid ${borderColor}` }}>
           <Typography
             sx={{
               fontStyle: uploaded?.remarks ? "normal" : "italic",
@@ -283,7 +298,7 @@ const RequirementUploader = () => {
           ) : null}
         </TableCell>
 
-        <TableCell sx={{ width: '10%', border: "2px solid maroon" }}>
+        <TableCell sx={{ width: '10%', border: `2px solid ${borderColor}` }}>
           {uploaded && (
             <Button
               variant="contained"
@@ -304,7 +319,7 @@ const RequirementUploader = () => {
           )}
         </TableCell>
 
-        <TableCell sx={{ width: '10%', border: "2px solid maroon" }}>
+        <TableCell sx={{ width: '10%', border: `2px solid ${borderColor}` }}>
           {uploaded && (
             <Button
               onClick={() => handleDelete(uploaded.upload_id)}
@@ -357,7 +372,7 @@ const RequirementUploader = () => {
           variant="h4"
           sx={{
             fontWeight: 'bold',
-            color: 'maroon',
+            color: titleColor,
             fontSize: '36px',
           }}
         >
@@ -448,7 +463,7 @@ const RequirementUploader = () => {
                   fontSize: "45px",
                   fontWeight: "bold",
                   textAlign: "center",
-                  color: "maroon",
+                  color: subtitleColor,
                   marginTop: "25px",
                 }}
               >
@@ -470,24 +485,34 @@ const RequirementUploader = () => {
                     color: "#333",
                   }}
                 >
-                  Complete the applicant form to secure your place for the upcoming academic year at{" "}
-                  <b>EARIST</b>.
+                  <div style={{ textAlign: "center" }}>
+                    Complete the applicant form to secure your place for the upcoming academic year at{" "}
+                    {shortTerm ? (
+                      <>
+                        <strong>{shortTerm.toUpperCase()}</strong> <br />
+                        {companyName || ""}
+                      </>
+                    ) : (
+                      companyName || ""
+                    )}
+                    .
+                  </div>
                 </div>
               )}
             </Container>
 
             <TableContainer
               component={Paper}
-              sx={{ width: "95%", mt: 2, border: "2px solid maroon" }}
+              sx={{ width: "95%", mt: 2, border: `2px solid ${borderColor}` }}
             >
               <Table>
-                <TableHead sx={{ backgroundColor: "#6D2323", border: "2px solid maroon" }}>
+                <TableHead sx={{  backgroundColor: settings?.header_color || "#1976d2", border: `2px solid ${borderColor}` }}>
                   <TableRow>
-                    <TableCell sx={{ color: "white", border: "2px solid maroon" }}>Document</TableCell>
-                    <TableCell sx={{ color: "white", border: "2px solid maroon" }}>Upload</TableCell>
-                    <TableCell sx={{ color: "white" }}>Remarks</TableCell>
-                    <TableCell sx={{ color: "white" }}>Preview</TableCell>
-                    <TableCell sx={{ color: "white" }}>Delete</TableCell>
+                    <TableCell sx={{ color: "white", border: `2px solid ${borderColor}` }}>Document</TableCell>
+                    <TableCell sx={{ color: "white", border: `2px solid ${borderColor}` }}>Upload</TableCell>
+                    <TableCell sx={{ color: "white", border: `2px solid ${borderColor}`  }}>Remarks</TableCell>
+                    <TableCell sx={{ color: "white", border: `2px solid ${borderColor}`  }}>Preview</TableCell>
+                    <TableCell sx={{ color: "white", border: `2px solid ${borderColor}` }}>Delete</TableCell>
                   </TableRow>
                 </TableHead>
 

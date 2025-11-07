@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import {
@@ -20,7 +20,26 @@ import Logo from "../assets/Logo.png";
 import { SettingsContext } from "../App";
 
 const Login = ({ setIsAuthenticated }) => {
+
   const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+
+
+  useEffect(() => {
+    if (settings) {
+      if (settings.title_color) setTitleColor(settings.title_color);
+      if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+      if (settings.border_color) setBorderColor(settings.border_color);
+      if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+
+    }
+  }, [settings]);
+
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -95,23 +114,6 @@ const Login = ({ setIsAuthenticated }) => {
     ? `http://localhost:5000${settings.logo_url}`
     : Logo;
 
-  // 🔒 Disable right-click
-  document.addEventListener('contextmenu', (e) => e.preventDefault());
-
-  // 🔒 Block DevTools shortcuts + Ctrl+P silently
-  document.addEventListener('keydown', (e) => {
-    const isBlockedKey =
-      e.key === 'F12' || // DevTools
-      e.key === 'F11' || // Fullscreen
-      (e.ctrlKey && e.shiftKey && (e.key.toLowerCase() === 'i' || e.key.toLowerCase() === 'j')) || // Ctrl+Shift+I/J
-      (e.ctrlKey && e.key.toLowerCase() === 'u') || // Ctrl+U (View Source)
-      (e.ctrlKey && e.key.toLowerCase() === 'p');   // Ctrl+P (Print)
-
-    if (isBlockedKey) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  });
 
   return (
     <Box
@@ -153,7 +155,9 @@ const Login = ({ setIsAuthenticated }) => {
               </div>
             </div>
             <div className="HeaderBody">
-              <strong>{settings?.company_name || "EARIST"}</strong>
+              <strong style={{
+                color: titleColor,
+              }}>{settings?.company_name || "Company Name"}</strong>
               <p>Student Information System</p>
             </div>
           </div>
@@ -178,7 +182,7 @@ const Login = ({ setIsAuthenticated }) => {
                   width: "100%",
                   padding: "0.8rem 2.5rem 0.8rem 2.5rem",
                   borderRadius: "6px",
-                  border: "2px solid maroon",
+                  border: `2px solid ${borderColor}`,
                   fontSize: "1rem",
                   backgroundColor: "white",
                   outline: "none",
@@ -224,7 +228,7 @@ const Login = ({ setIsAuthenticated }) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                style={{ paddingLeft: "2.5rem", border: "2px solid maroon" }}
+                style={{ paddingLeft: "2.5rem", border: `2px solid ${borderColor}`, }}
               />
               <EmailIcon
                 style={{
@@ -248,7 +252,7 @@ const Login = ({ setIsAuthenticated }) => {
                 onChange={(e) => setPassword(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleLogin()}
                 className="border"
-                style={{ paddingLeft: "2.5rem", border: "2px solid maroon" }}
+                style={{ paddingLeft: "2.5rem", border: `2px solid ${borderColor}`, }}
               />
               <LockIcon
                 style={{
@@ -277,7 +281,12 @@ const Login = ({ setIsAuthenticated }) => {
             </div>
 
             {/* Login Button */}
-            <div className="Button" onClick={handleLogin}>
+            <div style={{
+              height: "50px",
+              borderRadius: "10px",
+              backgroundColor: mainButtonColor,  // ✅ same color (prevents mismatch)
+
+            }} className="Button" onClick={handleLogin}>
               <span>Log In</span>
             </div>
 

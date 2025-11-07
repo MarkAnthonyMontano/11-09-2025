@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import '../styles/Container.css';
@@ -19,7 +19,24 @@ import ReCAPTCHA from "react-google-recaptcha";
 import { SettingsContext } from "../App"; // ✅ Access settings from context
 
 const Register = () => {
-  const settings = useContext(SettingsContext); // ✅ Get settings data (bg_image, logo_url)
+  const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+
+
+  useEffect(() => {
+    if (settings) {
+      if (settings.title_color) setTitleColor(settings.title_color);
+      if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+      if (settings.border_color) setBorderColor(settings.border_color);
+      if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+
+    }
+  }, [settings]);
+
   const [capVal, setCapVal] = useState(null);
   const [usersData, setUserData] = useState({
     email: '',
@@ -127,7 +144,9 @@ const Register = () => {
                 </div>
               </div>
               <div className="HeaderBody">
-                <strong>{settings?.company_name || "EARIST"}</strong>
+                <strong style={{
+                  color: titleColor,
+                }}>{settings?.company_name || "Company Name"}</strong>
                 <p>Student Information System</p>
               </div>
             </div>
@@ -143,7 +162,7 @@ const Register = () => {
                   placeholder="Enter your email address"
                   value={usersData.email}
                   onChange={handleChanges}
-                  style={{ paddingLeft: "2.5rem", border: "2px solid maroon" }}
+                  style={{ paddingLeft: "2.5rem", border: `2px solid ${borderColor}` }}
                 />
                 <EmailIcon
                   style={{
@@ -166,7 +185,7 @@ const Register = () => {
                   value={usersData.password}
                   onChange={handleChanges}
                   required
-                  style={{ paddingLeft: "2.5rem", border: "2px solid maroon" }}
+                  style={{ paddingLeft: "2.5rem", border: `2px solid ${borderColor}` }}
                 />
                 <LockIcon
                   style={{
@@ -204,17 +223,26 @@ const Register = () => {
 
               {/* Register Button — disabled until CAPTCHA is solved */}
               <div
-                className="Button"
                 onClick={capVal ? handleRegister : null}
                 style={{
                   pointerEvents: capVal ? "auto" : "none",
                   opacity: capVal ? 1 : 0.5,
                   cursor: capVal ? "pointer" : "not-allowed",
-                  marginTop: "20px"
+                  marginTop: "20px",
+                  backgroundColor: mainButtonColor,
+                  height: "50px",
+                  borderRadius: "10px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "white", // ✅ optional: make text visible if background is dark
+                  fontWeight: "bold", // ✅ optional: improve button appearance
+                  fontSize: "16px", // ✅ optional: make text readable
                 }}
               >
-                <span>Register</span>
+                Register
               </div>
+
 
               <div className="LinkContainer RegistrationLink" style={{ margin: '0.1rem 0rem' }}>
                 <p>Already Have an Account?</p>

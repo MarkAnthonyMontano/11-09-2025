@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
 import axios from "axios";
 import {
     Box,
@@ -31,7 +32,7 @@ const Notifications = () => {
     const [loading, setLoading] = useState(false);
 
 
-    const pageId = 77;
+    const pageId = 71;
 
     //Put this After putting the code of the past code
     useEffect(() => {
