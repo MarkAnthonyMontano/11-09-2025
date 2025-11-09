@@ -9,6 +9,45 @@ import LoadingOverlay from "../components/LoadingOverlay";
 
 const DepartmentRoom = () => {
 
+  const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
+
   const [room, setRoom] = useState({
     room_id: '',
     dprtmnt_id: ''
@@ -196,7 +235,7 @@ const DepartmentRoom = () => {
           variant="h4"
           sx={{
             fontWeight: 'bold',
-            color: 'maroon',
+            color: titleColor,
             fontSize: '36px',
           }}
         >
@@ -253,7 +292,9 @@ const DepartmentRoom = () => {
 
         <Button
           variant="contained"
-          color="primary"
+          
+          style={{backgroundColor: mainButtonColor, color: "#ffffff", width: "200px"}}
+
           onClick={handleAssignRoom}
           disabled={!room.room_id || !room.dprtmnt_id}
           sx={{ height: 56, alignSelf: 'flex-end' }} // align with select fields
@@ -269,7 +310,7 @@ const DepartmentRoom = () => {
       <Grid container spacing={1}>
         {departmentList.map((dept) => (
           <Grid item xs={12} md={4} key={dept.dprtmnt_id}>
-            <Paper elevation={2} style={{ padding: '10px', border: "2px solid maroon" }}>
+            <Paper elevation={2} style={{ padding: '10px', border: `2px solid ${borderColor}` }}>
               <Typography variant="subtitle2" style={{ fontSize: '14px', marginBottom: '8px' }}>
                 {dept.dprtmnt_name}
               </Typography>
@@ -281,7 +322,7 @@ const DepartmentRoom = () => {
                       key={room.room_id}
                       position="relative"
                       sx={{
-                        backgroundColor: '#800000',
+                        backgroundColor: mainButtonColor,
                         color: 'white',
                         borderRadius: '4px',
                         padding: '6px 8px',

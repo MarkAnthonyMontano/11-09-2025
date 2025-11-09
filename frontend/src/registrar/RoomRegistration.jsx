@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { SettingsContext } from "../App";
 import axios from "axios";
 import {
@@ -14,27 +14,60 @@ import {
   Paper,
   Grid,
   Snackbar,
-  Alert
+  Alert,
 } from "@mui/material";
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 
 const RoomRegistration = () => {
+  const settings = useContext(SettingsContext);
 
-// Also put it at the very top
-const [userID, setUserID] = useState("");
-const [user, setUser] = useState("");
-const [userRole, setUserRole] = useState("");
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
 
-const [hasAccess, setHasAccess] = useState(null);
-const [loading, setLoading] = useState(false);
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
 
+  useEffect(() => {
+    if (!settings) return;
 
-const pageId = 55;
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
 
-//Put this After putting the code of the past code
-useEffect(() => {
-    
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
+
+  // 🔹 Authentication and access states
+  const [userID, setUserID] = useState("");
+  const [user, setUser] = useState("");
+  const [userRole, setUserRole] = useState("");
+  const [hasAccess, setHasAccess] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const pageId = 55;
+
+  useEffect(() => {
     const storedUser = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
     const storedID = localStorage.getItem("person_id");
@@ -54,78 +87,98 @@ useEffect(() => {
     }
   }, []);
 
-const checkAccess = async (userID) => {
+  const checkAccess = async (userID) => {
     try {
-        const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
-        if (response.data && response.data.page_privilege === 1) {
-          setHasAccess(true);
-        } else {
-          setHasAccess(false);
-        }
-    } catch (error) {
-        console.error('Error checking access:', error);
+      setLoading(true);
+      const response = await axios.get(
+        `http://localhost:5000/api/page_access/${userID}/${pageId}`
+      );
+      if (response.data && response.data.page_privilege === 1) {
+        setHasAccess(true);
+      } else {
         setHasAccess(false);
-        if (error.response && error.response.data.message) {
-          console.log(error.response.data.message);
-        } else {
-          console.log("An unexpected error occurred.");
-        }
-        setLoading(false);
+      }
+    } catch (error) {
+      console.error("Error checking access:", error);
+      setHasAccess(false);
+    } finally {
+      setLoading(false);
     }
   };
 
-
-
-
-
+  // 🔹 Room management states
   const [roomName, setRoomName] = useState("");
   const [buildingName, setBuildingName] = useState("");
   const [roomList, setRoomList] = useState([]);
   const [editingRoom, setEditingRoom] = useState(null);
-  const [snack, setSnack] = useState({ open: false, message: "", severity: "info" });
+  const [snack, setSnack] = useState({
+    open: false,
+    message: "",
+    severity: "info",
+  });
 
-  useEffect(() => {
-    fetchRoomList();
-  }, []);
-
+  // 🔹 Fetch all rooms
   const fetchRoomList = async () => {
     try {
       const res = await axios.get("http://localhost:5000/room_list");
       setRoomList(res.data);
     } catch (err) {
       console.error("Failed to fetch rooms:", err);
-      setSnack({ open: true, message: "Failed to fetch rooms", severity: "error" });
+      setSnack({
+        open: true,
+        message: "Failed to fetch rooms",
+        severity: "error",
+      });
     }
   };
 
+  useEffect(() => {
+    fetchRoomList();
+  }, []);
+
+  // 🔹 Add new room
   const handleAddRoom = async () => {
     if (!roomName.trim() || !buildingName.trim()) {
-      setSnack({ open: true, message: "Room name and building name are required", severity: "warning" });
+      setSnack({
+        open: true,
+        message: "Room name and building name are required",
+        severity: "warning",
+      });
       return;
     }
 
     try {
       await axios.post("http://localhost:5000/room", {
         room_name: roomName,
-        building_name: buildingName
+        building_name: buildingName,
       });
 
-      setSnack({ open: true, message: "Room successfully added", severity: "success" });
+      setSnack({
+        open: true,
+        message: "Room successfully added",
+        severity: "success",
+      });
       setRoomName("");
       setBuildingName("");
       fetchRoomList();
     } catch (err) {
       console.error("Error adding room:", err);
-      setSnack({ open: true, message: "Failed to add room", severity: "error" });
+      setSnack({
+        open: true,
+        message: "Failed to add room",
+        severity: "error",
+      });
     }
   };
 
+  // 🔹 Edit room
   const handleEditRoom = (room) => {
     setEditingRoom(room);
     setBuildingName(room.building_description);
     setRoomName(room.room_description);
   };
 
+  // 🔹 Update room
   const handleUpdateRoom = async () => {
     if (!editingRoom) return;
 
@@ -135,101 +188,135 @@ const checkAccess = async (userID) => {
         room_name: roomName,
       });
 
-      setSnack({ open: true, message: "Room updated successfully", severity: "success" });
+      setSnack({
+        open: true,
+        message: "Room updated successfully",
+        severity: "success",
+      });
       setEditingRoom(null);
       setBuildingName("");
       setRoomName("");
       fetchRoomList();
     } catch (err) {
       console.error("Error updating room:", err);
-      setSnack({ open: true, message: "Failed to update room", severity: "error" });
+      setSnack({
+        open: true,
+        message: "Failed to update room",
+        severity: "error",
+      });
     }
   };
 
+  // 🔹 Delete room
   const handleDeleteRoom = async (roomId) => {
     if (!window.confirm("Are you sure you want to delete this room?")) return;
 
     try {
       await axios.delete(`http://localhost:5000/room/${roomId}`);
-      setSnack({ open: true, message: "Room deleted successfully", severity: "success" });
+      setSnack({
+        open: true,
+        message: "Room deleted successfully",
+        severity: "success",
+      });
       fetchRoomList();
     } catch (err) {
       console.error("Error deleting room:", err);
-      setSnack({ open: true, message: "Failed to delete room", severity: "error" });
+      setSnack({
+        open: true,
+        message: "Failed to delete room",
+        severity: "error",
+      });
     }
   };
 
+  // 🔹 Close snackbar
   const handleCloseSnack = (_, reason) => {
     if (reason === "clickaway") return;
     setSnack((prev) => ({ ...prev, open: false }));
   };
 
-  // 🔒 Disable right-click
-  document.addEventListener('contextmenu', (e) => e.preventDefault());
+  // 🔒 Security: disable right-click + devtools keys safely
+  useEffect(() => {
+    const disableContext = (e) => e.preventDefault();
+    const disableKeys = (e) => {
+      const isBlockedKey =
+        e.key === "F12" ||
+        e.key === "F11" ||
+        (e.ctrlKey &&
+          e.shiftKey &&
+          (e.key.toLowerCase() === "i" || e.key.toLowerCase() === "j")) ||
+        (e.ctrlKey && ["u", "p"].includes(e.key.toLowerCase()));
 
-  // 🔒 Block DevTools shortcuts + Ctrl+P silently
-  document.addEventListener('keydown', (e) => {
-    const isBlockedKey =
-      e.key === 'F12' ||
-      e.key === 'F11' ||
-      (e.ctrlKey && e.shiftKey && (e.key.toLowerCase() === 'i' || e.key.toLowerCase() === 'j')) ||
-      (e.ctrlKey && e.key.toLowerCase() === 'u') ||
-      (e.ctrlKey && e.key.toLowerCase() === 'p');
+      if (isBlockedKey) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+    document.addEventListener("contextmenu", disableContext);
+    document.addEventListener("keydown", disableKeys);
+    return () => {
+      document.removeEventListener("contextmenu", disableContext);
+      document.removeEventListener("keydown", disableKeys);
+    };
+  }, []);
 
-    if (isBlockedKey) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  });
-
-  
-
-// Put this at the very bottom before the return 
-if (loading || hasAccess === null) {
-   return <LoadingOverlay open={loading} message="Check Access"/>;
-}
+  // 🔹 Loading / Unauthorized states
+  if (loading || hasAccess === null) {
+    return <LoadingOverlay open={loading} message="Check Access" />;
+  }
 
   if (!hasAccess) {
-    return (
-      <Unauthorized />
-    );
+    return <Unauthorized />;
   }
 
   return (
-    <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
+    <Box
+      sx={{
+        height: "calc(100vh - 150px)",
+        overflowY: "auto",
+        paddingRight: 1,
+        backgroundColor: "transparent",
+      }}
+    >
+      {/* Header */}
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-     
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
           mb: 2,
-       
         }}
       >
         <Typography
           variant="h4"
           sx={{
-            fontWeight: 'bold',
-            color: 'maroon',
-            fontSize: '36px',
+            fontWeight: "bold",
+            color: titleColor,
+            fontSize: "36px",
           }}
         >
           ROOM REGISTRATION
         </Typography>
       </Box>
       <hr style={{ border: "1px solid #ccc", width: "100%" }} />
-
       <br />
 
       <Grid container spacing={4}>
-        {/* Form Section */}
+        {/* ✅ FORM SECTION */}
         <Grid item xs={12} md={5}>
-          <Paper elevation={3} sx={{ p: 3, border: "2px solid maroon", borderRadius: 2 }}>
-            <Typography variant="h6" sx={{ mb: 2, color: "#800000" }}>
+          <Paper
+            elevation={3}
+            sx={{
+              p: 3,
+              border: `2px solid ${borderColor}`,
+              borderRadius: 2,
+            }}
+          >
+            <Typography variant="h6" sx={{ mb: 2, color: subtitleColor,}}>
               {editingRoom ? "Edit Room" : "Register New Room"}
             </Typography>
+
             <Typography fontWeight={500}>Building Name:</Typography>
             <TextField
               fullWidth
@@ -255,7 +342,7 @@ if (loading || hasAccess === null) {
               fullWidth
               onClick={editingRoom ? handleUpdateRoom : handleAddRoom}
               sx={{
-                backgroundColor: "#800000",
+                backgroundColor: "primary",
                 "&:hover": { backgroundColor: "#a00000" },
               }}
             >
@@ -264,10 +351,17 @@ if (loading || hasAccess === null) {
           </Paper>
         </Grid>
 
-        {/* Room List Section */}
+        {/* ✅ TABLE SECTION */}
         <Grid item xs={12} md={7}>
-          <Paper elevation={3} sx={{ p: 3, border: "2px solid maroon", borderRadius: 2 }}>
-            <Typography variant="h6" sx={{ mb: 2, color: "#800000" }}>
+          <Paper
+            elevation={3}
+            sx={{
+              p: 3,
+              border: `2px solid ${borderColor}`,
+              borderRadius: 2,
+            }}
+          >
+            <Typography variant="h6" sx={{ mb: 2, color: subtitleColor }}>
               Registered Rooms
             </Typography>
 
@@ -275,26 +369,26 @@ if (loading || hasAccess === null) {
               <Table stickyHeader size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: "bold" }}>Room ID</TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>Building</TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>Room Name</TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>Actions</TableCell>
+                    <TableCell sx={{ border: `2px solid ${borderColor}` }}>Room ID</TableCell>
+                    <TableCell sx={{ border: `2px solid ${borderColor}` }}>Building</TableCell>
+                    <TableCell sx={{ border: `2px solid ${borderColor}` }}>Room Name</TableCell>
+                    <TableCell sx={{ border: `2px solid ${borderColor}` }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {roomList.map((room, index) => (
                     <TableRow key={index}>
-                      <TableCell>{room.room_id}</TableCell>
-                      <TableCell>{room.building_description || "N/A"}</TableCell>
-                      <TableCell>{room.room_description}</TableCell>
-                      <TableCell>
+                      <TableCell sx={{ border: `2px solid ${borderColor}` }}>{room.room_id}</TableCell>
+                      <TableCell sx={{ border: `2px solid ${borderColor}` }}>{room.building_description || "N/A"}</TableCell>
+                      <TableCell sx={{ border: `2px solid ${borderColor}` }}>{room.room_description}</TableCell>
+                      <TableCell sx={{ border: `2px solid ${borderColor}` }}>
                         <Button
                           variant="contained"
                           size="small"
                           sx={{
                             backgroundColor: "#4CAF50",
                             color: "white",
-                            marginRight: 1,
+                            mr: 1,
                             "&:hover": { backgroundColor: "#45A049" },
                           }}
                           onClick={() => handleEditRoom(room)}
@@ -323,7 +417,7 @@ if (loading || hasAccess === null) {
         </Grid>
       </Grid>
 
-      {/* Snackbar Notification */}
+      {/* ✅ Snackbar */}
       <Snackbar
         open={snack.open}
         autoHideDuration={4000}

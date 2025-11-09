@@ -8,6 +8,45 @@ import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 
 const ProgramTagging = () => {
+  const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
+
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
   const [userRole, setUserRole] = useState("");
@@ -212,18 +251,7 @@ const ProgramTagging = () => {
     }
   };
 
-  document.addEventListener("contextmenu", (e) => e.preventDefault());
-  document.addEventListener("keydown", (e) => {
-    const blocked =
-      e.key === "F12" ||
-      e.key === "F11" ||
-      (e.ctrlKey && e.shiftKey && ["i", "j"].includes(e.key.toLowerCase())) ||
-      (e.ctrlKey && ["u", "p"].includes(e.key.toLowerCase()));
-    if (blocked) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  });
+ 
 
   if (loading || hasAccess === null) {
     return <LoadingOverlay open={loading} message="Check Access" />;
@@ -245,7 +273,7 @@ const ProgramTagging = () => {
       >
         <Typography
           variant="h4"
-          sx={{ fontWeight: "bold", color: "maroon", fontSize: "36px" }}
+          sx={{ fontWeight: "bold", color: titleColor, fontSize: "36px" }}
         >
           PROGRAM AND COURSE MANAGEMENT
         </Typography>
@@ -256,7 +284,8 @@ const ProgramTagging = () => {
 
       <div style={styles.container}>
         {/* Left: Form Section */}
-        <div style={styles.formSection}>
+        <div style={{ ...styles.formSection, border: `2px solid ${borderColor}` }}>
+
           <div style={styles.formGroup}>
             <label style={styles.label}>Curriculum:</label>
             <select
@@ -329,7 +358,7 @@ const ProgramTagging = () => {
             onClick={handleInsertingProgTag}
             variant="contained"
             sx={{
-              backgroundColor: "maroon",
+              backgroundColor: "primary", 
               color: "white",
               mt: 3,
               width: "100%",
@@ -341,7 +370,8 @@ const ProgramTagging = () => {
         </div>
 
         {/* Right: Tagged Programs */}
-        <div style={styles.displaySection}>
+        <div style={{ ...styles.displaySection, border: `2px solid ${borderColor}` }}>
+
           <h3 style={{ color: "maroon" }}>Tagged Programs</h3>
           <div style={styles.taggedProgramsContainer}>
             {taggedPrograms.length > 0 ? (
@@ -447,7 +477,6 @@ const styles = {
   formSection: {
     flex: "1",
     background: "#f8f8f8",
-    border: "2px solid maroon",
     padding: "25px",
     borderRadius: "10px",
     boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
@@ -457,7 +486,6 @@ const styles = {
   displaySection: {
     flex: "1",
     background: "#f8f8f8",
-    border: "2px solid maroon",
     padding: "25px",
     borderRadius: "10px",
     boxShadow: "0 2px 6px rgba(0,0,0,0.1)",

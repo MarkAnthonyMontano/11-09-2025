@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
 import {
     Box,
     Typography,
@@ -25,8 +26,51 @@ import axios from "axios";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Cell } from "recharts";
 import LoadingOverlay from '../components/LoadingOverlay';
 import { Message } from "@mui/icons-material";
+import { FcPrint } from "react-icons/fc";
+
 
 const FacultyEvaluation = () => {
+
+    const settings = useContext(SettingsContext);
+
+    const [titleColor, setTitleColor] = useState("#000000");
+    const [subtitleColor, setSubtitleColor] = useState("#555555");
+    const [borderColor, setBorderColor] = useState("#000000");
+    const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+    const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+    const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+    const [fetchedLogo, setFetchedLogo] = useState(null);
+    const [companyName, setCompanyName] = useState("");
+    const [shortTerm, setShortTerm] = useState("");
+    const [campusAddress, setCampusAddress] = useState("");
+
+    useEffect(() => {
+        if (!settings) return;
+
+        // 🎨 Colors
+        if (settings.title_color) setTitleColor(settings.title_color);
+        if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+        if (settings.border_color) setBorderColor(settings.border_color);
+        if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+        if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+        if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+        // 🏫 Logo
+        if (settings.logo_url) {
+            setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+        } else {
+            setFetchedLogo(EaristLogo);
+        }
+
+        // 🏷️ School Information
+        if (settings.company_name) setCompanyName(settings.company_name);
+        if (settings.short_term) setShortTerm(settings.short_term);
+        if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+    }, [settings]);
+
+
     const [userID, setUserID] = useState("");
     const [user, setUser] = useState("");
     const [userRole, setUserRole] = useState("");
@@ -211,7 +255,7 @@ const FacultyEvaluation = () => {
     return (
         <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                <Typography variant="h4" fontWeight="bold" color="maroon">
+                <Typography variant="h4" fontWeight="bold" style={{ color: titleColor }}>
                     FACULTY EVALUATION
                 </Typography>
             </Box>
@@ -221,9 +265,9 @@ const FacultyEvaluation = () => {
 
             <TableContainer component={Paper} sx={{ width: '99%', }}>
                 <Table size="small">
-                    <TableHead sx={{ backgroundColor: '#6D2323', color: "white" }}>
+                    <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", color: "white" }}>
                         <TableRow>
-                            <TableCell colSpan={10} sx={{ border: "2px solid maroon", py: 0.5, height: "40px", backgroundColor: '#6D2323', color: "white" }}>
+                            <TableCell colSpan={10} sx={{ border: `2px solid ${borderColor}`, py: 0.5, height: "40px", backgroundColor: settings?.header_color || "#1976d2", color: "white" }}>
                                 <Box display="flex" justifyContent="space-between" alignItems="center">
 
                                 </Box>
@@ -232,12 +276,54 @@ const FacultyEvaluation = () => {
                     </TableHead>
                 </Table>
             </TableContainer>
-            <TableContainer component={Paper} sx={{ width: '99%', border: "2px solid maroon", p: 2 }}>
+            <TableContainer component={Paper} sx={{ width: '99%', border: `2px solid ${borderColor}`, p: 2 }}>
                 <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "1rem 0", padding: "0 1rem", }} gap={5}>
-                    <Box style={{ display: "flex", alignItems: "center", minWidth: "500px" }}>
-                        <Typography fontSize={13} sx={{ minWidth: "100px" }}>Print: </Typography>
-                        <Button style={{ background: "maroon", color: "white", width: "220px", height: "55px" }} onClick={AuditLog}>Print Evaluation</Button>
+                    <Box
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            minWidth: "500px",
+                        }}
+                    >
+                        <Typography fontSize={13} sx={{ minWidth: "100px" }}>
+                            Print:
+                        </Typography>
+
+                        <button
+                            onClick={AuditLog}
+                            style={{
+                                width: "300px",
+                                padding: "10px 20px",
+                                border: "2px solid black",
+                                backgroundColor: "#f0f0f0",
+                                color: "black",
+                                borderRadius: "5px",
+                                cursor: "pointer",
+                                fontSize: "16px",
+                                fontWeight: "bold",
+                                transition: "background-color 0.3s, transform 0.2s",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                            }}
+                            onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
+                            onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
+                            onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
+                            onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
+                        >
+                            <span
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "8px",
+                                }}
+                            >
+                                <FcPrint size={20} />
+                                Print Evaluation
+                            </span>
+                        </button>
                     </Box>
+
                     <Box display="flex" gap={2} sx={{ minWidth: "450px" }}>
                         <Box display="flex" alignItems="center" gap={1}>
                             <Typography fontSize={13} sx={{ minWidth: "100px" }}>School Year:</Typography>
@@ -304,7 +390,7 @@ const FacultyEvaluation = () => {
                                     borderRadius: 3,
                                     width: 550,
                                     height: 400,
-                                    border: "2px solid maroon",
+                                    border: `2px solid ${borderColor}`,
                                     transition: "transform 0.2s ease",
                                     boxShadow: 3,
                                     "&:hover": { transform: "scale(1.03)" },
@@ -366,7 +452,7 @@ const FacultyEvaluation = () => {
                             </Card>
                         </Grid>
                     ))) : (
-                    <Typography variant="body1" color="text.secondary" sx={{ mt: 1, ml: 1, width: '97%', border: "1px solid maroon", p: 10, textAlign: "center" }}>
+                    <Typography variant="body1" color="text.secondary" sx={{ mt: 1, ml: 1, width: '97%', border: `2px solid ${borderColor}`, p: 10, textAlign: "center" }}>
                         There's no evaluation in this term.
                     </Typography>
                 )}

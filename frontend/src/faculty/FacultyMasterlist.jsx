@@ -1,10 +1,53 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
 import '../styles/TempStyles.css';
 import { Link } from "react-router-dom";
 import { Box, Typography, Table, TableBody, TableCell, TableHead, TableRow, TableContainer, Paper, FormControl, Select, InputLabel, MenuItem, Button } from "@mui/material";
 import axios from "axios";
 
 const FacultyMasterList = () => {
+
+  const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
+
+
+
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
   const [userRole, setUserRole] = useState("");
@@ -239,7 +282,7 @@ const FacultyMasterList = () => {
           variant="h4"
           sx={{
             fontWeight: 'bold',
-            color: 'maroon',
+            color: titleColor,
             fontSize: '36px',
           }}
         >
@@ -258,7 +301,7 @@ const FacultyMasterList = () => {
         <Table size="small">
           <TableHead sx={{ backgroundColor: '#6D2323', color: "white" }}>
             <TableRow>
-              <TableCell colSpan={10} sx={{ border: "2px solid maroon", py: 0.5, backgroundColor: '#6D2323', color: "white" }}>
+              <TableCell colSpan={10} sx={{ border: `2px solid ${borderColor}`, py: 0.5, backgroundColor: settings?.header_color || "#1976d2", color: "white" }}>
                 <Box display="flex" justifyContent="space-between" alignItems="center">
                   {/* Left: Total Count */}
                   <Typography fontSize="14px" fontWeight="bold" color="white">
@@ -437,7 +480,7 @@ const FacultyMasterList = () => {
           </TableHead>
         </Table>
       </TableContainer>
-      <TableContainer component={Paper} sx={{ width: '95%', border: "2px solid maroon", p: 2 }}>
+      <TableContainer component={Paper} sx={{ width: '95%', border: `2px solid ${borderColor}`, p: 2 }}>
         <Box sx={{ display: "flex", alignItems: "center", margin: "1rem 0", padding: "0 1rem", }} gap={5}>
           <Box display="flex" flexDirection="column">
             <Box display="flex" alignItems="center" gap={1} sx={{ minWidth: 500, marginRight: "1rem" }}>
@@ -565,47 +608,47 @@ const FacultyMasterList = () => {
       </TableContainer>
       <TableContainer component={Paper} sx={{ width: "95%", marginTop: "2rem" }}>
         <Table size="small">
-          <TableHead sx={{ backgroundColor: "#6D2323" }}>
+          <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2" }}>
             <TableRow>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>#</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>Student Number</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>Student Name</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>Section</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>Student Status</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>Class Schedule</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>Room</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>#</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Student Number</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Student Name</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Section</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Student Status</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Class Schedule</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Room</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredStudents.length > 0 ? (
               filteredStudents.map((student, index) => (
                 <TableRow key={student.student_number}>
-                  <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>
+                  <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>
                     {index + 1}
                   </TableCell>
-                  <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>
+                  <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>
                     {student.student_number}
                   </TableCell>
-                  <TableCell sx={{ border: "1px solid maroon" }}>
+                  <TableCell sx={{ border: `2px solid ${borderColor}` }}>
                     {student.last_name}, {student.first_name} {student.middle_name}
                   </TableCell>
-                  <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>
+                  <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>
                     {student.program_code}-{student.section_description}
                   </TableCell>
-                  <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>
+                  <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>
                     {student.status === 1 ? "Regular" : "Irregular"}
                   </TableCell>
-                  <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>
+                  <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>
                     {student.day} {student.school_time_start} - {student.school_time_end}
                   </TableCell>
-                  <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>
+                  <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>
                     {student.room_description}
                   </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ border: "1px solid maroon" }}>
+                <TableCell colSpan={7} align="center" sx={{ border: `2px solid ${borderColor}` }}>
                   No class details available
                 </TableCell>
               </TableRow>

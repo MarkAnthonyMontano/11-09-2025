@@ -239,7 +239,44 @@ const StudentRequirements = () => {
   const [newRemarkMode, setNewRemarkMode] = useState({}); // { [upload_id]: true|false }
   const [documentStatus, setDocumentStatus] = useState("");
 
+const settings = useContext(SettingsContext);
 
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
 
 
   const [hasAccess, setHasAccess] = useState(null);
@@ -655,9 +692,9 @@ const StudentRequirements = () => {
 
     return (
       <TableRow key={doc.key}>
-        <TableCell sx={{ fontWeight: 'bold', width: '20%', border: "1px solid maroon" }}>{doc.label}</TableCell>
+        <TableCell sx={{ fontWeight: 'bold', width: '20%', border: `2px solid ${borderColor}` }}>{doc.label}</TableCell>
 
-        <TableCell sx={{ width: '20%', border: "1px solid maroon" }}>
+        <TableCell sx={{ width: '20%', border: `2px solid ${borderColor}` }}>
           {uploadId && editingRemarkId === uploadId ? (
             newRemarkMode[uploadId] ? (
               // free-text mode
@@ -770,7 +807,7 @@ const StudentRequirements = () => {
 
 
 
-        <TableCell align="center" sx={{ width: '15%', border: "1px solid maroon" }}>
+        <TableCell align="center" sx={{ width: '15%', border: `2px solid ${borderColor}` }}>
           {uploaded ? (
             uploaded.status === 1 ? (
               <Box
@@ -825,7 +862,7 @@ const StudentRequirements = () => {
           ) : null}
         </TableCell>
 
-        <TableCell style={{ border: "1px solid maroon" }}>
+        <TableCell style={{ border: `2px solid ${borderColor}` }}>
           {uploaded?.created_at &&
             new Date(uploaded.created_at).toLocaleString('en-PH', {
               dateStyle: 'medium',
@@ -834,14 +871,14 @@ const StudentRequirements = () => {
             })}
         </TableCell>
 
-        <TableCell style={{ border: "1px solid maroon" }}>
+        <TableCell style={{ border: `2px solid ${borderColor}` }}>
           {(selectedPerson?.applicant_number || person?.applicant_number)
             ? `[${selectedPerson?.applicant_number || person?.applicant_number}] ${(selectedPerson?.last_name || person?.last_name || "").toUpperCase()}, ${(selectedPerson?.first_name || person?.first_name || "").toUpperCase()} ${(selectedPerson?.middle_name || person?.middle_name || "").toUpperCase()} ${(selectedPerson?.extension || person?.extension || "").toUpperCase()}`
             : ""}
         </TableCell>
 
 
-        <TableCell style={{ border: "1px solid maroon" }}>
+        <TableCell style={{ border: `2px solid ${borderColor}` }}>
           <Box display="flex" justifyContent="center" gap={1}>
             {uploaded ? (
               <>
@@ -934,7 +971,7 @@ const StudentRequirements = () => {
             variant="h4"
             sx={{
               fontWeight: 'bold',
-              color: 'maroon',
+              color: titleColor,
               fontSize: '36px',
             }}
           >
@@ -1011,12 +1048,12 @@ const StudentRequirements = () => {
 
         <br />
         {/* Applicant ID and Name */}
-        <TableContainer component={Paper} sx={{ width: '100%', border: "1px solid maroon" }}>
+        <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}` }}>
           <Table>
-            <TableHead sx={{ backgroundColor: '#6D2323', }}>
+            <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", }}>
               <TableRow>
                 {/* Left cell: Applicant ID */}
-                <TableCell sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}>
+                <TableCell sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black',  }}>
                   Applicant ID:&nbsp;
                   <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
                     {selectedPerson?.applicant_number || person?.applicant_number || "N/A"}
@@ -1026,7 +1063,7 @@ const StudentRequirements = () => {
                 {/* Right cell: Applicant Name, right-aligned */}
                 <TableCell
                   align="right"
-                  sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}
+                  sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', }}
                 >
                   Applicant Name:&nbsp;
                   <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
@@ -1042,7 +1079,7 @@ const StudentRequirements = () => {
         </TableContainer>
 
 
-        <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon" }}>
+        <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}` }}>
           {/* SHS GWA and Height row below Applicant Name */}
           <Box sx={{ px: 2, mb: 2, mt: 2 }}>
             {/* SHS GWA Field */}
@@ -1416,19 +1453,19 @@ const StudentRequirements = () => {
 
 
         <>
-          <TableContainer component={Paper} sx={{ width: '100%', border: "1px solid maroon" }}>
+          <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}` }}>
             <Table>
-              <TableHead sx={{ backgroundColor: '#6D2323', }}>
+              <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", }}>
                 <TableRow>
-                  <TableCell sx={{ color: 'white', textAlign: "Center", border: "1px solid maroon" }}>Document Type</TableCell>
-                  <TableCell sx={{ color: 'white', textAlign: "Center", border: "1px solid maroon" }}>Remarks</TableCell>
-                  <TableCell sx={{ color: 'white', textAlign: "Center", border: "1px solid maroon" }}>Status</TableCell>
-                  <TableCell sx={{ color: 'white', textAlign: "Center", border: "1px solid maroon" }}>Date and Time Submitted</TableCell>
-                  <TableCell sx={{ color: 'white', textAlign: "Center", border: "1px solid maroon" }}>User</TableCell>
-                  <TableCell sx={{ color: 'white', textAlign: "Center", border: "1px solid maroon" }}>Action</TableCell>
+                  <TableCell sx={{ color: 'white', textAlign: "Center", border: `2px solid ${borderColor}` }}>Document Type</TableCell>
+                  <TableCell sx={{ color: 'white', textAlign: "Center", border: `2px solid ${borderColor}` }}>Remarks</TableCell>
+                  <TableCell sx={{ color: 'white', textAlign: "Center", border: `2px solid ${borderColor}` }}>Status</TableCell>
+                  <TableCell sx={{ color: 'white', textAlign: "Center", border: `2px solid ${borderColor}` }}>Date and Time Submitted</TableCell>
+                  <TableCell sx={{ color: 'white', textAlign: "Center", border: `2px solid ${borderColor}` }}>User</TableCell>
+                  <TableCell sx={{ color: 'white', textAlign: "Center", border: `2px solid ${borderColor}` }}>Action</TableCell>
                 </TableRow>
               </TableHead>
-              <TableBody>
+              <TableBody sx={{border: `2px solid ${borderColor}`}}>
                 {requirements.map((doc) =>
                   renderRow({
                     label: doc.description,

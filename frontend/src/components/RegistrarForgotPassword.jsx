@@ -147,9 +147,9 @@ const RegistrarForgotPassword = () => {
                 <img src={logoSrc} alt="EARIST Logo" />
               </div>
             </div>
-              <div className="HeaderBody">
+            <div className="HeaderBody">
               <strong style={{
-                color: titleColor,
+                color: "white",
               }}>{settings?.company_name || "Company Name"}</strong>
               <p>Student Information System</p>
             </div>
@@ -161,7 +161,7 @@ const RegistrarForgotPassword = () => {
             <TextField
               fullWidth
               type="email"
-          style={{border: `2px solid ${borderColor}`, borderRadius: "5px"}}
+              style={{ border: `2px solid ${borderColor}`, borderRadius: "5px" }}
               placeholder="Enter your Email Address (e.g., username@gmail.com)"
               variant="outlined"
               value={email}
@@ -178,7 +178,7 @@ const RegistrarForgotPassword = () => {
                     height: "50px",
                     padding: "0 10px",
                     boxSizing: "border-box",
-                    
+
                   },
                 },
               }}
@@ -201,11 +201,11 @@ const RegistrarForgotPassword = () => {
                 sx={{
                   width: "100%",
                   py: 1.5,
-                  backgroundColor: mainButtonColor, 
+                  backgroundColor: mainButtonColor,
                   color: "white",
                   height: "50px",
                   borderRadius: "10px"
-                 
+
                 }}
               >
                 {loading ? "Sending..." : "Reset Password"}

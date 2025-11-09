@@ -131,7 +131,7 @@ const ApplicantForgotPassword = () => {
             </div>
             <div className="HeaderBody">
               <strong style={{
-                color: titleColor,
+                color: "white",
               }}>{settings?.company_name || "Company Name"}</strong>
               <p>Student Information System</p>
             </div>
@@ -184,8 +184,8 @@ const ApplicantForgotPassword = () => {
                   py: 1.5,
                   backgroundColor: mainButtonColor,
                   color: "white",
-                 height: "50px",
-                 borderRadius: "10px"
+                  height: "50px",
+                  borderRadius: "10px"
                 }}
               >
                 Reset Password

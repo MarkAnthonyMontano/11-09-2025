@@ -1,31 +1,64 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { SettingsContext } from "../App";
-import axios from 'axios';
-import { Box, Typography } from '@mui/material'; // ✅ Import MUI components
+import axios from "axios";
+import { Box, Typography, Button } from "@mui/material";
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 
-const ChangeGradingPeriod = () => {
-  const [gradingPeriod, setGradingPeriod] = useState([]);
 
+const ChangeGradingPeriod = () => {
+  const settings = useContext(SettingsContext);
+
+  // 🎨 UI color states
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");
+  const [stepperColor, setStepperColor] = useState("#000000");
+
+  // 🏫 School info
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    setTitleColor(settings.title_color || "#000000");
+    setSubtitleColor(settings.subtitle_color || "#555555");
+    setBorderColor(settings.border_color || "#000000");
+    setMainButtonColor(settings.main_button_color || "#1976d2");
+    setSubButtonColor(settings.sub_button_color || "#ffffff");
+    setStepperColor(settings.stepper_color || "#000000");
+
+    setFetchedLogo(settings.logo_url ? `http://localhost:5000${settings.logo_url}` : EaristLogo);
+    setCompanyName(settings.company_name || "");
+    setShortTerm(settings.short_term || "");
+    setCampusAddress(settings.campus_address || "");
+  }, [settings]);
+
+  // 📆 Grading period list
+  const [gradingPeriod, setGradingPeriod] = useState([]);
   const fetchYearPeriod = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/get-grading-period');
+      const response = await axios.get("http://localhost:5000/get-grading-period");
       setGradingPeriod(response.data);
     } catch (error) {
       console.error("Error in Fetching Data", error);
     }
   };
 
+  // 👤 User and access control
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
   const [userRole, setUserRole] = useState("");
   const [hasAccess, setHasAccess] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const pageId = 14;
 
   useEffect(() => {
-
     const storedUser = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
     const storedID = localStorage.getItem("person_id");
@@ -54,13 +87,9 @@ const ChangeGradingPeriod = () => {
         setHasAccess(false);
       }
     } catch (error) {
-      console.error('Error checking access:', error);
+      console.error("Error checking access:", error);
       setHasAccess(false);
-      if (error.response && error.response.data.message) {
-        console.log(error.response.data.message);
-      } else {
-        console.log("An unexpected error occurred.");
-      }
+    } finally {
       setLoading(false);
     }
   };
@@ -79,144 +108,90 @@ const ChangeGradingPeriod = () => {
     }
   };
 
-  // 🔒 Disable right-click
-  document.addEventListener('contextmenu', (e) => e.preventDefault());
-
-  // 🔒 Block DevTools shortcuts + Ctrl+P silently
-  document.addEventListener('keydown', (e) => {
-    const isBlockedKey =
-      e.key === 'F12' || // DevTools
-      e.key === 'F11' || // Fullscreen
-      (e.ctrlKey && e.shiftKey && (e.key.toLowerCase() === 'i' || e.key.toLowerCase() === 'j')) || // Ctrl+Shift+I/J
-      (e.ctrlKey && e.key.toLowerCase() === 'u') || // Ctrl+U (View Source)
-      (e.ctrlKey && e.key.toLowerCase() === 'p');   // Ctrl+P (Print)
-
-    if (isBlockedKey) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  });
-
-
-  // Put this at the very bottom before the return 
+  // 🌀 Loading and access guard
   if (loading || hasAccess === null) {
-    return <LoadingOverlay open={loading} message="Check Access" />;
+    return <LoadingOverlay open={loading} message="Checking Access..." />;
   }
 
   if (!hasAccess) {
-    return (
-      <Unauthorized />
-    );
+    return <Unauthorized />;
   }
 
   return (
-    <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
-
+    <Box
+      sx={{
+        height: "calc(100vh - 150px)",
+        overflowY: "auto",
+        paddingRight: 1,
+        backgroundColor: "transparent",
+      }}
+    >
+      {/* Header */}
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-
-
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
           mb: 2,
-
         }}
       >
         <Typography
           variant="h4"
           sx={{
-            fontWeight: 'bold',
-            color: 'maroon',
-            fontSize: '36px',
+            fontWeight: "bold",
+            color: titleColor,
+            fontSize: "36px",
           }}
         >
           GRADING PERIOD
         </Typography>
-
-
-
-
       </Box>
+
       <hr style={{ border: "1px solid #ccc", width: "100%" }} />
 
-      <br />
-
-
-      <div style={styles.periodList}>
+      {/* Period List */}
+      <Box sx={{ mt: 3 }}>
         {gradingPeriod.map((period) => (
-          <div key={period.id} style={styles.periodItem}>
-            <div style={styles.periodDescription}>{period.description}</div>
-            <div style={styles.buttonContainer}>
+          <Box
+            key={period.id}
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              border: `2px solid ${borderColor}`,
+              padding: "15px",
+              backgroundColor: "#fff",
+              margin: "20px auto",
+              width: "50%",
+              borderRadius: "6px",
+              boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            <Typography sx={{ fontSize: "18px", fontWeight: 500, color: "#333" }}>
+              {period.description}
+            </Typography>
+            <Box>
               {period.status === 1 ? (
-                <span style={styles.activatedStatus}>Activated</span>
+                <Typography sx={{ color: "#757575", fontSize: "16px" }}>Activated</Typography>
               ) : (
-                <button
-                  style={styles.activateButton}
+                <Button
+                  variant="contained"
                   onClick={() => handlePeriodActivate(period.id)}
+                  sx={{
+                    backgroundColor: "#4CAF50",
+                    "&:hover": { backgroundColor: "#45a049" },
+                  }}
                 >
                   Activate
-                </button>
+                </Button>
               )}
-            </div>
-          </div>
+            </Box>
+          </Box>
         ))}
-      </div>
+      </Box>
     </Box>
   );
-};
-
-// ✅ Styling object
-const styles = {
-  container: {
-    maxWidth: 900,
-    margin: '30px auto',
-
-    padding: '20px',
-    backgroundColor: '#f9f9f9',
-    borderRadius: '8px',
-    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
-  },
-  periodList: {
-    marginTop: '20px',
-  },
-  periodItem: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    border: "2px solid maroon",
-    padding: '15px',
-    backgroundColor: '#fff',
-    margin: '20px auto',   // 🔹 auto centers horizontally
-    width: "50%",
-    borderRadius: '6px',
-    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.1)',
-  },
-
-  periodDescription: {
-    fontSize: '18px',
-    fontWeight: 500,
-    color: '#333',
-  },
-  buttonContainer: {
-    display: 'flex',
-    alignItems: 'center',
-  },
-  activateButton: {
-    padding: '8px 15px',
-    backgroundColor: '#4CAF50',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontSize: '16px',
-    transition: 'background-color 0.3s',
-  },
-  activatedStatus: {
-    color: '#757575',
-    fontSize: '16px',
-  },
 };
 
 export default ChangeGradingPeriod;

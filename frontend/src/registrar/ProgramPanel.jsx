@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { SettingsContext } from "../App";
 import axios from "axios";
 import {
@@ -13,26 +13,54 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 
-
 const ProgramPanel = () => {
+  const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");
+  const [stepperColor, setStepperColor] = useState("#000000");
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);
+
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    }
+
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+  }, [settings]);
+
   const [program, setProgram] = useState({ name: "", code: "" });
   const [programs, setPrograms] = useState([]);
   const [editMode, setEditMode] = useState(false);
   const [editId, setEditId] = useState(null);
 
-  // Also put it at the very top
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
   const [userRole, setUserRole] = useState("");
   const [hasAccess, setHasAccess] = useState(null);
   const [loading, setLoading] = useState(false);
 
-
   const pageId = 38;
 
-  //Put this After putting the code of the past code
   useEffect(() => {
-
     const storedUser = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
     const storedID = localStorage.getItem("person_id");
@@ -54,24 +82,20 @@ const ProgramPanel = () => {
 
   const checkAccess = async (userID) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+      const response = await axios.get(
+        `http://localhost:5000/api/page_access/${userID}/${pageId}`
+      );
       if (response.data && response.data.page_privilege === 1) {
         setHasAccess(true);
       } else {
         setHasAccess(false);
       }
     } catch (error) {
-      console.error('Error checking access:', error);
+      console.error("Error checking access:", error);
       setHasAccess(false);
-      if (error.response && error.response.data.message) {
-        console.log(error.response.data.message);
-      } else {
-        console.log("An unexpected error occurred.");
-      }
       setLoading(false);
     }
   };
-
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -79,7 +103,6 @@ const ProgramPanel = () => {
     severity: "success",
   });
 
-  // 🔹 Fetch programs
   const fetchPrograms = async () => {
     try {
       const res = await axios.get("http://localhost:5000/get_program");
@@ -93,13 +116,11 @@ const ProgramPanel = () => {
     fetchPrograms();
   }, []);
 
-  // 🔹 Handle input change
   const handleChangesForEverything = (e) => {
     const { name, value } = e.target;
     setProgram((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 🔹 Add or Update Program
   const handleAddingProgram = async () => {
     if (!program.name || !program.code) {
       setSnackbar({
@@ -141,7 +162,6 @@ const ProgramPanel = () => {
     }
   };
 
-  // 🔹 Edit Program
   const handleEdit = (prog) => {
     setProgram({
       name: prog.program_description,
@@ -151,7 +171,6 @@ const ProgramPanel = () => {
     setEditId(prog.program_id);
   };
 
-  // 🔹 Delete Program
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this program?")) return;
 
@@ -173,37 +192,135 @@ const ProgramPanel = () => {
     }
   };
 
-  // 🔹 Close Snackbar
   const handleCloseSnackbar = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
-  // 🔒 Disable right-click and blocked keys
-  document.addEventListener("contextmenu", (e) => e.preventDefault());
-  document.addEventListener("keydown", (e) => {
-    const blocked =
-      e.key === "F12" ||
-      e.key === "F11" ||
-      (e.ctrlKey && e.shiftKey && ["i", "j"].includes(e.key.toLowerCase())) ||
-      (e.ctrlKey && ["u", "p"].includes(e.key.toLowerCase()));
-    if (blocked) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  });
+  // ✅ Move security event listeners inside useEffect
+  useEffect(() => {
+    const handleContextMenu = (e) => e.preventDefault();
+    const handleKeyDown = (e) => {
+      const blocked =
+        e.key === "F12" ||
+        e.key === "F11" ||
+        (e.ctrlKey && e.shiftKey && ["i", "j"].includes(e.key.toLowerCase())) ||
+        (e.ctrlKey && ["u", "p"].includes(e.key.toLowerCase()));
+      if (blocked) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
 
+    document.addEventListener("contextmenu", handleContextMenu);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("contextmenu", handleContextMenu);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
-
-  // Put this at the very bottom before the return 
   if (loading || hasAccess === null) {
     return <LoadingOverlay open={loading} message="Check Access" />;
   }
 
   if (!hasAccess) {
-    return (
-      <Unauthorized />
-    );
+    return <Unauthorized />;
   }
+
+  // ✅ Styles now INSIDE the component
+  const styles = {
+    container: {
+      display: "flex",
+      justifyContent: "space-between",
+      gap: "40px",
+      flexWrap: "wrap",
+    },
+    formSection: {
+      width: "48%",
+      background: "#f8f8f8",
+      padding: "25px",
+      borderRadius: "10px",
+      boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+      boxSizing: "border-box",
+      border: `2px solid ${borderColor}`,
+    },
+    displaySection: {
+      width: "48%",
+      background: "#f8f8f8",
+      padding: "25px",
+      borderRadius: "10px",
+      boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+      overflowY: "auto",
+      maxHeight: "600px",
+      boxSizing: "border-box",
+      border: `2px solid ${borderColor}`,
+    },
+    formGroup: { marginBottom: "20px" },
+    label: {
+      display: "block",
+      marginBottom: "8px",
+      fontWeight: "bold",
+      color: "#444",
+      fontSize: "16px",
+    },
+    input: {
+      width: "100%",
+      padding: "12px",
+      fontSize: "16px",
+      borderRadius: "5px",
+      border: "1px solid #ccc",
+    },
+    taggedProgramsContainer: {
+      overflowY: "auto",
+      maxHeight: "500px",
+      marginTop: "15px",
+    },
+    table: { width: "100%", borderCollapse: "collapse" },
+    th: {
+      backgroundColor: "#f1f1f1",
+      padding: "15px",
+      textAlign: "left",
+      fontWeight: "bold",
+      border: `2px solid ${borderColor}`,
+      fontSize: "16px",
+    },
+    td: {
+      padding: "12px",
+      textAlign: "left",
+      borderBottom: "1px solid #ddd",
+      fontSize: "16px",
+      border: `2px solid ${borderColor}`,
+    },
+    editButton: {
+      backgroundColor: "#2E7D32",
+      color: "white",
+      border: "none",
+      borderRadius: "5px",
+      padding: "8px 14px",
+      marginRight: "6px",
+      cursor: "pointer",
+      width: "100px",
+      height: "40px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "5px",
+    },
+    deleteButton: {
+      backgroundColor: "#800000",
+      color: "white",
+      border: "none",
+      borderRadius: "5px",
+      padding: "8px 14px",
+      cursor: "pointer",
+      width: "100px",
+      height: "40px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "5px",
+    },
+  };
 
   return (
     <Box
@@ -220,14 +337,12 @@ const ProgramPanel = () => {
           justifyContent: "space-between",
           alignItems: "center",
           flexWrap: "wrap",
-          
           mb: 2,
-          
         }}
       >
         <Typography
           variant="h4"
-          sx={{ fontWeight: "bold", color: "maroon", fontSize: "36px" }}
+          sx={{ fontWeight: "bold", color: titleColor, fontSize: "36px" }}
         >
           PROGRAM PANEL
         </Typography>
@@ -237,7 +352,6 @@ const ProgramPanel = () => {
       <br />
 
       <div style={styles.container}>
-        {/* LEFT SECTION: Form */}
         <div style={styles.formSection}>
           <div style={styles.formGroup}>
             <label htmlFor="program_name" style={styles.label}>
@@ -273,7 +387,7 @@ const ProgramPanel = () => {
             onClick={handleAddingProgram}
             variant="contained"
             sx={{
-              backgroundColor: "maroon",
+              backgroundColor: "primary",
               color: "white",
               mt: 3,
               width: "100%",
@@ -284,7 +398,6 @@ const ProgramPanel = () => {
           </Button>
         </div>
 
-        {/* RIGHT SECTION: Table */}
         <div style={styles.displaySection}>
           <Typography
             variant="h6"
@@ -327,13 +440,11 @@ const ProgramPanel = () => {
                 ))}
               </tbody>
             </table>
-
             {programs.length === 0 && <p>No programs available.</p>}
           </div>
         </div>
       </div>
 
-      {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
@@ -350,100 +461,6 @@ const ProgramPanel = () => {
       </Snackbar>
     </Box>
   );
-};
-
-const styles = {
-  container: {
-    display: "flex",
-    justifyContent: "space-between",
-    gap: "40px",
-    flexWrap: "wrap",
-  },
-  formSection: {
-    width: "48%",
-    background: "#f8f8f8",
-    padding: "25px",
-    borderRadius: "10px",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-    boxSizing: "border-box",
-    border: "2px solid maroon",
-  },
-  displaySection: {
-    width: "48%",
-    background: "#f8f8f8",
-    padding: "25px",
-    borderRadius: "10px",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-    overflowY: "auto",
-    maxHeight: "600px",
-    boxSizing: "border-box",
-    border: "2px solid maroon",
-  },
-  formGroup: { marginBottom: "20px" },
-  label: {
-    display: "block",
-    marginBottom: "8px",
-    fontWeight: "bold",
-    color: "#444",
-    fontSize: "16px",
-  },
-  input: {
-    width: "100%",
-    padding: "12px",
-    fontSize: "16px",
-    borderRadius: "5px",
-    border: "1px solid #ccc",
-  },
-  taggedProgramsContainer: {
-    overflowY: "auto",
-    maxHeight: "500px",
-    marginTop: "15px",
-  },
-  table: { width: "100%", borderCollapse: "collapse" },
-  th: {
-    backgroundColor: "#f1f1f1",
-    padding: "15px",
-    textAlign: "left",
-    fontWeight: "bold",
-    border: "2px solid maroon",
-    fontSize: "16px",
-  },
-  td: {
-    padding: "12px",
-    textAlign: "left",
-    borderBottom: "1px solid #ddd",
-    fontSize: "16px",
-    border: "2px solid maroon",
-  },
-  editButton: {
-    backgroundColor: "#2E7D32", // success green
-    color: "white",
-    border: "none",
-    borderRadius: "5px",
-    padding: "8px 14px",
-    marginRight: "6px",
-    cursor: "pointer",
-    width: "100px",
-    height: "40px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "5px",
-  },
-  deleteButton: {
-    backgroundColor: "#800000", // maroon
-    color: "white",
-    border: "none",
-    borderRadius: "5px",
-    padding: "8px 14px",
-    cursor: "pointer",
-    width: "100px",
-    height: "40px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "5px",
-  },
 };
 
 export default ProgramPanel;

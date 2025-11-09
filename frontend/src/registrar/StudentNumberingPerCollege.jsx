@@ -45,6 +45,45 @@ import SearchIcon from "@mui/icons-material/Search";
 const socket = io("http://localhost:5000");
 
 const StudentNumbering = () => {
+const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
+
 
     const tabs = [
         { label: "Admission Process For College", to: "/applicant_list", icon: <SchoolIcon fontSize="large" /> },
@@ -523,7 +562,7 @@ const StudentNumbering = () => {
     return (
         <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1, p: 2 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                <Typography variant="h4" fontWeight="bold" color="maroon">
+                <Typography variant="h4" fontWeight="bold" sx={{color: titleColor}}>
                     ASSIGN STUDENT NUMBER FOR COLLEGES
                 </Typography>
 
@@ -599,16 +638,16 @@ const StudentNumbering = () => {
 
             <br />
 
-            <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon", }}>
+            <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}`, }}>
                 <Table>
-                    <TableHead sx={{ backgroundColor: '#6D2323' }}>
+                    <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2" }}>
                         <TableRow>
                             <TableCell sx={{ color: 'white', textAlign: "Center" }}>Student Numbering Panel</TableCell>
                         </TableRow>
                     </TableHead>
                 </Table>
             </TableContainer>
-            <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon", p: 2 }}>
+            <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}`, p: 2 }}>
                 <Box display="flex" justifyContent="space-between" flexWrap="wrap" rowGap={3} columnGap={5}>
 
                     {/* LEFT COLUMN: Sorting & Status Filters */}
@@ -738,14 +777,14 @@ const StudentNumbering = () => {
 
             <TableContainer component={Paper} sx={{ width: '100%' }}>
                 <Table size="small">
-                    <TableHead sx={{ backgroundColor: '#6D2323', color: "white" }}>
+                    <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", color: "white" }}>
                         <TableRow>
                             <TableCell
                                 colSpan={10}
                                 sx={{
-                                    border: "2px solid maroon",
+                                    border: `2px solid ${borderColor}`,
                                     py: 0.5,
-                                    backgroundColor: '#6D2323',
+                                    backgroundColor: settings?.header_color || "#1976d2",
                                     color: "white"
                                 }}
                             >
@@ -913,7 +952,7 @@ const StudentNumbering = () => {
             </TableContainer>
 
             {/* ✅ Applicant List */}
-            <Box sx={{ display: 'flex', gap: 4, border: "2px solid maroon", padding: "10px" }}>
+            <Box sx={{ display: 'flex', gap: 4, border: `2px solid ${borderColor}`, padding: "10px" }}>
                 <Box flex={1}>
                     {currentPersons.length === 0 && <Typography>No matching students.</Typography>}
                     {currentPersons.map((person, index) => (

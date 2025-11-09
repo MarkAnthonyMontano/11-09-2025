@@ -18,6 +18,7 @@ import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 
 function Settings({ onUpdate }) {
+    
     // User states
     const [userID, setUserID] = useState("");
     const [user, setUser] = useState("");
@@ -83,8 +84,6 @@ function Settings({ onUpdate }) {
     const [subButtonColor, setSubButtonColor] = useState("#ffffff");
 
     const [borderColor, setBorderColor] = useState("#000000");
-    const [stepperColor, setStepperColor] = useState("#000000");
-    const [sidebarButtonColor, setSidebarButtonColor] = useState("#000000");
     const [fontThemeColor, setFontThemeColor] = useState("#000000");
 
     const [titleColor, setTitleColor] = useState("#000000");
@@ -120,8 +119,7 @@ function Settings({ onUpdate }) {
                     main_button_color,
                     sub_button_color,
                     border_color,
-                    stepper_color,
-                    sidebar_button_color,
+                   
                     font_theme_color,
                     title_color,
                     subtitle_color
@@ -141,8 +139,7 @@ function Settings({ onUpdate }) {
 
 
                 setBorderColor(border_color || "#000000");
-                setStepperColor(stepper_color || "#000000");
-                setSidebarButtonColor(sidebar_button_color || "#000000");
+              
                 setFontThemeColor(font_theme_color || "#000000");
 
                 setTitleColor(title_color || "#000000");
@@ -176,8 +173,7 @@ function Settings({ onUpdate }) {
         formData.append("sub_button_color", subButtonColor);
 
         formData.append("border_color", borderColor);
-        formData.append("stepper_color", stepperColor);
-        formData.append("sidebar_button_color", sidebarButtonColor);
+      
         formData.append("font_theme_color", fontThemeColor);
 
         formData.append("title_color", titleColor);
@@ -246,7 +242,7 @@ function Settings({ onUpdate }) {
                     variant="h4"
                     sx={{
                         fontWeight: "bold",
-                        color: "maroon",
+                        color: titleColor,
                         fontSize: "36px",
                         mb: 1,
                     }}
@@ -271,7 +267,7 @@ function Settings({ onUpdate }) {
                     maxWidth: "600px",
                     borderRadius: 4,
                     backgroundColor: "#fff",
-                    border: "2px solid maroon",
+                    border: `2px solid ${borderColor}`, 
                     boxShadow: "0px 4px 20px rgba(0,0,0,0.1)",
                     mb: 12,
                 }}
@@ -280,7 +276,7 @@ function Settings({ onUpdate }) {
                     <SettingsIcon
                         sx={{
                             fontSize: 80,
-                            color: "#800000",
+                            color: "#000000",
                             backgroundColor: "#e3f2fd",
                             borderRadius: "50%",
                             p: 1,
@@ -289,7 +285,7 @@ function Settings({ onUpdate }) {
                     <Typography
                         variant="h5"
                         fontWeight="bold"
-                        sx={{ mt: 1, color: "#800000" }}
+                        sx={{ mt: 1, color: subtitleColor }}
                     >
                         Customize Your Settings
                     </Typography>
@@ -489,28 +485,7 @@ function Settings({ onUpdate }) {
                         />
                     </Box>
 
-                    <Box mb={2}>
-                        <InputLabel>Stepper Color</InputLabel>
-                        <Input
-                            type="color"
-                            value={stepperColor}
-                            onChange={(e) => setStepperColor(e.target.value)}
-                            fullWidth
-                            sx={{ height: "40px", cursor: "pointer" }}
-                        />
-                    </Box>
-
-                    <Box mb={2}>
-                        <InputLabel>Sidebar Button Color</InputLabel>
-                        <Input
-                            type="color"
-                            value={sidebarButtonColor}
-                            onChange={(e) => setSidebarButtonColor(e.target.value)}
-                            fullWidth
-                            sx={{ height: "40px", cursor: "pointer" }}
-                        />
-                    </Box>
-
+                   
                     <Box mb={2}>
                         <InputLabel>Font Theme Color</InputLabel>
                         <Input

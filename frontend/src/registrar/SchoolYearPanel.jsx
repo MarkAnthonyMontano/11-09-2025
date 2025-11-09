@@ -7,6 +7,45 @@ import LoadingOverlay from "../components/LoadingOverlay";
 
 const SchoolYearPanel = () => {
 
+  const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
+
 // Also put it at the very top
 const [userID, setUserID] = useState("");
 const [user, setUser] = useState("");
@@ -179,7 +218,7 @@ if (loading || hasAccess === null) {
           variant="h4"
           sx={{
             fontWeight: 'bold',
-            color: 'maroon',
+            color: titleColor,
             fontSize: '36px',
           }}
         >
@@ -199,13 +238,13 @@ if (loading || hasAccess === null) {
           flex: 1,
           p: 3,
           bgcolor: "#fff",
-          border: "2px solid maroon",
+          border: `2px solid ${borderColor}`, 
           boxShadow: 2,
           width: 800,
           borderRadius: 2,
           minWidth: "300px"
         }}>
-          <Typography variant="h6" mb={2} style={{color: "maroon"}}>
+          <Typography variant="h6" mb={2} style={{color: subtitleColor, }}>
             Add New School Year
           </Typography>
           <form onSubmit={handleSubmit} className="grid gap-4">
@@ -244,6 +283,7 @@ if (loading || hasAccess === null) {
             <button
               type="submit"
               className="bg-red-800 hover:bg-red-900 text-white px-4 py-2 rounded"
+              style={{   backgroundColor: "#1967d2",}}
             >
               Save
             </button>
@@ -257,30 +297,30 @@ if (loading || hasAccess === null) {
           p: 3,
           bgcolor: "#fff",
           boxShadow: 2,
-          border: "2px solid maroon",
+          border: `2px solid ${borderColor}`, 
           borderRadius: 2,
           minWidth: "300px"
         }}>
-          <Typography variant="h6" mb={2} style={{color: "maroon"}}>
+          <Typography variant="h6" mb={2} style={{color: subtitleColor, }}>
             Saved School Years
           </Typography>
           <Box sx={{ maxHeight: 350, overflowY: "auto" }}>
-            <table className="w-full border border-gray-300 text-sm">
+            <table style={{border: `2px solid ${borderColor}`}} className="w-full border border-gray-300 text-sm">
               <thead>
-                <tr className="bg-gray-200">
-                  <th className="p-2 border">Year Level</th>
-                  <th className="p-2 border">Semester</th>
-                  <th className="p-2 border">Status</th>
+                <tr style={{backgroundColor: settings?.header_color || "#1976d2", color: "#ffffff"}} className="bg-gray-200">
+                  <th style={{border: `2px solid ${borderColor}`}} className="p-2 border">Year Level</th>
+                  <th style={{border: `2px solid ${borderColor}`}} className="p-2 border">Semester</th>
+                  <th style={{border: `2px solid ${borderColor}`}} className="p-2 border">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {schoolYears.map((sy, index) => (
                   <tr key={index}>
-                    <td className="p-2 border text-center">
+                    <td style={{border: `2px solid ${borderColor}`}} className="p-2 border text-center">
                       {`${sy.year_description}-${parseInt(sy.year_description) + 1}`}
                     </td>
-                    <td className="p-2 border text-center">{sy.semester_description}</td>
-                    <td className="p-2 border text-center">{getStatus(sy.astatus)}</td>
+                    <td style={{border: `2px solid ${borderColor}`}} className="p-2 border text-center">{sy.semester_description}</td>
+                    <td style={{border: `2px solid ${borderColor}`}} className="p-2 border text-center">{getStatus(sy.astatus)}</td>
                   </tr>
                 ))}
               </tbody>

@@ -687,24 +687,7 @@ const Dashboard1 = (props) => {
       });
   }, [userID]);
 
-  // 🔒 Disable right-click
-  document.addEventListener('contextmenu', (e) => e.preventDefault());
-
-  // 🔒 Block DevTools shortcuts + Ctrl+P silently
-  document.addEventListener('keydown', (e) => {
-    const isBlockedKey =
-      e.key === 'F12' || // DevTools
-      e.key === 'F11' || // Fullscreen
-      (e.ctrlKey && e.shiftKey && (e.key.toLowerCase() === 'i' || e.key.toLowerCase() === 'j')) || // Ctrl+Shift+I/J
-      (e.ctrlKey && e.key.toLowerCase() === 'u') || // Ctrl+U (View Source)
-      (e.ctrlKey && e.key.toLowerCase() === 'p');   // Ctrl+P (Print)
-
-    if (isBlockedKey) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  });
-
+  
   // dot not alter
   return (
     <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
@@ -822,7 +805,7 @@ const Dashboard1 = (props) => {
               sx={{
                 minHeight: 60,
                 borderRadius: 2,
-                border: "2px solid #6D2323",
+                 border: `2px solid ${borderColor}`,
                 backgroundColor: "#fff",
                 display: "flex",
                 flexDirection: "row",
@@ -834,7 +817,8 @@ const Dashboard1 = (props) => {
                 transition: "all 0.3s ease-in-out",
                 "&:hover": {
                   transform: "scale(1.05)",
-                  backgroundColor: "#6D2323", // ✅ background becomes maroon
+                 backgroundColor: settings?.header_color || "#1976d2",
+
                   "& .card-text": {
                     color: "#fff", // ✅ text becomes white
                   },
@@ -924,7 +908,7 @@ const Dashboard1 = (props) => {
                     width: 50,
                     height: 50,
                     borderRadius: "50%",
-                    backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+                    backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
                     color: activeStep === index ? "#fff" : "#000",
                     display: "flex",
                     alignItems: "center",
@@ -2609,7 +2593,7 @@ const Dashboard1 = (props) => {
                   color: "#fff", // Set text color to white
                   marginRight: "5px", // Add margin between buttons
                   "&:hover": {
-                    backgroundColor: "#5a1f1f", // Adjust hover color to match
+                    backgroundColor: "#000000", // Adjust hover color to match
                   },
                   display: "flex", // Ensure icon and text are aligned
                   alignItems: "center", // Center the content vertically
@@ -2642,10 +2626,10 @@ const Dashboard1 = (props) => {
                   backgroundColor: mainButtonColor,
                   color: '#fff',
                   '&:hover': {
-                    backgroundColor: '#E8C999',
-                    color: '#000',
+                     backgroundColor: "#000000",
+                    color: '#fff',
                     '& .MuiSvgIcon-root': {
-                      color: '#000',
+                      color: '#fff',
                     },
                   },
                 }}

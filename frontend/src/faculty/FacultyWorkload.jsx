@@ -1,10 +1,53 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
 import axios from 'axios';
 import EaristLogo from '../assets/EaristLogo.png';
 import { Avatar, Box, Typography } from "@mui/material";
 import { Padding } from '@mui/icons-material';
+import { FcPrint } from "react-icons/fc";
 
 const FacultyWorkload = () => {
+
+    const settings = useContext(SettingsContext);
+
+    const [titleColor, setTitleColor] = useState("#000000");
+    const [subtitleColor, setSubtitleColor] = useState("#555555");
+    const [borderColor, setBorderColor] = useState("#000000");
+    const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+    const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+    const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+    const [fetchedLogo, setFetchedLogo] = useState(null);
+    const [companyName, setCompanyName] = useState("");
+    const [shortTerm, setShortTerm] = useState("");
+    const [campusAddress, setCampusAddress] = useState("");
+
+    useEffect(() => {
+        if (!settings) return;
+
+        // 🎨 Colors
+        if (settings.title_color) setTitleColor(settings.title_color);
+        if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+        if (settings.border_color) setBorderColor(settings.border_color);
+        if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+        if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+        if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+        // 🏫 Logo
+        if (settings.logo_url) {
+            setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+        } else {
+            setFetchedLogo(EaristLogo);
+        }
+
+        // 🏷️ School Information
+        if (settings.company_name) setCompanyName(settings.company_name);
+        if (settings.short_term) setShortTerm(settings.short_term);
+        if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+    }, [settings]);
+
+
     const [userID, setUserID] = useState("");
     const [user, setUser] = useState("");
     const [userRole, setUserRole] = useState("");
@@ -190,74 +233,84 @@ const FacultyWorkload = () => {
 
     const printDiv = async () => {
         try {
-          const page_name = "Faculty Workload Report";
-          const fullName = `${profData.lname}, ${profData.fname} ${profData.mname}`;
-          const type = "Printing"
-    
-          await axios.post(`http://localhost:5000/insert-logs/for-print/faculty/${profData.prof_id}`, {
-            message: `User #${profData.prof_id} - ${fullName} printed ${page_name}`, type: type,
-          });
-    
-          window.print();
+            const page_name = "Faculty Workload Report";
+            const fullName = `${profData.lname}, ${profData.fname} ${profData.mname}`;
+            const type = "Printing"
+
+            await axios.post(`http://localhost:5000/insert-logs/for-print/faculty/${profData.prof_id}`, {
+                message: `User #${profData.prof_id} - ${fullName} printed ${page_name}`, type: type,
+            });
+
+            window.print();
         } catch (err) {
-          console.error("Error inserting audit log");
+            console.error("Error inserting audit log");
         }
     };
 
-    // 🔒 Disable right-click
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
-
-    // 🔒 Block DevTools shortcuts + Ctrl+P silently
-    document.addEventListener('keydown', (e) => {
-        const isBlockedKey =
-        e.key === 'F12' || // DevTools
-        e.key === 'F11' || // Fullscreen
-        (e.ctrlKey && e.shiftKey && (e.key.toLowerCase() === 'i' || e.key.toLowerCase() === 'j')) || // Ctrl+Shift+I/J
-        (e.ctrlKey && e.key.toLowerCase() === 'u') || // Ctrl+U (View Source)
-        (e.ctrlKey && e.key.toLowerCase() === 'p');   // Ctrl+P (Print)
-
-        if (isBlockedKey) {
-        e.preventDefault();
-        e.stopPropagation();
-        }
-    });
 
     return (
-        <Box className="body" sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', overflowX: 'hidden', pr: 1, p: 2 }}>
+        <Box className="body" sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', overflowX: 'hidden', pr: 1 }}>
             <Box
                 sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
                     mb: 2,
-                   
+                    width: "100%",
                 }}
             >
                 <Typography
                     variant="h4"
                     sx={{
-                        fontWeight: 'bold',
-                        color: 'maroon',
-                        fontSize: '36px',
+                        fontWeight: "bold",
+                        color: titleColor,
+                        fontSize: "36px",
                     }}
                 >
                     FACULTY WORKLOAD
                 </Typography>
 
-
-
-
+                <button
+                    onClick={printDiv}
+                    style={{
+                        width: "300px",
+                        padding: "10px 20px",
+                        border: "2px solid black",
+                        backgroundColor: "#f0f0f0",
+                        color: "black",
+                        borderRadius: "5px",
+                        cursor: "pointer",
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                        transition: "background-color 0.3s, transform 0.2s",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}
+                    onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
+                    onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
+                    onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
+                    onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
+                >
+                    <span
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                        }}
+                    >
+                        <FcPrint size={20} />
+                        Print Evaluation
+                    </span>
+                </button>
             </Box>
+
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
 
             <br />
 
 
-            <button onClick={printDiv} className='bg-maroon-500 w-[10rem] h-[3rem] text-[18px] mt-[-5.5rem] text-white rounded fixed right-[2rem]'>
-                Print
-            </button>
+
             <style>
                 {`
                 @media print {
@@ -335,8 +388,8 @@ const FacultyWorkload = () => {
                 }
                 `}
             </style>
-            <Box style={{width: "100%", justifyContent: "center", display: "flex"}}>
-                <Box style={{paddingTop: "1rem", paddingLeft: "2rem", border: "1px solid maroon"}}>
+            <Box style={{ width: "100%", justifyContent: "center", display: "flex" }}>
+                <Box style={{ paddingTop: "1rem", paddingLeft: "2rem", border: `2px solid ${borderColor}` }}>
                     <div className='min-h-[10rem] mb-[16rem] print-container' ref={divToPrintRef}>
                         <div className='mt-[2rem]'>
                             <div>

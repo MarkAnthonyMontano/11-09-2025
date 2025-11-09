@@ -49,23 +49,43 @@ const socket = io("http://localhost:5000");
 
 const QualifyingExamScore = () => {
     const settings = useContext(SettingsContext);
-    const [fetchedLogo, setFetchedLogo] = useState(null);
-    const [companyName, setCompanyName] = useState("");
 
-    useEffect(() => {
-        if (settings) {
-            // ✅ load dynamic logo
-            if (settings.logo_url) {
-                setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
-            } else {
-                setFetchedLogo(EaristLogo);
-            }
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
 
-            // ✅ load dynamic name + address
-            if (settings.company_name) setCompanyName(settings.company_name);
-            if (settings.campus_address) setCampusAddress(settings.campus_address);
-        }
-    }, [settings]);
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
 
     const words = companyName.trim().split(" ");
     const middle = Math.ceil(words.length / 2);
@@ -152,7 +172,7 @@ const QualifyingExamScore = () => {
     const [hasAccess, setHasAccess] = useState(null);
 
 
-    const pageId = 40;
+    const pageId = 44;
 
     //Put this After putting the code of the past code
     useEffect(() => {
@@ -785,7 +805,10 @@ th, td {
                 return;
             }
 
-            const res = await axios.post("http://localhost:5000/api/qualifying_exam/import", sheet, {
+            const res = await axios.post("http://localhost:5000/api/qualifying_exam/import", {
+                userID, 
+                data: sheet
+            }, {
                 headers: { "Content-Type": "application/json" },
             });
 
@@ -1394,7 +1417,7 @@ ${companyName} Registrar’s Office
     return (
         <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1,}}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                <Typography variant="h4" fontWeight="bold" color="maroon">
+                <Typography variant="h4" fontWeight="bold" sx={{color: titleColor}}>
                     QUALIFYING EXAMINATION SCORING
                 </Typography>
 
@@ -1481,9 +1504,9 @@ ${companyName} Registrar’s Office
             <div style={{ height: "20px" }}></div>
 
 
-            <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon", }}>
+            <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}`, }}>
                 <Table>
-                    <TableHead sx={{ backgroundColor: '#6D2323' }}>
+                    <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", }}>
                         <TableRow>
                             <TableCell sx={{ color: 'white', textAlign: "Center" }}>Qualifiying Examination Score</TableCell>
                         </TableRow>
@@ -1491,7 +1514,7 @@ ${companyName} Registrar’s Office
                 </Table>
             </TableContainer>
 
-            <TableContainer component={Paper} sx={{ width: "100%", border: "2px solid maroon", p: 2 }}>
+            <TableContainer component={Paper} sx={{ width: "100%", border: `2px solid ${borderColor}`, p: 2 }}>
                 <Box display="flex" justifyContent="space-between" flexWrap="wrap" rowGap={2}>
                     {/* Left Side: From and To Date */}
                     <Box display="flex" flexDirection="column" gap={2}>
@@ -1637,7 +1660,7 @@ ${companyName} Registrar’s Office
                 <Table size="small">
                     <TableHead sx={{ backgroundColor: '#6D2323', color: "white" }}>
                         <TableRow>
-                            <TableCell colSpan={10} sx={{ border: "2px solid maroon", py: 0.5, backgroundColor: '#6D2323', color: "white" }}>
+                            <TableCell colSpan={10} sx={{ border: `2px solid ${borderColor}`, py: 0.5, backgroundColor: settings?.header_color || "#1976d2", color: "white" }}>
                                 <Box display="flex" justifyContent="space-between" alignItems="center">
                                     {/* Left: Total Count */}
                                     <Typography fontSize="14px" fontWeight="bold" color="white">
@@ -1808,7 +1831,7 @@ ${companyName} Registrar’s Office
 
 
 
-            <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon", p: 2 }}>
+            <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}`, p: 2 }}>
                 <Box display="flex" justifyContent="space-between" flexWrap="wrap" rowGap={3} columnGap={5}>
 
                     {/* LEFT COLUMN: Sorting & Status Filters */}
@@ -2050,42 +2073,42 @@ ${companyName} Registrar’s Office
 
             <TableContainer component={Paper} sx={{ width: "100%" }}>
                 <Table size="small">
-                    <TableHead sx={{ backgroundColor: "#6D2323" }}>
+                    <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", }}>
                         <TableRow>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "2%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "2%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 #
                             </TableCell>
 
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "8%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "8%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Applicant ID
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "25%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "25%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Name
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "20%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "20%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Program
                             </TableCell>
 
                             {/* Exam Columns */}
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "10%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "10%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Qualifying Exam Score
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "10%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "10%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Qualifying Interview Score
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "10%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "10%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Total Ave.
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "10%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "10%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Status
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "10%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "10%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Date
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "10%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "10%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Action
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "15%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "15%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 User
                             </TableCell>
 
@@ -2109,7 +2132,7 @@ ${companyName} Registrar’s Office
                                         sx={{
                                             color: "black",
                                             textAlign: "center",
-                                            border: "2px solid maroon",
+                                            border: `2px solid ${borderColor}`,
                                             borderLeft: "2px solid maroon",
                                             py: 0.5,
                                             fontSize: "12px",
@@ -2124,7 +2147,7 @@ ${companyName} Registrar’s Office
                                             color: "blue",
                                             cursor: "pointer",
                                             textAlign: "center",
-                                            border: "2px solid maroon",
+                                            border: `2px solid ${borderColor}`,
                                             borderLeft: "2px solid maroon",
                                             py: 0.5,
                                             fontSize: "12px",
@@ -2140,7 +2163,7 @@ ${companyName} Registrar’s Office
                                             color: "blue",
                                             cursor: "pointer",
                                             textAlign: "left",
-                                            border: "2px solid maroon",
+                                            border: `2px solid ${borderColor}`,
                                             borderLeft: "2px solid maroon",
                                             py: 0.5,
                                             fontSize: "12px",
@@ -2155,7 +2178,7 @@ ${companyName} Registrar’s Office
                                         sx={{
                                             color: "black",
                                             textAlign: "center",
-                                            border: "2px solid maroon",
+                                            border: `2px solid ${borderColor}`,
                                             py: 0.5,
                                             fontSize: "12px",
                                         }}
@@ -2167,7 +2190,7 @@ ${companyName} Registrar’s Office
                                     </TableCell>
 
                                     {/* Qualifying Exam Score */}
-                                    <TableCell sx={{ border: "2px solid maroon", textAlign: "center" }}>
+                                    <TableCell sx={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>
                                         <TextField
                                             value={qualifyingExam}
                                             onChange={(e) =>
@@ -2180,7 +2203,7 @@ ${companyName} Registrar’s Office
                                     </TableCell>
 
                                     {/* Qualifying Interview Score */}
-                                    <TableCell sx={{ border: "2px solid maroon", textAlign: "center" }}>
+                                    <TableCell sx={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>
                                         <TextField
                                             value={qualifyingInterview}
                                             onChange={(e) =>
@@ -2197,7 +2220,7 @@ ${companyName} Registrar’s Office
                                         sx={{
                                             color: "black",
                                             textAlign: "center",
-                                            border: "2px solid maroon",
+                                            border: `2px solid ${borderColor}`,
                                             py: 0.5,
                                             fontSize: "15px",
                                         }}
@@ -2207,7 +2230,7 @@ ${companyName} Registrar’s Office
                                     <TableCell
                                         sx={{
                                             textAlign: "center",
-                                            border: "2px solid maroon",
+                                            border: `2px solid ${borderColor}`,
                                             fontSize: "12px",
                                         }}
                                     >
@@ -2235,7 +2258,7 @@ ${companyName} Registrar’s Office
                                         sx={{
                                             color: "black",
                                             textAlign: "center",
-                                            border: "2px solid maroon",
+                                            border: `2px solid ${borderColor}`,
 
                                             py: 0.5,
                                             fontSize: "12px",
@@ -2247,7 +2270,7 @@ ${companyName} Registrar’s Office
                                     <TableCell
                                         sx={{
                                             textAlign: "center",
-                                            border: "2px solid maroon",
+                                            border: `2px solid ${borderColor}`,
 
                                             verticalAlign: "middle",
                                         }}
@@ -2298,17 +2321,15 @@ ${companyName} Registrar’s Office
                                         sx={{
                                             color: "black",
                                             textAlign: "center",
-                                            border: "2px solid maroon",
+                                            border: `2px solid ${borderColor}`,
 
                                             py: 0.5,
                                             fontSize: "12px",
                                         }}
                                     >
                                         {person.registrar_user_email
-                                            ? person.registrar_user_email // ✅ only email, no (registrar)
-                                            : person.exam_user_email
-                                                ? person.exam_user_email // ✅ only email, no (exam)
-                                                : "N/A"}
+                                        ? person.registrar_user_email
+                                        : "N/A"}
                                     </TableCell>
 
                                 </TableRow>

@@ -2422,7 +2422,9 @@ app.get("/exam_schedules_with_count", async (req, res) => {
 // 📌 Import Excel to person_status_table + log notifications
 app.post("/api/qualifying_exam/import", async (req, res) => {
   try {
-    const rows = Array.isArray(req.body) ? req.body : [];
+
+    const loggedInUserId = req.body.userID;
+    const rows = Array.isArray(req.body.data) ? req.body.data : [];
     if (rows.length === 0) return res.status(400).json({ success: false, error: "No rows found" });
 
     const applicantNumbers = rows.map(r => r.applicant_number).filter(n => n);
@@ -2460,6 +2462,8 @@ app.post("/api/qualifying_exam/import", async (req, res) => {
       [values]
     );
 
+    await db.query("UPDATE admission_exam SET user = ?", [loggedInUserId]);
+
     // ✅ Use user_accounts instead of prof_table
     const [registrarRows] = await db3.query(
       "SELECT last_name, first_name, middle_name, email, employee_id FROM user_accounts WHERE role = 'registrar' LIMIT 1"
@@ -2493,6 +2497,7 @@ app.post("/api/qualifying_exam/import", async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
 app.get("/api-applicant-scoring", async (req, res) => {
   try {
     const [rows] = await db.execute(`
@@ -2550,6 +2555,8 @@ app.get("/api-applicant-scoring", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
+
 
 // Assign Max Slots
 app.put("/api/interview_applicants/assign-max", async (req, res) => {
@@ -2630,6 +2637,7 @@ app.put("/api/interview_applicants/assign-custom", async (req, res) => {
   }
 });
 
+
 app.get("/api/applicants-with-number", async (req, res) => {
   try {
     const [rows] = await db.execute(`
@@ -2640,12 +2648,10 @@ app.get("/api/applicants-with-number", async (req, res) => {
         p.middle_name,
         p.last_name,
         p.extension,
-        p.emailAddress,
         a.applicant_number,
         SUBSTRING(a.applicant_number, 5, 1) AS middle_code,
         p.program,
         p.created_at,
-        ia.status AS interview_status,
 
         -- Exam scores
         e.English AS english,
@@ -2657,10 +2663,8 @@ app.get("/api/applicants-with-number", async (req, res) => {
           e.final_rating,
           (COALESCE(e.English,0) + COALESCE(e.Science,0) + COALESCE(e.Filipino,0) + COALESCE(e.Math,0) + COALESCE(e.Abstract,0))
         ) AS final_rating,
-
-        -- Exam encoder (admission DB)
-        e.user AS exam_user_id,
-        ue.email AS exam_user_email,
+		e.user,
+      	ue.email as registrar_user_email,
 
         -- From person_status_table
         COALESCE(ps.exam_result, 0)        AS total_ave,
@@ -2668,8 +2672,7 @@ app.get("/api/applicants-with-number", async (req, res) => {
         COALESCE(ps.interview_result, 0)   AS qualifying_interview_score,
 
         -- ✅ College Approval (interview_applicants.status)
-        ia.status AS college_approval_status,
-        ia.action AS action
+        ia.status AS college_approval_status
 
       FROM admission.person_table p
       INNER JOIN admission.applicant_numbering_table a 
@@ -2677,13 +2680,13 @@ app.get("/api/applicants-with-number", async (req, res) => {
       LEFT JOIN admission.admission_exam e
         ON p.person_id = e.person_id
       LEFT JOIN enrollment.user_accounts ue   -- exam encoder
-        ON e.user = ue.id
+        ON e.user = ue.person_id
       LEFT JOIN admission.person_status_table ps
         ON p.person_id = ps.person_id
-      LEFT JOIN admission.interview_applicants ia
+      LEFT JOIN admission.interview_applicants ia   -- 👈 add join here
         ON ia.applicant_id = a.applicant_number
 
-      ORDER BY p.person_id ASC
+      ORDER BY p.person_id ASC;
     `);
 
     res.json(rows);
@@ -2692,6 +2695,8 @@ app.get("/api/applicants-with-number", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
+
 
 // Get full person info + applicant_number
 app.get("/api/person_with_applicant/:id", async (req, res) => {
@@ -5308,6 +5313,7 @@ WHERE proctor LIKE ?
 
   // 🔹 Bulk Excel Import Exam Scores
   // 🔹 Bulk Excel Import Exam Scores
+ 
   app.post("/api/exam/import", upload.single("file"), async (req, res) => {
     try {
       if (!req.file) {
@@ -5318,8 +5324,9 @@ WHERE proctor LIKE ?
       const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
       const rows = XLSX.utils.sheet_to_json(sheet);
+    
 
-      const loggedInUserId = 1; // 🔑 Should come from session or token (frontend/localStorage)
+      const loggedInUserId = req.body.userID; // 🔑 Should come from session or token (frontend/localStorage)
 
       // 1️⃣ Collect applicant numbers
       const applicantNumbers = rows
@@ -5442,6 +5449,7 @@ WHERE proctor LIKE ?
       res.status(500).json({ error: "Failed to import Excel" });
     }
   });
+
 
 
 
@@ -8766,9 +8774,8 @@ app.get("/enrolled_courses/:userId/:currId", async (req, res) => {
 });
 
 
-//(UPDATED!)
 app.post("/add-all-to-enrolled-courses", async (req, res) => {
-  const { subject_id, user_id, curriculumID, departmentSectionID } = req.body;
+  const { subject_id, user_id, curriculumID, departmentSectionID, year_level } = req.body;
   console.log("Received request:", { subject_id, user_id, curriculumID, departmentSectionID });
 
   try {
@@ -8803,7 +8810,7 @@ app.post("/add-all-to-enrolled-courses", async (req, res) => {
     console.log("Active semester:", activeSemesterId);
     console.log("Curriculum found:", curriculum_id);
 
-    if (year_level_id !== 1 || semester_id !== activeSemesterId || curriculum_id !== curriculumID) {
+    if (year_level_id !== year_level || semester_id !== activeSemesterId || curriculum_id !== curriculumID) {
       console.log(`Skipping subject ${subject_id} (not Year 1, not active semester ${activeSemesterId}, or wrong curriculum)`);
       return res.status(200).json({ message: "Skipped - Not Year 1 / Not Active Semester / Wrong Curriculum" });
     }
@@ -8834,7 +8841,7 @@ app.post("/add-all-to-enrolled-courses", async (req, res) => {
       WHERE student_number = ?
     `;
 
-    await db3.query(updateStatusSql, [curriculumID, year_level_id, user_id]);
+    await db3.query(updateStatusSql, [curriculumID, year_level, user_id]);
 
     const [getStudentNUmber] = await db3.query(`
       SELECT id, person_id FROM student_numbering_table WHERE student_number = ?
@@ -12437,106 +12444,6 @@ app.get("/api/page_access/:userId/:pageId", async (req, res) => {
 });
 
 
-app.get("/api/program_evaluation/:student_number", async (req, res) => {
-  const { student_number } = req.params;
-
-  try {
-    const [rows] = await db3.query(`
-        SELECT DISTINCT pt.last_name, pt.first_name, pt.middle_name, pgt.program_code, yt.year_description, pgt.program_description, snt.student_number, dpt.dprtmnt_name FROM enrolled_subject AS es
-        LEFT JOIN student_numbering_table AS snt ON es.student_number = snt.student_number
-        LEFT JOIN person_table AS pt ON snt.person_id = pt.person_id
-        LEFT JOIN curriculum_table AS cct ON es.curriculum_id = cct.curriculum_id
-        LEFT JOIN program_table AS pgt ON cct.program_id = pgt.program_id
-        LEFT JOIN year_table AS yt ON cct.year_id = yt.year_id
-        LEFT JOIN dprtmnt_curriculum_table AS dct ON cct.curriculum_id = dct.curriculum_id
-        LEFT JOIN dprtmnt_table AS dpt ON dct.dprtmnt_id = dpt.dprtmnt_id
-        WHERE es.student_number = ?;
-      `, [student_number]);
-
-    if (rows.length === 0) {
-      res.status(404).send({ message: "Student is not found" });
-    }
-
-    res.json(rows[0]);
-  } catch (error) {
-    console.log("Database Error", error);
-    res.status(500).send({ message: "Database/Server Error", error });
-  }
-});
-
-app.get("/api/program_evaluation/:student_number", async (req, res) => {
-  const { student_number } = req.params;
-
-  try {
-    const [rows] = await db3.query(`
-        SELECT DISTINCT 
-          pt.last_name, pt.first_name, pt.middle_name, pt.gender, pgt.program_code, pgt.major, yt.year_description, pgt.program_description, snt.student_number, dpt.dprtmnt_name FROM enrolled_subject AS es
-        LEFT JOIN student_numbering_table AS snt ON es.student_number = snt.student_number
-        LEFT JOIN person_table AS pt ON snt.person_id = pt.person_id
-        LEFT JOIN curriculum_table AS cct ON es.curriculum_id = cct.curriculum_id
-        LEFT JOIN program_table AS pgt ON cct.program_id = pgt.program_id
-        LEFT JOIN year_table AS yt ON cct.year_id = yt.year_id
-        LEFT JOIN dprtmnt_curriculum_table AS dct ON cct.curriculum_id = dct.curriculum_id
-        LEFT JOIN dprtmnt_table AS dpt ON dct.dprtmnt_id = dpt.dprtmnt_id
-        WHERE es.student_number = ?;
-      `, [student_number]);
-
-    if (rows.length === 0) {
-      return res.status(404).send({ message: "Student is not found" });
-    }
-
-    res.json(rows[0]);
-  } catch (error) {
-    console.log("Database Error", error);
-    res.status(500).send({ message: "Database/Server Error", error });
-  }
-});
-
-app.get("/api/program_evaluation/details/:student_number", async (req, res) => {
-  const { student_number } = req.params;
-
-  try {
-    const [rows] = await db3.query(`
-        SELECT 
-          es.id as enrolled_id, 
-          es.final_grade, 
-          ct.course_code, 
-          st.description as section,
-          ct.course_description, 
-          ct.course_unit, 
-          ct.lab_unit, 
-          smt.semester_description, 
-          smt.semester_id,
-          sy.id as school_year, 
-          ct.course_id,
-          yt.year_description as current_year,
-          yt.year_id,
-          pgt.program_code,
-          es.en_remarks,
-          yt.year_description + 1 as next_year
-        FROM enrolled_subject AS es
-          LEFT JOIN course_table AS ct ON es.course_id = ct.course_id
-          LEFT JOIN active_school_year_table AS sy ON es.active_school_year_id = sy.id
-          LEFT JOIN dprtmnt_section_table AS dst ON es.department_section_id = dst.id
-          LEFT JOIN section_table AS st ON dst.section_id = st.id
-          LEFT JOIN curriculum_table AS cct ON dst.curriculum_id = cct.curriculum_id
-          LEFT JOIN program_table AS pgt ON cct.program_id = pgt.program_id
-          LEFT JOIN semester_table AS smt ON sy.semester_id = smt.semester_id
-          LEFT JOIN year_table AS yt ON sy.year_id = yt.year_id
-        WHERE es.student_number= ?;
-    `, [student_number]);
-
-    if (rows.length === 0) {
-      return res.status(404).send({ message: "Student Data is not found" });
-    }
-
-    res.json(rows);
-  } catch (err) {
-    res.status(500).send({ message: "Student Data is not found" });
-    console.log("Database / Server Error", err)
-  }
-});
-
 // ✅ GET registrar name (or any prof by role)
 app.get("/api/scheduled-by/:role", async (req, res) => {
   const { role } = req.params;
@@ -12651,14 +12558,13 @@ app.get("/api/requirements", async (req, res) => {
 });
 
 
-
 app.get("/api/program_evaluation/:student_number", async (req, res) => {
   const { student_number } = req.params;
 
   try {
     const [rows] = await db3.query(`
         SELECT DISTINCT 
-          pt.last_name, pt.first_name, pt.schoolLastAttended, pt.profile_img AS profile_image, pt.yearGraduated, pt.middle_name, pt.gender, pt.birthOfDate, rt.id AS requirements, pgt.program_code, pgt.major, yt.year_description, pgt.program_description, snt.student_number, dpt.dprtmnt_name FROM enrolled_subject AS es
+          pt.gender, pt.birthOfDate, rt.id AS requirements, pt.last_name, pt.first_name, pt.schoolLastAttended, pt.profile_img AS profile_image, pt.yearGraduated, pt.middle_name, pgt.program_code, pgt.major, yt.year_description, pgt.program_description, snt.student_number, dpt.dprtmnt_name FROM enrolled_subject AS es
         LEFT JOIN student_numbering_table AS snt ON es.student_number = snt.student_number
         LEFT JOIN person_table AS pt ON snt.person_id = pt.person_id
         LEFT JOIN curriculum_table AS cct ON es.curriculum_id = cct.curriculum_id
@@ -12682,11 +12588,13 @@ app.get("/api/program_evaluation/:student_number", async (req, res) => {
 
     res.json(studentInfo);
     console.log(studentInfo);
+    
   } catch (error) {
     console.log("Database Error", error);
     res.status(500).send({ message: "Database/Server Error", error });
   }
 });
+
 
 app.get("/api/program_evaluation/details/:student_number", async (req, res) => {
   const { student_number } = req.params;
@@ -12733,7 +12641,6 @@ app.get("/api/program_evaluation/details/:student_number", async (req, res) => {
     console.log("Database / Server Error", err)
   }
 });
-
 
 app.post("/api/pages", async (req, res) => {
   const { page_description, page_group } = req.body;

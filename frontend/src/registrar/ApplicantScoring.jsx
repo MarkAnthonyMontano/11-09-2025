@@ -41,24 +41,44 @@ import SearchIcon from "@mui/icons-material/Search";
 
 
 const ApplicantScoring = () => {
-    const settings = useContext(SettingsContext);
-    const [fetchedLogo, setFetchedLogo] = useState(null);
-    const [companyName, setCompanyName] = useState("");
+   const settings = useContext(SettingsContext);
 
-    useEffect(() => {
-        if (settings) {
-            // ✅ load dynamic logo
-            if (settings.logo_url) {
-                setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
-            } else {
-                setFetchedLogo(EaristLogo);
-            }
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
 
-            // ✅ load dynamic name + address
-            if (settings.company_name) setCompanyName(settings.company_name);
-            if (settings.campus_address) setCampusAddress(settings.campus_address);
-        }
-    }, [settings]);
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]);
 
     const words = companyName.trim().split(" ");
     const middle = Math.ceil(words.length / 2);
@@ -97,7 +117,7 @@ const ApplicantScoring = () => {
     const [hasAccess, setHasAccess] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    const pageId = 8;
+    const pageId = 11;
 
     //
     useEffect(() => {
@@ -695,7 +715,7 @@ th, td {
     };
 
     // when import button clicked
-    const handleImport = async () => {
+    const handleImport = async (userID) => {
         try {
             if (!selectedFile) {
                 setSnack({ open: true, message: "Please choose a file first!", severity: "warning" });
@@ -838,7 +858,7 @@ th, td {
     return (
         <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1, }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                <Typography variant="h4" fontWeight="bold" color="maroon">
+                <Typography variant="h4" fontWeight="bold" sx={{color: titleColor}}>
                     ENTRANCE EXAMINATION SCORING
                 </Typography>
 
@@ -899,7 +919,7 @@ th, td {
                             cursor: "pointer",
                             borderRadius: 2,
                             border: "2px solid #6D2323",
-                            backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+                            backgroundColor: activeStep === index ?settings?.header_color || "#1976d2" : "#E8C999",
                             color: activeStep === index ? "#fff" : "#000",
                             boxShadow:
                                 activeStep === index
@@ -923,9 +943,9 @@ th, td {
             <div style={{ height: "20px" }}></div>
 
 
-            <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon", }}>
+            <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}`, }}>
                 <Table>
-                    <TableHead sx={{ backgroundColor: '#6D2323' }}>
+                    <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2" }}>
                         <TableRow>
                             <TableCell sx={{ color: 'white', textAlign: "Center" }}>Entrance Examination Score</TableCell>
                         </TableRow>
@@ -933,7 +953,7 @@ th, td {
                 </Table>
             </TableContainer>
 
-            <TableContainer component={Paper} sx={{ width: "100%", border: "2px solid maroon", p: 2 }}>
+            <TableContainer component={Paper} sx={{ width: "100%", border: `2px solid ${borderColor}`, p: 2 }}>
                 <Box display="flex" justifyContent="space-between" flexWrap="wrap" rowGap={2}>
                     {/* Left Side: From and To Date */}
                     <Box display="flex" flexDirection="column" gap={2}>
@@ -1079,7 +1099,7 @@ th, td {
                 <Table size="small">
                     <TableHead sx={{ backgroundColor: '#6D2323', color: "white" }}>
                         <TableRow>
-                            <TableCell colSpan={10} sx={{ border: "2px solid maroon", py: 0.5, backgroundColor: '#6D2323', color: "white" }}>
+                            <TableCell colSpan={10} sx={{ border: `2px solid ${borderColor}`, py: 0.5, backgroundColor: settings?.header_color || "#1976d2", color: "white" }}>
                                 <Box display="flex" justifyContent="space-between" alignItems="center">
                                     {/* Left: Total Count */}
                                     <Typography fontSize="14px" fontWeight="bold" color="white">
@@ -1250,7 +1270,7 @@ th, td {
 
 
 
-            <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon", p: 2 }}>
+            <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}`, p: 2 }}>
                 <Box display="flex" justifyContent="space-between" flexWrap="wrap" rowGap={3} columnGap={5}>
 
                     {/* LEFT COLUMN: Sorting & Status Filters */}
@@ -1384,47 +1404,47 @@ th, td {
 
             <TableContainer component={Paper} sx={{ width: "100%" }}>
                 <Table size="small">
-                    <TableHead sx={{ backgroundColor: "#6D2323" }}>
+                    <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", }}>
                         <TableRow>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "2%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "2%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 #
                             </TableCell>
 
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "8%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "8%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Applicant ID
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "25%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "25%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Name
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "10%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "10%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Program
                             </TableCell>
 
                             {/* Exam Columns */}
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "6%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "6%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 English
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "6%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "6%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Science
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "6%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "6%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Filipino
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "6%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "6%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Math
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "6%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "6%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Abstract
                             </TableCell>
 
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "6%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "6%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Final Rating
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "5%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "5%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Date Applied
                             </TableCell>
 
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "12%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "12%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 User
                             </TableCell>
                         </TableRow>
@@ -1454,7 +1474,7 @@ th, td {
                                         sx={{
                                             color: "black",
                                             textAlign: "center",
-                                            border: "2px solid maroon",
+                                            border: `2px solid ${borderColor}`,
                                             borderLeft: "2px solid maroon",
                                             py: 0.5,
                                             fontSize: "12px",
@@ -1468,7 +1488,7 @@ th, td {
                                         sx={{
                                             color: "blue",
                                             textAlign: "center",
-                                            border: "2px solid maroon",
+                                            border: `2px solid ${borderColor}`,
                                             py: 0.5,
                                             fontSize: "12px",
                                             cursor: "pointer",
@@ -1483,7 +1503,7 @@ th, td {
                                         sx={{
                                             color: "blue",
                                             textAlign: "left",
-                                            border: "2px solid maroon",
+                                            border: `2px solid ${borderColor}`,
                                             py: 0.5,
                                             fontSize: "12px",
                                             cursor: "pointer",
@@ -1499,7 +1519,7 @@ th, td {
                                         sx={{
                                             color: "black",
                                             textAlign: "center",
-                                            border: "2px solid maroon",
+                                            border: `2px solid ${borderColor}`,
                                             py: 0.5,
                                             fontSize: "12px",
                                         }}
@@ -1511,7 +1531,7 @@ th, td {
                                     </TableCell>
 
                                     {/* Editable Exam Scores */}
-                                    <TableCell sx={{ border: "2px solid maroon", textAlign: "center" }}>
+                                    <TableCell sx={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>
                                         <TextField
                                             value={editScores[person.person_id]?.english ?? english}
                                             onChange={(e) => handleScoreChange(person, "english", Number(e.target.value))}
@@ -1522,7 +1542,7 @@ th, td {
                                         />
                                     </TableCell>
 
-                                    <TableCell sx={{ border: "2px solid maroon", textAlign: "center" }}>
+                                    <TableCell sx={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>
                                         <TextField
                                             value={editScores[person.person_id]?.science ?? science}
                                             onChange={(e) => handleScoreChange(person, "science", Number(e.target.value))}
@@ -1533,7 +1553,7 @@ th, td {
                                         />
                                     </TableCell>
 
-                                    <TableCell sx={{ border: "2px solid maroon", textAlign: "center" }}>
+                                    <TableCell sx={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>
                                         <TextField
                                             value={editScores[person.person_id]?.filipino ?? filipino}
                                             onChange={(e) => handleScoreChange(person, "filipino", Number(e.target.value))}
@@ -1544,7 +1564,7 @@ th, td {
                                         />
                                     </TableCell>
 
-                                    <TableCell sx={{ border: "2px solid maroon", textAlign: "center" }}>
+                                    <TableCell sx={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>
                                         <TextField
                                             value={editScores[person.person_id]?.math ?? math}
                                             onChange={(e) => handleScoreChange(person, "math", Number(e.target.value))}
@@ -1555,7 +1575,7 @@ th, td {
                                         />
                                     </TableCell>
 
-                                    <TableCell sx={{ border: "2px solid maroon", textAlign: "center" }}>
+                                    <TableCell sx={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>
                                         <TextField
                                             value={editScores[person.person_id]?.abstract ?? abstract}
                                             onChange={(e) => handleScoreChange(person, "abstract", Number(e.target.value))}
@@ -1573,7 +1593,7 @@ th, td {
                                         sx={{
                                             color: "black",
                                             textAlign: "center",
-                                            border: "2px solid maroon",
+                                            border: `2px solid ${borderColor}`,
                                             py: 0.5,
                                             fontSize: "15px",
                                         }}
@@ -1585,7 +1605,7 @@ th, td {
                                         sx={{
                                             color: "black",
                                             textAlign: "center",
-                                            border: "2px solid maroon",
+                                            border: `2px solid ${borderColor}`,
                                             py: 0.5,
                                             fontSize: "15px",
                                         }}
@@ -1598,7 +1618,7 @@ th, td {
                                         sx={{
                                             color: "black",
                                             textAlign: "center",
-                                            border: "2px solid maroon",
+                                            border: `2px solid ${borderColor}`,
                                             borderRight: "2px solid maroon",
                                             py: 0.5,
                                             fontSize: "12px",

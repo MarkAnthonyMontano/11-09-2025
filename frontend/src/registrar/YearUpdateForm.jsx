@@ -6,6 +6,44 @@ import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 
 const YearUpdateForm = () => {
+  const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
 
   // Also put it at the very top
   const [userID, setUserID] = useState("");
@@ -143,7 +181,7 @@ const YearUpdateForm = () => {
           variant="h4"
           sx={{
             fontWeight: 'bold',
-            color: 'maroon',
+            color: titleColor,
             fontSize: '36px',
           }}
         >
@@ -159,23 +197,23 @@ const YearUpdateForm = () => {
       <br />
 
 
-      <div className="max-w-2xl mx-auto" style={{ maxHeight: 'calc(100vh - 220px)', overflowY: 'scroll', border: "2px solid maroon" }}>
+      <div className="max-w-2xl mx-auto" style={{ maxHeight: 'calc(100vh - 220px)', overflowY: 'scroll', border: `2px solid ${borderColor}`, }}>
         <table className="w-full border-collapse shadow-md">
           <thead className="bg-gray-100">
             <tr>
-              <th className="p-3 border text-left text-gray-600" style={{ border: "2px solid maroon", textAlign: "center" }}>Year</th>
-              <th className="p-3 border text-left text-gray-600" style={{ border: "2px solid maroon", textAlign: "center" }}>Status</th>
-              <th className="p-3 border text-left text-gray-600" style={{ border: "2px solid maroon", textAlign: "center" }}>Activator</th>
+              <th className="p-3 border text-left text-gray-600" style={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>Year</th>
+              <th className="p-3 border text-left text-gray-600" style={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>Status</th>
+              <th className="p-3 border text-left text-gray-600" style={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>Activator</th>
             </tr>
           </thead>
           <tbody>
             {years.map((entry) => (
               <tr key={entry.year_id} className="hover:bg-gray-50">
-                <td className="p-3 border" >{entry.year_description}</td>
-                <td className="p-3 border">
+                <td className="p-3 border" style={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>{entry.year_description}</td>
+                <td className="p-3 border" style={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>
                   {entry.status === 1 ? "Active" : "Inactive"}
                 </td>
-                <td className="p-3 border flex justify-center items-center">
+                <td className="p-3 border flex justify-center items-center" style={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>
                   <button
                     onClick={() => toggleActivator(entry.year_id, entry.status)}
                     className={`px-4 py-2 rounded-lg font-semibold text-white transition-all ${entry.status === 1 ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"

@@ -21,6 +21,47 @@ import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 
 const DepartmentRegistration = () => {
+
+  const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
+
+
   const [department, setDepartment] = useState({ dep_name: '', dep_code: '' });
   const [departmentList, setDepartmentList] = useState([]);
   const [openModal, setOpenModal] = useState(false);
@@ -158,7 +199,7 @@ const DepartmentRegistration = () => {
           variant="h4"
           sx={{
             fontWeight: 'bold',
-            color: 'maroon',
+            color: titleColor,
             fontSize: '36px',
           }}
         >
@@ -177,7 +218,7 @@ const DepartmentRegistration = () => {
       <Box display="flex" justifyContent="flex-end" mb={2}>
         <Button
           variant="contained"
-          sx={{ backgroundColor: "maroon", "&:hover": { backgroundColor: "#800000" } }}
+          sx={{ backgroundColor: "#1967d2", "&:hover": { backgroundColor: "#000000" } }}
           onClick={() => setOpenModal(true)}
         >
           Add Department
@@ -190,8 +231,8 @@ const DepartmentRegistration = () => {
             <Card
               variant="outlined"
               sx={{
-                borderColor: "maroon",
-                borderWidth: "3px",
+                borderColor: `${borderColor}`,
+                borderWidth: "2px",
                 height: "100%", // allow card to fill the grid height
                 display: "flex",
                 flexDirection: "column",

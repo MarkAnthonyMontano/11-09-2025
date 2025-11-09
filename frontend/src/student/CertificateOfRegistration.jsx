@@ -318,8 +318,8 @@ const CertificateOfRegistration = forwardRef(({ student_number }, divToPrintRef)
         });
 
         const {
-          token,
-          person_id,
+          token2,
+          person_id2,
           studentNumber: studentNum,
           activeCurriculum: active_curriculum,
           major,
@@ -336,12 +336,11 @@ const CertificateOfRegistration = forwardRef(({ student_number }, divToPrintRef)
           lastName: last_name
         } = response.data;
 
-        console.log("data[0]:", data[0]);
         console.log(course_unit);
 
         // Save to localStorage
-        localStorage.setItem("token", token);
-        localStorage.setItem("person_id", person_id);
+        localStorage.setItem("token2", token2);
+        localStorage.setItem("person_id2", person_id2);
         localStorage.setItem("studentNumber", studentNum);
         localStorage.setItem("activeCurriculum", active_curriculum);
         localStorage.setItem("major", major);
@@ -369,7 +368,7 @@ const CertificateOfRegistration = forwardRef(({ student_number }, divToPrintRef)
         setCourseDescription(course_desc);
         setCourseUnit(course_unit);
         setLabUnit(lab_unit);
-        setPersonID(person_id);
+        setPersonID(person_id2);
         setYearLevelDescription(yearLevelDescription);
         setYearDescription(yearDesc);
 
@@ -391,7 +390,6 @@ const CertificateOfRegistration = forwardRef(({ student_number }, divToPrintRef)
 
       } catch (error) {
         console.error("Student search failed:", error);
-        alert(error.response?.data?.message || "Student not found");
       }
     };
 

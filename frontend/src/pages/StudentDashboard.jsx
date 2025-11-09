@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
+
 import '../styles/TempStyles.css';
 import axios from 'axios';
 import {
@@ -25,6 +27,45 @@ import AddIcon from "@mui/icons-material/Add";
 
 
 const StudentDashboard = ({ profileImage, setProfileImage }) => {
+  const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
+
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
   const [userRole, setUserRole] = useState("");
@@ -334,7 +375,7 @@ const StudentDashboard = ({ profileImage, setProfileImage }) => {
         {/* Student Information */}
         <Grid item xs={12}>
           <Card sx={{
-            borderRadius: 1, boxShadow: 3, p: 1, border: "2px solid maroon", height: "260px", transition: "transform 0.3s ease, box-shadow 0.3s ease",
+            borderRadius: 1, boxShadow: 3, p: 1, border: `2px solid ${borderColor}`, height: "260px", transition: "transform 0.3s ease, box-shadow 0.3s ease",
             "&:hover": {
               transform: "scale(1.05)",
               boxShadow: 6,
@@ -369,7 +410,7 @@ const StudentDashboard = ({ profileImage, setProfileImage }) => {
                       sx={{
                         width: 90,
                         height: 90,
-                        border: "2px solid maroon",
+                       border: `2px solid ${borderColor}`,
                         cursor: "pointer",
                         mt: -1.5,
                       }}
@@ -407,7 +448,7 @@ const StudentDashboard = ({ profileImage, setProfileImage }) => {
                   </Box>
                   )}
                   <Box>
-                    <Typography variant="h4" fontWeight="bold" color="maroon">
+                    <Typography variant="h4" fontWeight="bold" sx={{color: titleColor,}}>
                       Welcome back! {personData.last_name}, {personData.first_name} {personData.middle_name}
                     </Typography>
                     <Typography variant="body1" color="text.secondary">
@@ -497,7 +538,7 @@ const StudentDashboard = ({ profileImage, setProfileImage }) => {
           <Grid item sx={{ flex: "1 1 33%" }}>
             <Card
               sx={{
-                border: "2px solid maroon",
+           border: `2px solid ${borderColor}`,
                 boxShadow: 3,
                 p: 2,
                 height: "375px",
@@ -517,7 +558,7 @@ const StudentDashboard = ({ profileImage, setProfileImage }) => {
                   alignItems="center"
                   justifyContent="space-between"
                   sx={{
-                    backgroundColor: "maroon",
+                   backgroundColor: settings?.header_color || "#1976d2",
                     color: "white",
                     borderRadius: "6px 6px 0 0",
                     padding: "4px 8px",
@@ -572,7 +613,7 @@ const StudentDashboard = ({ profileImage, setProfileImage }) => {
                             sx={{
                               color: isToday ? "white" : "black",
                               backgroundColor: isToday
-                                ? "maroon"
+                                ? settings?.header_color || "#1976d2"
                                 : isHoliday
                                   ? "#E8C999"
                                   : "transparent",
@@ -602,7 +643,7 @@ const StudentDashboard = ({ profileImage, setProfileImage }) => {
           <Grid item sx={{ flex: "1 1 33%", }}>
             <Card
               sx={{
-                border: "2px solid maroon",
+          border: `2px solid ${borderColor}`,
                 borderRadius: 3,
                 boxShadow: 3,
                 transition: "transform 0.2s ease",
@@ -852,7 +893,7 @@ const StudentDashboard = ({ profileImage, setProfileImage }) => {
               display: "flex",
               marginLeft: "10px",
               flexDirection: "column",
-              border: "2px solid maroon",
+        border: `2px solid ${borderColor}`,
               backgroundColor: "#fffaf5",
               alignItems: "center",
               justifyContent: "center",
@@ -866,14 +907,14 @@ const StudentDashboard = ({ profileImage, setProfileImage }) => {
             }}
           >
             <CardContent sx={{ textAlign: "center" }}>
-              <SchoolIcon sx={{ color: "maroon" }} fontSize="large" />
+              <SchoolIcon sx={{color: subtitleColor, }} fontSize="large" />
               <Typography variant="h6" gutterBottom sx={{ mt: 1 }}>
                 Certificate of Registration
               </Typography>
               <Button
                 variant="contained"
                 startIcon={<DownloadIcon />}
-                sx={{ backgroundColor: "maroon" }}
+                sx={{ backgroundColor: settings?.header_color || "#1976d2", }}
                 onClick={printDiv}
               >
                 Download (Student's Copy)
@@ -888,7 +929,7 @@ const StudentDashboard = ({ profileImage, setProfileImage }) => {
             sx={{
               borderRadius: 3,
               boxShadow: 3,
-              border: "2px solid maroon",
+          border: `2px solid ${borderColor}`,
               backgroundColor: "#fffaf5",
               minHeight: 170,
               transition: "transform 0.3s ease, box-shadow 0.3s ease",

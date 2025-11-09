@@ -156,7 +156,7 @@ const Login = ({ setIsAuthenticated }) => {
             </div>
             <div className="HeaderBody">
               <strong style={{
-                color: titleColor,
+               color: "white",
               }}>{settings?.company_name || "Company Name"}</strong>
               <p>Student Information System</p>
             </div>

@@ -30,6 +30,45 @@ import LoadingOverlay from "../components/LoadingOverlay";
 
 function Announcement() {
 
+    const settings = useContext(SettingsContext);
+
+    const [titleColor, setTitleColor] = useState("#000000");
+    const [subtitleColor, setSubtitleColor] = useState("#555555");
+    const [borderColor, setBorderColor] = useState("#000000");
+    const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+    const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+    const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+    const [fetchedLogo, setFetchedLogo] = useState(null);
+    const [companyName, setCompanyName] = useState("");
+    const [shortTerm, setShortTerm] = useState("");
+    const [campusAddress, setCampusAddress] = useState("");
+
+    useEffect(() => {
+        if (!settings) return;
+
+        // 🎨 Colors
+        if (settings.title_color) setTitleColor(settings.title_color);
+        if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+        if (settings.border_color) setBorderColor(settings.border_color);
+        if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+        if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+        if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+        // 🏫 Logo
+        if (settings.logo_url) {
+            setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+        } else {
+            setFetchedLogo(EaristLogo);
+        }
+
+        // 🏷️ School Information
+        if (settings.company_name) setCompanyName(settings.company_name);
+        if (settings.short_term) setShortTerm(settings.short_term);
+        if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+    }, [settings]);
+
 
     // Also put it at the very top
     const [userID, setUserID] = useState("");
@@ -187,209 +226,118 @@ function Announcement() {
     }
 
 
-
-    return (
-        <>
-            {/* Header */}
-            <Box >
-                <Box display="flex" alignItems="center">
-                    <CampaignIcon color="primary" sx={{ fontSize: 40, mr: 2 }} />
-                    <Typography variant="h4" fontWeight="bold" color="maroon">
-                        ANNOUNCEMENT
-                    </Typography>
-                </Box>
-                <br />
-                <hr style={{ border: "1px solid #ccc", width: "100%" }} />
+return (
+    <>
+        {/* Header */}
+        <Box>
+            <Box display="flex" alignItems="center">
+                <CampaignIcon color="primary" sx={{ fontSize: 40, mr: 2 }} />
+                <Typography variant="h4" fontWeight="bold" style={{ color: titleColor }}>
+                    ANNOUNCEMENT
+                </Typography>
             </Box>
+            <br />
+            <hr style={{ border: "1px solid #ccc", width: "100%" }} />
+        </Box>
 
-            {/* Main */}
-            <Container maxWidth="lg" sx={{ py: 2, height: "calc(100vh - 150px)" }}>
-                <Grid container spacing={4} sx={{ height: "100%" }}>
-                    {/* Left: Form */}
-                    <Grid item xs={12} md={5}>
-                        <PaperForm
-                            form={form}
-                            setForm={setForm}
-                            handleSubmit={handleSubmit}
-                            editingId={editingId}
-                            image={image}
-                            setImage={setImage}
-                        />
-                    </Grid>
-
-                    {/* Right: Active Announcements */}
-                    <Grid item xs={12} md={7} sx={{ display: "flex", flexDirection: "column", height: "95%" }}>
-                        <Box
-                            sx={{
-                                flexGrow: 1,
-                                overflowY: "auto",
-                                height: "100%",
-                                pr: 1,
-
-                                p: 2,
-                                border: "2px solid maroon",
-                                borderRadius: 2,
-                            }}
-                        >
-                            <Typography variant="h5" gutterBottom sx={{ color: "maroon" }}>
-                                Active Announcements
-                            </Typography>
-
-                            {announcements.length === 0 ? (
-                                <Typography color="text.secondary">No active announcements.</Typography>
-                            ) : (
-                                <Grid container spacing={2}>
-                                    {announcements.map((a) => (
-                                        <Grid item xs={12} key={a.id}>
-                                            <Card elevation={3} sx={{ borderRadius: 2, border: "2px solid maroon" }}>
-                                                <CardContent>
-                                                    <Typography variant="h6">{a.title}</Typography>
-                                                    <Typography variant="body2" sx={{ mb: 1 }}>
-                                                        {a.content}
-                                                    </Typography>
-                                                    <Typography variant="caption" color="text.secondary" display="block">
-                                                        For: {a.target_role}
-                                                    </Typography>
-                                                    <Typography variant="caption" color="text.secondary">
-                                                        Expires: {new Date(a.expires_at).toLocaleString()}
-                                                    </Typography>
-
-                                                    {a.file_path && (
-                                                        <>
-                                                            <img
-                                                                src={`http://localhost:5000/uploads/${a.file_path}`}
-                                                                alt={a.title}
-                                                                style={{
-                                                                    width: "100%",
-
-                                                                    objectFit: "cover",
-                                                                    borderRadius: "6px",
-                                                                    marginBottom: "6px",
-                                                                    cursor: "pointer",
-                                                                }}
-                                                                onClick={() =>
-                                                                    setOpenImage(`http://localhost:5000/uploads/${a.file_path}`)
-                                                                }
-                                                            />
-
-                                                            <Dialog
-                                                                open={Boolean(openImage)}
-                                                                onClose={() => setOpenImage(null)}
-                                                                fullScreen
-                                                                PaperProps={{
-                                                                    style: {
-                                                                        backgroundColor: "transparent",
-                                                                        display: "flex",
-                                                                        justifyContent: "center",
-                                                                        alignItems: "center",
-                                                                        position: "relative",
-                                                                        boxShadow: "none",
-                                                                        cursor: "pointer",
-                                                                    },
-                                                                }}
-                                                            >
-                                                                {/* Clicking outside image closes dialog */}
-                                                                <Box
-                                                                    onClick={() => setOpenImage(null)}
-                                                                    sx={{
-                                                                        position: "absolute",
-                                                                        top: 0,
-                                                                        left: 0,
-                                                                        width: "100%",
-                                                                        height: "100%",
-                                                                        zIndex: 1,
-                                                                    }}
-                                                                />
-
-                                                                {/* Back Button */}
-                                                                <IconButton
-                                                                    onClick={() => setOpenImage(null)}
-                                                                    sx={{
-                                                                        position: "absolute",
-                                                                        top: 20,
-                                                                        left: 20,
-                                                                        backgroundColor: "white",
-                                                                        width: 70,
-                                                                        height: 70,
-                                                                        display: "flex",
-                                                                        justifyContent: "center",
-                                                                        alignItems: "center",
-                                                                        zIndex: 2,
-                                                                        "&:hover": { backgroundColor: "#f5f5f5" },
-                                                                    }}
-                                                                >
-                                                                    <KeyboardBackspaceIcon sx={{ fontSize: 50, color: "black" }} />
-                                                                </IconButton>
-
-                                                                {/* Fullscreen Image */}
-                                                                <Box
-                                                                    onClick={(e) => e.stopPropagation()}
-                                                                    sx={{
-                                                                        position: "relative",
-                                                                        zIndex: 2,
-                                                                        display: "flex",
-                                                                        justifyContent: "center",
-                                                                        alignItems: "center",
-                                                                        maxWidth: "100%",
-                                                                        maxHeight: "100%",
-                                                                    }}
-                                                                >
-                                                                    <img
-                                                                        src={openImage}
-                                                                        alt="Preview"
-                                                                        style={{
-                                                                            maxWidth: "100%",
-                                                                            maxHeight: "90%",
-                                                                            objectFit: "contain",
-                                                                        }}
-                                                                    />
-                                                                </Box>
-                                                            </Dialog>
-                                                        </>
-                                                    )}
-                                                </CardContent>
-
-                                                <CardActions>
-                                                    <Button
-                                                        size="small"
-                                                        style={{
-                                                            border: "2px solid black",
-                                                            backgroundColor: "green",
-                                                            color: "white",
-                                                        }}
-                                                        onClick={() => handleEdit(a)}
-                                                    >
-                                                        Edit
-                                                    </Button>
-                                                    <Button
-                                                        size="small"
-                                                        style={{
-                                                            border: "2px solid black",
-                                                            backgroundColor: "maroon",
-                                                            color: "white",
-                                                        }}
-                                                        onClick={() => handleDelete(a.id)}
-                                                    >
-                                                        Delete
-                                                    </Button>
-                                                </CardActions>
-                                            </Card>
-                                        </Grid>
-                                    ))}
-                                </Grid>
-                            )}
-                        </Box>
-                    </Grid>
+        {/* Main */}
+        <Container maxWidth="lg" sx={{ py: 2, height: "calc(100vh - 150px)" }}>
+            <Grid container spacing={4} sx={{ height: "100%" }}>
+                {/* Left: Form */}
+                <Grid item xs={12} md={5}>
+                    <PaperForm
+                        form={form}
+                        setForm={setForm}
+                        handleSubmit={handleSubmit}
+                        editingId={editingId}
+                        image={image}
+                        setImage={setImage}
+                        borderColor={borderColor}
+                        mainButtonColor={mainButtonColor}
+                        subtitleColor={subtitleColor} // ✅ Apply subtitleColor to Form title
+                    />
                 </Grid>
-            </Container>
-        </>
-    );
+
+                {/* Right: Active Announcements */}
+                <Grid item xs={12} md={7} sx={{ display: "flex", flexDirection: "column", height: "95%" }}>
+                    <Box
+                        sx={{
+                            flexGrow: 1,
+                            overflowY: "auto",
+                            height: "100%",
+                            pr: 1,
+                            p: 2,
+                            border: `2px solid ${borderColor}`,
+                            borderRadius: 2,
+                        }}
+                    >
+                        {/* Active Announcements Title */}
+                        <Typography variant="h5" gutterBottom sx={{ color: subtitleColor }}> 
+                            Active Announcements
+                        </Typography>
+
+                        {announcements.length === 0 ? (
+                            <Typography color="text.secondary">No active announcements.</Typography>
+                        ) : (
+                            <Grid container spacing={2}>
+                                {announcements.map((a) => (
+                                    <Grid item xs={12} key={a.id}>
+                                        <Card elevation={3} sx={{ borderRadius: 2, border: `2px solid ${borderColor}` }}>
+                                            <CardContent>
+                                                <Typography variant="h6">{a.title}</Typography>
+                                                <Typography variant="body2" sx={{ mb: 1 }}>
+                                                    {a.content}
+                                                </Typography>
+                                                <Typography variant="caption" color="text.secondary" display="block">
+                                                    For: {a.target_role}
+                                                </Typography>
+                                                <Typography variant="caption" color="text.secondary">
+                                                    Expires: {new Date(a.expires_at).toLocaleString()}
+                                                </Typography>
+                                            </CardContent>
+
+                                            <CardActions>
+                                                <Button
+                                                    size="small"
+                                                    sx={{ border: "2px solid black", backgroundColor: "green", color: "white" }}
+                                                    onClick={() => handleEdit(a)}
+                                                >
+                                                    Edit
+                                                </Button>
+                                                <Button
+                                                    size="small"
+                                                    sx={{ border: "2px solid black", backgroundColor: "maroon", color: "white" }}
+                                                    onClick={() => handleDelete(a.id)}
+                                                >
+                                                    Delete
+                                                </Button>
+                                            </CardActions>
+                                        </Card>
+                                    </Grid>
+                                ))}
+                            </Grid>
+                        )}
+                    </Box>
+                </Grid>
+            </Grid>
+        </Container>
+    </>
+);
+
 }
 
+function PaperForm({
+    form,
+    setForm,
+    handleSubmit,
+    editingId,
+    image,
+    setImage,
+    borderColor,
+    mainButtonColor,
+    subtitleColor // ✅ receive subtitleColor
+}) {
 
-function PaperForm({ form, setForm, handleSubmit, editingId, image, setImage }) {
-
-    
     // Local state for modal preview
     const [openModal, setOpenModal] = useState(false);
     const [tempImage, setTempImage] = useState(null);
@@ -403,7 +351,6 @@ function PaperForm({ form, setForm, handleSubmit, editingId, image, setImage }) 
         }
     };
 
-    // Confirm upload → move tempImage to actual image
     // Confirm upload → move tempImage to actual image
     const handleConfirm = () => {
         setImage(tempImage);
@@ -422,24 +369,6 @@ function PaperForm({ form, setForm, handleSubmit, editingId, image, setImage }) 
         setImage(null);
     };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     return (
         <Box
             component="form"
@@ -449,11 +378,16 @@ function PaperForm({ form, setForm, handleSubmit, editingId, image, setImage }) 
                 borderRadius: 2,
                 bgcolor: "background.paper",
                 boxShadow: 2,
-                color: "#800000",
-                border: "2px solid maroon",
+                color: subtitleColor, // ✅ applied subtitleColor
+                border: `2px solid ${borderColor}`,
             }}
         >
-            <Typography variant="h6" gutterBottom>
+            {/* Form Title */}
+            <Typography
+                variant="h6"
+                gutterBottom
+                sx={{ color: subtitleColor }} // ✅ applied subtitleColor
+            >
                 {editingId ? "Edit Announcement" : "Create New Announcement"}
             </Typography>
 
@@ -509,7 +443,6 @@ function PaperForm({ form, setForm, handleSubmit, editingId, image, setImage }) 
             </FormControl>
 
             {/* Upload Section */}
-            {/* Upload Section */}
             <Box mt={2}>
                 <Button
                     variant="contained"
@@ -517,10 +450,10 @@ function PaperForm({ form, setForm, handleSubmit, editingId, image, setImage }) 
                     fullWidth
                     startIcon={<CloudUploadIcon />}
                     sx={{
-                        border: "2px dashed maroon",
-                        bgcolor: "maroon",
+                        border: `2px dashed ${borderColor}`,
+                        backgroundColor: mainButtonColor,
                         color: "white",
-                        "&:hover": { bgcolor: "#800000" },
+                        "&:hover": { bgcolor: "#000000" },
                         py: 1.5,
                         fontWeight: "bold",
                         textTransform: "none",
@@ -530,14 +463,13 @@ function PaperForm({ form, setForm, handleSubmit, editingId, image, setImage }) 
                     <input type="file" hidden accept="image/*" onChange={handleFileChange} />
                 </Button>
 
-                {/* Replace the current image preview section with this */}
                 {image && (
                     <Box
                         sx={{
                             position: "relative",
                             mt: 2,
                             p: 2,
-                            border: "1px solid #ccc",
+                            border: `1px solid ${borderColor}`,
                             borderRadius: 2,
                             bgcolor: "#f5f5f5",
                             display: "flex",
@@ -562,7 +494,6 @@ function PaperForm({ form, setForm, handleSubmit, editingId, image, setImage }) 
                         </IconButton>
                     </Box>
                 )}
-
             </Box>
 
             <Button type="submit" variant="contained" size="large" fullWidth sx={{ mt: 2 }}>

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
 import axios from "axios";
 import {
   Box,
@@ -33,6 +34,48 @@ const passwordRules = [
 ];
 
 const FacultyResetPassword = () => {
+
+  const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
+
+
+
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -138,7 +181,7 @@ const FacultyResetPassword = () => {
           variant="h4"
           sx={{
             fontWeight: "bold",
-            color: "maroon",
+            color: titleColor,
             fontSize: "36px",
           }}
         >
@@ -159,7 +202,7 @@ const FacultyResetPassword = () => {
             maxWidth: "540px",
             borderRadius: 4,
             backgroundColor: "#fff",
-            border: "2px solid maroon",
+            border: `2px solid ${borderColor}`,
             boxShadow: "0px 4px 20px rgba(0,0,0,0.1)",
             mb: 12,
           }}
@@ -169,13 +212,13 @@ const FacultyResetPassword = () => {
             <LockReset
               sx={{
                 fontSize: 80,
-                color: "#800000",
+                color: "#000000",
                 backgroundColor: "#f0f0f0",
                 borderRadius: "50%",
                 p: 1,
               }}
             />
-            <Typography variant="h5" fontWeight="bold" sx={{ mt: 1, color: "#800000" }}>
+            <Typography variant="h5" fontWeight="bold" sx={{ mt: 1, color: subtitleColor, }}>
               Reset Your Password
             </Typography>
             <Typography fontSize={13} color="text.secondary">
@@ -287,10 +330,10 @@ const FacultyResetPassword = () => {
               sx={{
                 py: 1.2,
                 borderRadius: 2,
-                backgroundColor: "#1976d2",
+                backgroundColor: mainButtonColor, 
                 textTransform: "none",
                 fontWeight: "bold",
-                "&:hover": { backgroundColor: "#1565c0" },
+                "&:hover": { backgroundColor: "#000000" },
               }}
             >
               Update Password

@@ -26,6 +26,47 @@ const API = "http://localhost:5000/api/email-templates";
 
 export default function EmailTemplateManager() {
 
+
+  const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]);
+
+
   // Also put it at the very top
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
@@ -235,7 +276,7 @@ export default function EmailTemplateManager() {
           variant="h4"
           sx={{
             fontWeight: "bold",
-            color: "maroon",
+            color: titleColor,
             fontSize: "36px",
           }}
         >
@@ -251,9 +292,9 @@ export default function EmailTemplateManager() {
         <Grid item xs={12} md={5}>
           <Paper
             elevation={3}
-            sx={{ p: 3, border: "2px solid maroon", borderRadius: 2 }}
+            sx={{ p: 3, border: `2px solid ${borderColor}`, borderRadius: 2 }}
           >
-            <Typography variant="h6" sx={{ mb: 2, color: "#800000" }}>
+            <Typography variant="h6" sx={{ mb: 2, color: subtitleColor,  }}>
               {editing ? "Edit Email Template" : "Register New Template"}
             </Typography>
 
@@ -287,8 +328,9 @@ export default function EmailTemplateManager() {
               fullWidth
               onClick={editing ? handleUpdate : handleAdd}
               sx={{
-                backgroundColor: "#800000",
-                "&:hover": { backgroundColor: "#a00000" },
+                backgroundColor: "#1967d2",
+
+                "&:hover": { backgroundColor: "#000000" },
               }}
             >
               {editing ? "Update Template" : "Save"}
@@ -300,7 +342,7 @@ export default function EmailTemplateManager() {
         <Grid item xs={12} md={7}>
           <Paper
             elevation={3}
-            sx={{ p: 3, border: "2px solid maroon", borderRadius: 2 }}
+            sx={{ p: 3, border: `2px solid ${borderColor}`, borderRadius: 2 }}
           >
             <Typography variant="h6" sx={{ mb: 2, color: "#800000" }}>
               Registered Templates

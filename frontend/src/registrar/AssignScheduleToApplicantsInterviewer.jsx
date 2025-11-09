@@ -47,6 +47,45 @@ const socket = io("http://localhost:5000");
 
 
 const AssignScheduleToApplicantsInterviewer = () => {
+const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
+
     const [user, setUser] = useState(null);
     const [adminData, setAdminData] = useState({ dprtmnt_id: "" });
     const [emailSender, setEmailSender] = useState("");
@@ -896,7 +935,7 @@ Thank you and good luck on your Qualifying / Interview Exam!
                     variant="h4"
                     sx={{
                         fontWeight: 'bold',
-                        color: 'maroon',
+                        color: titleColor,
                         fontSize: '36px',
                     }}
                 >
@@ -981,9 +1020,9 @@ Thank you and good luck on your Qualifying / Interview Exam!
             <div style={{ height: "40px" }}></div>
 
 
-            <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon", }}>
+            <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}`, }}>
                 <Table>
-                    <TableHead sx={{ backgroundColor: '#6D2323' }}>
+                    <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", }}>
                         <TableRow>
                             <TableCell sx={{ color: 'white', textAlign: "Center" }}>Interview Schedule</TableCell>
                         </TableRow>
@@ -996,7 +1035,7 @@ Thank you and good luck on your Qualifying / Interview Exam!
 
                     p: 3,
 
-                    border: "3px solid maroon",
+                    border: `2px solid ${borderColor}`,
                     bgcolor: "white",
                     boxShadow: "0 3px 12px rgba(0,0,0,0.1)",
 
@@ -1017,7 +1056,7 @@ Thank you and good luck on your Qualifying / Interview Exam!
                                 onChange={(e) => setSelectedSchedule(e.target.value)}
                                 variant="outlined"
                                 sx={{
-                                    border: "3px solid maroon",
+                                    border: `2px solid ${borderColor}`,
                                     borderRadius: 2,
                                     "& .MuiOutlinedInput-notchedOutline": { border: "none" },
                                     bgcolor: "white",
@@ -1059,7 +1098,7 @@ Thank you and good luck on your Qualifying / Interview Exam!
                                 InputProps={{ readOnly: true }}
                                 variant="outlined"
                                 sx={{
-                                    border: "3px solid maroon",
+                                    border: `2px solid ${borderColor}`,
                                     borderRadius: 2,
                                     "& .MuiOutlinedInput-notchedOutline": { border: "none" },
                                     bgcolor: "#f9f9f9",
@@ -1082,7 +1121,7 @@ Thank you and good luck on your Qualifying / Interview Exam!
                                 InputProps={{ readOnly: true }}
                                 variant="outlined"
                                 sx={{
-                                    border: "3px solid maroon",
+                                    border: `2px solid ${borderColor}`,
                                     borderRadius: 2,
                                     "& .MuiOutlinedInput-notchedOutline": { border: "none" },
                                     bgcolor: "#f9f9f9",
@@ -1108,7 +1147,7 @@ Thank you and good luck on your Qualifying / Interview Exam!
                                 InputProps={{ readOnly: true }}
                                 variant="outlined"
                                 sx={{
-                                    border: "3px solid maroon",
+                                    border: `2px solid ${borderColor}`,
                                     borderRadius: 2,
                                     "& .MuiOutlinedInput-notchedOutline": { border: "none" },
                                     bgcolor: "#f9f9f9",
@@ -1331,7 +1370,7 @@ Thank you and good luck on your Qualifying / Interview Exam!
                 <Table size="small">
                     <TableHead sx={{ backgroundColor: '#6D2323', color: "white" }}>
                         <TableRow>
-                            <TableCell colSpan={10} sx={{ border: "2px solid maroon", py: 0.5, backgroundColor: '#6D2323', color: "white" }}>
+                            <TableCell colSpan={10} sx={{ border: `2px solid ${borderColor}`, py: 0.5, backgroundColor: settings?.header_color || "#1976d2", color: "white" }}>
                                 <Box display="flex" justifyContent="space-between" alignItems="center">
                                     {/* Left: Total Count */}
                                     <Typography fontSize="14px" fontWeight="bold" color="white">
@@ -1530,7 +1569,7 @@ Thank you and good luck on your Qualifying / Interview Exam!
                                         <TableCell
                                             sx={{
                                                 textAlign: "center",
-                                                border: "2px solid maroon",
+                                                border: `2px solid ${borderColor}`,
 
                                                 fontSize: "12px",
                                             }}
@@ -1543,7 +1582,7 @@ Thank you and good luck on your Qualifying / Interview Exam!
                                                 color: "blue",
                                                 cursor: "pointer",
                                                 textAlign: "center",
-                                                border: "2px solid maroon",
+                                                border: `2px solid ${borderColor}`,
                                                 borderLeft: "2px solid maroon",
                                                 py: 0.5,
                                                 fontSize: "12px",
@@ -1559,7 +1598,7 @@ Thank you and good luck on your Qualifying / Interview Exam!
                                                 color: "blue",
                                                 cursor: "pointer",
                                                 textAlign: "left",
-                                                border: "2px solid maroon",
+                                                border: `2px solid ${borderColor}`,
                                                 borderLeft: "2px solid maroon",
                                                 py: 0.5,
                                                 fontSize: "12px",
@@ -1573,7 +1612,7 @@ Thank you and good luck on your Qualifying / Interview Exam!
                                         <TableCell
                                             sx={{
                                                 textAlign: "center",
-                                                border: "2px solid maroon",
+                                                border: `2px solid ${borderColor}`,
                                                 fontSize: "12px",
                                             }}
                                         >
@@ -1588,7 +1627,7 @@ Thank you and good luck on your Qualifying / Interview Exam!
                                         <TableCell
                                             sx={{
                                                 textAlign: "center",
-                                                border: "2px solid maroon",
+                                                border: `2px solid ${borderColor}`,
                                                 fontSize: "12px",
                                             }}
                                         >
@@ -1599,7 +1638,7 @@ Thank you and good luck on your Qualifying / Interview Exam!
                                         <TableCell
                                             sx={{
                                                 textAlign: "center",
-                                                border: "2px solid maroon",
+                                                border: `2px solid ${borderColor}`,
                                                 fontSize: "12px",
                                             }}
                                         >
@@ -1609,7 +1648,7 @@ Thank you and good luck on your Qualifying / Interview Exam!
                                         <TableCell
                                             sx={{
                                                 textAlign: "center",
-                                                border: "2px solid maroon",
+                                                border: `2px solid ${borderColor}`,
                                                 fontSize: "12px",
                                             }}
                                         >
@@ -1620,7 +1659,7 @@ Thank you and good luck on your Qualifying / Interview Exam!
                                         <TableCell
                                             sx={{
                                                 textAlign: "center",
-                                                border: "2px solid maroon",
+                                                border: `2px solid ${borderColor}`,
 
                                             }}
                                         >

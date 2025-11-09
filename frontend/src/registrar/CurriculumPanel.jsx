@@ -6,6 +6,45 @@ import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 
 const CurriculumPanel = () => {
+  const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]);
+
   const [curriculum, setCurriculum] = useState({ year_id: "", program_id: "" });
   const [yearList, setYearList] = useState([]);
   const [programList, setProgramList] = useState([]);
@@ -141,9 +180,8 @@ const CurriculumPanel = () => {
     // Show instant feedback
     setSnackbar({
       open: true,
-      message: `Curriculum #${id} is now ${
-        newStatus === 1 ? "Active" : "Inactive"
-      }`,
+      message: `Curriculum #${id} is now ${newStatus === 1 ? "Active" : "Inactive"
+        }`,
       severity: "info",
     });
 
@@ -155,9 +193,8 @@ const CurriculumPanel = () => {
       // Confirm success
       setSnackbar({
         open: true,
-        message: `Curriculum #${id} successfully set to ${
-          newStatus === 1 ? "Active" : "Inactive"
-        }`,
+        message: `Curriculum #${id} successfully set to ${newStatus === 1 ? "Active" : "Inactive"
+          }`,
         severity: "success",
       });
     } catch (err) {
@@ -212,7 +249,7 @@ const CurriculumPanel = () => {
     >
       <Typography
         variant="h4"
-        sx={{ fontWeight: "bold", color: "maroon", fontSize: "36px", mb: 2 }}
+        sx={{ fontWeight: "bold", color: titleColor, fontSize: "36px", mb: 2 }}
       >
         CURRICULUM PANEL
       </Typography>
@@ -235,7 +272,7 @@ const CurriculumPanel = () => {
             padding: "20px",
             borderRadius: "8px",
             backgroundColor: "#fff",
-            border: "2px solid maroon",
+            border: `2px solid ${borderColor}`,
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
           }}
         >
@@ -292,7 +329,7 @@ const CurriculumPanel = () => {
             style={{
               width: "100%",
               padding: "10px",
-              backgroundColor: "maroon",
+              backgroundColor: "#1976d2", // typical Material UI primary blue
               color: "white",
               border: "none",
               borderRadius: "4px",
@@ -301,6 +338,7 @@ const CurriculumPanel = () => {
           >
             Insert
           </button>
+
         </div>
 
         {/* RIGHT SECTION */}
@@ -309,7 +347,7 @@ const CurriculumPanel = () => {
             flex: 2,
             padding: "20px",
             borderRadius: "8px",
-            border: "2px solid maroon",
+            border: `2px solid ${borderColor}`,
             backgroundColor: "#f9f9f9",
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
           }}
@@ -321,10 +359,10 @@ const CurriculumPanel = () => {
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr>
-                <th style={{ border: "2px solid maroon" }}>ID</th>
-                <th style={{ border: "2px solid maroon" }}>Year</th>
-                <th style={{ border: "2px solid maroon" }}>Program</th>
-                <th style={{ border: "2px solid maroon" }}>Status</th>
+                <th style={{ border: `2px solid ${borderColor}`, }}>ID</th>
+                <th style={{ border: `2px solid ${borderColor}`, border: `2px solid ${borderColor}`, }}>Year</th>
+                <th style={{ border: `2px solid ${borderColor}`, }}>Program</th>
+                <th style={{ border: `2px solid ${borderColor}`, }}>Status</th>
               </tr>
             </thead>
 
@@ -333,7 +371,7 @@ const CurriculumPanel = () => {
                 <tr key={item.curriculum_id}>
                   <td
                     style={{
-                      border: "2px solid maroon",
+                      border: `2px solid ${borderColor}`,
                       textAlign: "center",
                     }}
                   >
@@ -341,7 +379,7 @@ const CurriculumPanel = () => {
                   </td>
                   <td
                     style={{
-                      border: "2px solid maroon",
+                      border: `2px solid ${borderColor}`,
                       textAlign: "center",
                     }}
                   >
@@ -349,7 +387,7 @@ const CurriculumPanel = () => {
                   </td>
                   <td
                     style={{
-                      border: "2px solid maroon",
+                      border: `2px solid ${borderColor}`,
                       textAlign: "left",
                     }}
                   >
@@ -357,7 +395,7 @@ const CurriculumPanel = () => {
                   </td>
                   <td
                     style={{
-                      border: "2px solid maroon",
+                      border: `2px solid ${borderColor}`,
                       textAlign: "center",
                     }}
                   >

@@ -1,10 +1,53 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
 import '../styles/TempStyles.css';
 import axios from 'axios';
 import { FaFileExcel } from "react-icons/fa";
 import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer, TextField, Button, FormControl, Select, InputLabel, MenuItem, Box, Typography, Paper, Snackbar, Alert} from "@mui/material";
 
 const GradingSheet = () => {
+
+  const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
+
+
+
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
   const [userRole, setUserRole] = useState("");
@@ -446,7 +489,7 @@ const GradingSheet = () => {
           variant="h4"
           sx={{
             fontWeight: 'bold',
-            color: 'maroon',
+            color: titleColor,
             fontSize: '36px',
           }}
         >
@@ -465,7 +508,7 @@ const GradingSheet = () => {
         <Table size="small">
           <TableHead sx={{ backgroundColor: '#6D2323', color: "white" }}>
             <TableRow>
-              <TableCell colSpan={10} sx={{ border: "2px solid maroon", py: 0.5, backgroundColor: '#6D2323', color: "white" }}>
+              <TableCell colSpan={10} sx={{ border: `2px solid ${borderColor}`, py: 0.5, backgroundColor: settings?.header_color || "#1976d2", color: "white" }}>
                 <Box display="flex" justifyContent="space-between" alignItems="center">
                   {/* Left: Total Count */}
                   <Typography fontSize="14px" fontWeight="bold" color="white">
@@ -645,7 +688,7 @@ const GradingSheet = () => {
         </Table>
       </TableContainer>
 
-      <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon", p: 2, marginRight: "4rem" }}>
+      <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}`, p: 2, marginRight: "4rem" }}>
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: "2rem", alignItems: "center", justifyContent: 'space-between' }}>
           <Box>
             <Box display="flex" alignItems="center" gap={1} sx={{ minWidth: 500 }}>
@@ -685,7 +728,7 @@ const GradingSheet = () => {
                       <Button
                         variant="contained"
                         sx={{
-                          backgroundColor: "maroon",
+                          backgroundColor: mainButtonColor,
                           mb: 2,
                           mr: 2,
                           height: "45px",
@@ -749,7 +792,7 @@ const GradingSheet = () => {
                 </button>
               </Box>
               <Box display="flex" alignItems="center" gap={1} sx={{ minWidth: 200 }}>
-                <Button variant="contained" fullWidth sx={{ height: '50px', background: 'maroon' }} onClick={handleImport}>
+                <Button variant="contained" fullWidth sx={{ height: '50px', backgroundColor: mainButtonColor }} onClick={handleImport}>
                   Upload
                 </Button>
               </Box>
@@ -811,17 +854,17 @@ const GradingSheet = () => {
       <TableContainer component={Paper} sx={{ width: "100%", marginTop: "2rem" }}>
         <Table size="small">
           {/* Header */}
-          <TableHead sx={{ backgroundColor: "#6D2323" }}>
+          <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2" }}>
             <TableRow>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>#</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>Student Number</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>Name</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>Section</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>Midterm</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>Finals</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>Final Grade</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>Remarks</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>Action</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>#</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Student Number</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Name</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Section</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Midterm</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Finals</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Final Grade</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Remarks</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Action</TableCell>
             </TableRow>
           </TableHead>
 
@@ -836,15 +879,15 @@ const GradingSheet = () => {
             ) : (
               students.map((student, index) => (
                 <TableRow key={index}>
-                  <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>{index + 1}</TableCell>
-                  <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>{student.student_number}</TableCell>
-                  <TableCell sx={{ border: "1px solid maroon" }}>
+                  <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>{index + 1}</TableCell>
+                  <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>{student.student_number}</TableCell>
+                  <TableCell sx={{ border: `2px solid ${borderColor}` }}>
                     {student.last_name}, {student.first_name} {student.middle_name}
                   </TableCell>
-                  <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>
+                  <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>
                     {student.program_code}-{student.section_description}
                   </TableCell>
-                  <TableCell sx={{ border: "1px solid maroon" }}>
+                  <TableCell sx={{ border: `2px solid ${borderColor}` }}>
                     <input
                       type="text"
                       value={student.midterm}
@@ -859,7 +902,7 @@ const GradingSheet = () => {
                       }}
                     />
                   </TableCell>
-                  <TableCell sx={{ border: "1px solid maroon" }}>
+                  <TableCell sx={{ border: `2px solid ${borderColor}` }}>
                     <input
                       type="text"
                       value={student.finals}
@@ -874,7 +917,7 @@ const GradingSheet = () => {
                       }}
                     />
                   </TableCell>
-                  <TableCell sx={{ border: "1px solid maroon" }}>
+                  <TableCell sx={{ border: `2px solid ${borderColor}` }}>
                     <input
                       type="text"
                       value={finalGradeCalc(student.midterm, student.finals)}
@@ -889,7 +932,7 @@ const GradingSheet = () => {
                       }}
                     />
                   </TableCell>
-                  <TableCell sx={{ border: "1px solid maroon" }}>
+                  <TableCell sx={{ border: `2px solid ${borderColor}` }}>
                     <select
                       name="en_remarks"
                       value={student.en_remarks}
@@ -904,11 +947,11 @@ const GradingSheet = () => {
                       <option value="3">INCOMPLETE</option>
                     </select>
                   </TableCell>
-                  <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>
+                  <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>
                     <Button sx={{
                       height: "40px",
                       width: "200px", // ✅ matches Print
-                      backgroundColor: "maroon",
+                      backgroundColor: mainButtonColor,
                       "&:hover": { backgroundColor: "" },
                       color: "white"
                     }}

@@ -9,6 +9,46 @@ import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 
 const CourseTagging = () => {
+const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
+
+
   const [data, setdata] = useState([]);
   const [currentDate, setCurrentDate] = useState("");
   const [personID, setPersonID] = useState('');
@@ -22,7 +62,7 @@ const CourseTagging = () => {
   const [userRole, setUserRole] = useState("");
   
   ///////////
-  const pageId = 17;
+  const pageId = 20;
 
   // do not alter
   useEffect(() => {
@@ -103,7 +143,7 @@ const CourseTagging = () => {
   const [error, setError] = useState(null);
   const [departments, setDepartments] = useState([]);
   const [selectedDepartment, setSelectedDepartment] = useState(null);
-
+  const [yearLevel, setYearLevel] = useState([])
   const [subjectCounts, setSubjectCounts] = useState({});
 
   const fetchSubjectCounts = async (sectionId) => {
@@ -125,6 +165,13 @@ const CourseTagging = () => {
 
     }
   };
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/get_year_level")
+      .then((res) => setYearLevel(res.data))
+      .catch((err) => console.error(err));
+  })
 
   useEffect(() => {
     if (selectedSection) {
@@ -239,7 +286,7 @@ const CourseTagging = () => {
     }
   };
 
-  const addAllToCart = async () => {
+  const addAllToCart = async (yearLevelId) => {
     const newCourses = courses.filter((c) => !isEnrolled(c.course_id));
     if (!selectedSection) {
       alert("Please select a department section before adding the course.");
@@ -256,8 +303,9 @@ const CourseTagging = () => {
             const res = await axios.post("http://localhost:5000/add-all-to-enrolled-courses", {
               subject_id: course.course_id,
               user_id: userId,
-              curriculumID: currId, // Include curriculum_id
-              departmentSectionID: selectedSection, // Include selected section
+              curriculumID: currId,
+              departmentSectionID: selectedSection,
+              year_level: yearLevelId,
             });
 
             console.log(`Response for subject ${course.course_id}:`, res.data.message);
@@ -461,7 +509,7 @@ if (loading || hasAccess === null) {
           variant="h4"
           sx={{
             fontWeight: 'bold',
-            color: 'maroon',
+            color: titleColor,
             fontSize: '36px',
           }}
         >
@@ -531,7 +579,7 @@ if (loading || hasAccess === null) {
       <Typography
         variant="h4"
         fontWeight="bold"
-        color="maroon"
+        sx={{color: subtitleColor}}
         textAlign="center"
         gutterBottom
         mb={3}
@@ -577,7 +625,7 @@ if (loading || hasAccess === null) {
           component={Paper}
           backgroundColor={"#f1f1f1"}
           p={2}
-          sx={{ border: "2px solid maroon" }}
+          sx={{ border: `2px solid ${borderColor}` }}
         >
           {/* Search Student */}
 
@@ -613,9 +661,11 @@ if (loading || hasAccess === null) {
             </Button>
           </Box>
           <Box display="flex" gap={2} mt={2}>
-            <Button variant="contained" color="success" onClick={addAllToCart} disabled={!userId}>
-              Enroll All
-            </Button>
+            {yearLevel.map((year_level, index) => (
+              <Button variant="contained" color="success" key={index} onClick={() => addAllToCart(year_level.year_level_id)} disabled={!userId} value={year_level.year_level_id}>
+                {year_level.year_level_description} Button
+              </Button>
+            ))}
             <Button variant="contained" color="warning" onClick={deleteAllCart}>
               Unenroll All
             </Button>
@@ -628,21 +678,21 @@ if (loading || hasAccess === null) {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell style={{ border: "2px solid maroon", textAlign: "center" }}>Course Code</TableCell>
-                <TableCell style={{ border: "2px solid maroon", textAlign: "center" }}>Subject ID</TableCell>
-                <TableCell style={{ border: "2px solid maroon", textAlign: "center" }}>Enrolled Students</TableCell>
-                <TableCell style={{ border: "2px solid maroon", textAlign: "center" }}>Action</TableCell>
+                <TableCell style={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>Course Code</TableCell>
+                <TableCell style={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>Subject ID</TableCell>
+                <TableCell style={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>Enrolled Students</TableCell>
+                <TableCell style={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {courses.map((c) => (
                 <TableRow key={c.course_id}>
-                  <TableCell style={{ border: "2px solid maroon", }}>{c.course_code}</TableCell>
-                  <TableCell style={{ border: "2px solid maroon", }}>{c.course_description}</TableCell>
-                  <TableCell style={{ border: "2px solid maroon", textAlign: "center" }}>
+                  <TableCell style={{ border: `2px solid ${borderColor}`, }}>{c.course_code}</TableCell>
+                  <TableCell style={{ border: `2px solid ${borderColor}`, }}>{c.course_description}</TableCell>
+                  <TableCell style={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>
                     {subjectCounts[c.course_id] || 0}
                   </TableCell>
-                  <TableCell style={{ border: "2px solid maroon", }}>
+                  <TableCell style={{ border: `2px solid ${borderColor}`, }}>
                     {!isEnrolled(c.course_id) ? (
                       <Button variant="contained" size="small" onClick={() => addToCart(c)} disabled={!userId}>
                         Enroll
@@ -661,7 +711,7 @@ if (loading || hasAccess === null) {
           component={Paper}
           backgroundColor={"#f1f1f1"}
           p={2}
-          sx={{ border: "2px solid maroon" }}
+          sx={{ border: `2px solid ${borderColor}` }}
         >
           <Box sx={{ mb: 2 }}>
             <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
@@ -704,16 +754,16 @@ if (loading || hasAccess === null) {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell style={{ display: "none", border: "2px solid maroon" }}>Enrolled Subject ID</TableCell>
-                <TableCell style={{ display: "none", border: "2px solid maroon" }}>Subject ID</TableCell>
-                <TableCell style={{ textAlign: "center", border: "2px solid maroon" }}>SUBJECT CODE</TableCell>
-                <TableCell style={{ textAlign: "center", border: "2px solid maroon" }}>SECTION</TableCell>
-                <TableCell style={{ textAlign: "center", border: "2px solid maroon" }}>DAY</TableCell>
-                <TableCell style={{ textAlign: "center", border: "2px solid maroon" }}>TIME</TableCell>
-                <TableCell style={{ textAlign: "center", border: "2px solid maroon" }}>ROOM</TableCell>
-                <TableCell style={{ textAlign: "center", border: "2px solid maroon" }}>FACULTY</TableCell>
-                <TableCell style={{ textAlign: "center", border: "2px solid maroon" }}>ENROLLED STUDENTS</TableCell>
-                <TableCell style={{ textAlign: "center", border: "2px solid maroon" }}>Action</TableCell>
+                <TableCell style={{ display: "none", border: `2px solid ${borderColor}` }}>Enrolled Subject ID</TableCell>
+                <TableCell style={{ display: "none", border: `2px solid ${borderColor}` }}>Subject ID</TableCell>
+                <TableCell style={{ textAlign: "center", border: `2px solid ${borderColor}` }}>SUBJECT CODE</TableCell>
+                <TableCell style={{ textAlign: "center", border: `2px solid ${borderColor}` }}>SECTION</TableCell>
+                <TableCell style={{ textAlign: "center", border: `2px solid ${borderColor}` }}>DAY</TableCell>
+                <TableCell style={{ textAlign: "center", border: `2px solid ${borderColor}` }}>TIME</TableCell>
+                <TableCell style={{ textAlign: "center", border: `2px solid ${borderColor}` }}>ROOM</TableCell>
+                <TableCell style={{ textAlign: "center", border: `2px solid ${borderColor}` }}>FACULTY</TableCell>
+                <TableCell style={{ textAlign: "center", border: `2px solid ${borderColor}` }}>ENROLLED STUDENTS</TableCell>
+                <TableCell style={{ textAlign: "center", border: `2px solid ${borderColor}` }}>Action</TableCell>
               </TableRow>
             </TableHead>
 
@@ -724,20 +774,20 @@ if (loading || hasAccess === null) {
               {enrolled.map((e, idx) => (
 
                 <TableRow key={idx} >
-                  <TableCell style={{ display: "none", border: "2px solid maroon" }}>{e.id}</TableCell>
-                  <TableCell style={{ display: "none", border: "2px solid maroon" }}>{e.course_id}</TableCell>
-                  <TableCell style={{ textAlign: "center", border: "2px solid maroon" }}>
+                  <TableCell style={{ display: "none", border: `2px solid ${borderColor}` }}>{e.id}</TableCell>
+                  <TableCell style={{ display: "none", border: `2px solid ${borderColor}` }}>{e.course_id}</TableCell>
+                  <TableCell style={{ textAlign: "center", border: `2px solid ${borderColor}` }}>
                     {e.course_code}-{e.section_description}
                   </TableCell>
-                  <TableCell style={{ textAlign: "center", border: "2px solid maroon" }}>
+                  <TableCell style={{ textAlign: "center", border: `2px solid ${borderColor}` }}>
                     {e.program_code}-{e.description}
                   </TableCell>
-                  <TableCell style={{ textAlign: "center", border: "2px solid maroon" }}>{e.day_description}</TableCell>
-                  <TableCell style={{ textAlign: "center", border: "2px solid maroon" }}>{e.school_time_start}-{e.school_time_end}</TableCell>
-                  <TableCell style={{ textAlign: "center", border: "2px solid maroon" }}>{e.room_description}</TableCell>
-                  <TableCell style={{ textAlign: "center", border: "2px solid maroon" }}>Prof. {e.lname}</TableCell>
-                  <TableCell style={{ textAlign: "center", border: "2px solid maroon" }}> ({e.number_of_enrolled})</TableCell>
-                  <TableCell style={{ textAlign: "center", border: "2px solid maroon" }}>
+                  <TableCell style={{ textAlign: "center", border: `2px solid ${borderColor}` }}>{e.day_description}</TableCell>
+                  <TableCell style={{ textAlign: "center", border: `2px solid ${borderColor}` }}>{e.school_time_start}-{e.school_time_end}</TableCell>
+                  <TableCell style={{ textAlign: "center", border: `2px solid ${borderColor}` }}>{e.room_description}</TableCell>
+                  <TableCell style={{ textAlign: "center", border: `2px solid ${borderColor}` }}>Prof. {e.lname}</TableCell>
+                  <TableCell style={{ textAlign: "center", border: `2px solid ${borderColor}` }}> ({e.number_of_enrolled})</TableCell>
+                  <TableCell style={{ textAlign: "center", border: `2px solid ${borderColor}` }}>
                     <Button style={{ textAlign: "center", }} variant="contained" color="error" size="small" onClick={() => deleteFromCart(e.id)}>
                       Unenroll
                     </Button>

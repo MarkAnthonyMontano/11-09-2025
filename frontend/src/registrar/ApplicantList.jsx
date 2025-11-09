@@ -53,21 +53,40 @@ const ApplicantList = () => {
     const settings = useContext(SettingsContext);
     const [fetchedLogo, setFetchedLogo] = useState(null);
     const [companyName, setCompanyName] = useState("");
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
 
-    useEffect(() => {
-        if (settings) {
-            // ✅ load dynamic logo
-            if (settings.logo_url) {
-                setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
-            } else {
-                setFetchedLogo(EaristLogo);
-            }
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
 
-            // ✅ load dynamic name + address
-            if (settings.company_name) setCompanyName(settings.company_name);
-            if (settings.campus_address) setCampusAddress(settings.campus_address);
-        }
-    }, [settings]);
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
 
     const words = companyName.trim().split(" ");
     const middle = Math.ceil(words.length / 2);
@@ -922,7 +941,7 @@ th {
     return (
         <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                <Typography variant="h4" fontWeight="bold" color="maroon">
+                <Typography variant="h4" fontWeight="bold" sx={{color: titleColor}}>
                     ADMISSION PROCESS FOR REGISTRAR
                 </Typography>
                 <Box sx={{ position: 'absolute', top: 10, right: 24 }}>
@@ -1051,9 +1070,9 @@ th {
             <div style={{ height: "20px" }}></div>
 
 
-            <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon", }}>
+            <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}`, }}>
                 <Table>
-                    <TableHead sx={{ backgroundColor: '#6D2323' }}>
+                    <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2" }}>
                         <TableRow>
                             <TableCell sx={{ color: 'white', textAlign: "Center" }}>Application Date</TableCell>
                         </TableRow>
@@ -1061,7 +1080,7 @@ th {
                 </Table>
             </TableContainer>
 
-            <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon", p: 2 }}>
+            <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}`, p: 2 }}>
                 <Box display="flex" justifyContent="space-between" flexWrap="wrap" rowGap={2}>
 
                     {/* Left Side: Campus Dropdown */}
@@ -1155,7 +1174,7 @@ th {
                 <Table size="small">
                     <TableHead sx={{ backgroundColor: '#6D2323', color: "white" }}>
                         <TableRow>
-                            <TableCell colSpan={10} sx={{ border: "2px solid maroon", py: 0.5, backgroundColor: '#6D2323', color: "white" }}>
+                            <TableCell colSpan={10} sx={{ border: `2px solid ${borderColor}`, py: 0.5, backgroundColor: settings?.header_color || "#1976d2", color: "white" }}>
                                 <Box display="flex" justifyContent="space-between" alignItems="center">
                                     {/* Left: Total Count */}
                                     <Typography fontSize="14px" fontWeight="bold" color="white">
@@ -1326,7 +1345,7 @@ th {
 
 
 
-            <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon", p: 2 }}>
+            <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}`, p: 2 }}>
                 <Box display="flex" justifyContent="space-between" flexWrap="wrap" rowGap={3} columnGap={5}>
 
                     {/* LEFT COLUMN: Sorting & Status Filters */}
@@ -1498,40 +1517,40 @@ th {
 
             <TableContainer component={Paper} sx={{ width: "100%" }}>
                 <Table size="small">
-                    <TableHead sx={{ backgroundColor: "#6D2323", }}>
+                    <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", }}>
                         <TableRow>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "2%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "2%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 #
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "3%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "3%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Submitted Orig Documents
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "4%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "4%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Applicant ID
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "25%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "25%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Name
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "10%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "10%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Program
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "6%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "6%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 SHS GWA
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "8%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "8%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Date Applied
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "8%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "8%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Date Last Updated
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "16%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "16%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Applicant Status
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "15%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "15%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Remarks
                             </TableCell>
                             {/*
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "8%", py: 0.5, fontSize: "12px", border: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "8%", py: 0.5, fontSize: "12px", border: `2px solid ${borderColor}` }}>
                                 Registrar Status
                             </TableCell>
                             */}
@@ -1565,12 +1584,12 @@ th {
                         {currentPersons.map((person, index) => (
                             <TableRow key={person.person_id} sx={{ height: "48px" }}>
                                 {/* # */}
-                                <TableCell sx={{ textAlign: "center", border: "2px solid maroon" }}>
+                                <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>
                                     {index + 1}
                                 </TableCell>
 
                                 {/* ✅ Submitted Checkbox */}
-                                <TableCell sx={{ textAlign: "center", border: "2px solid maroon" }}>
+                                <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>
                                     <Checkbox
                                         disabled
                                         checked={Number(person.submitted_documents) === 1}
@@ -1610,7 +1629,7 @@ th {
                                 <TableCell
                                     sx={{
                                         textAlign: "center",
-                                        border: "2px solid maroon",
+                                        border: `2px solid ${borderColor}`,
                                         color: "blue",
                                         cursor: "pointer",
                                     }}
@@ -1623,7 +1642,7 @@ th {
                                 <TableCell
                                     sx={{
                                         textAlign: "left",
-                                        border: "2px solid maroon",
+                                        border: `2px solid ${borderColor}`,
                                         color: "blue",
                                         cursor: "pointer",
                                     }}
@@ -1633,7 +1652,7 @@ th {
                                 </TableCell>
 
                                 {/* Program */}
-                                <TableCell sx={{ textAlign: "center", border: "2px solid maroon" }}>
+                                <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>
                                     {curriculumOptions.find(
                                         (item) =>
                                             item.curriculum_id?.toString() === person.program?.toString()
@@ -1641,17 +1660,17 @@ th {
                                 </TableCell>
 
                                 {/* SHS GWA */}
-                                <TableCell sx={{ textAlign: "center", border: "2px solid maroon" }}>
+                                <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>
                                     {person.generalAverage1}
                                 </TableCell>
 
                                 {/* Created Date */}
-                                <TableCell sx={{ textAlign: "center", border: "2px solid maroon" }}>
+                                <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>
                                     {person.created_at}
                                 </TableCell>
 
                                 {/* Last Updated */}
-                                <TableCell sx={{ textAlign: "center", border: "2px solid maroon" }}>
+                                <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>
                                     {person.last_updated
                                         ? new Date(person.last_updated).toLocaleDateString("en-PH", {
                                             year: "numeric",
@@ -1662,14 +1681,14 @@ th {
                                 </TableCell>
 
                                 {/* Status */}
-                                <TableCell sx={{ textAlign: "center", border: "2px solid maroon" }}>
+                                <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>
                                     {getApplicantStatus(person)}
                                 </TableCell>
 
 
                                 <TableCell
                                     sx={{
-                                        border: "2px solid maroon",
+                                        border: `2px solid ${borderColor}`,
                                         textAlign: "center",
                                         verticalAlign: "middle",   // 🔑 force cell content to middle
                                         p: 0,
@@ -1738,7 +1757,7 @@ th {
 
 
                                 {/*
-                                                               <TableCell sx={{ textAlign: "center", border: "2px solid maroon" }}>
+                                                               <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>
                                                                    {person.registrar_status === 1 ? (
                                                                        <Box
                                                                            sx={{

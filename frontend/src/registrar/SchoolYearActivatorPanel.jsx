@@ -10,6 +10,45 @@ import LoadingOverlay from "../components/LoadingOverlay";
 
 const SchoolYearActivatorPanel = () => {
 
+    const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]);
+
     // Also put it at the very top
     const [userID, setUserID] = useState("");
     const [user, setUser] = useState("");
@@ -152,7 +191,7 @@ const SchoolYearActivatorPanel = () => {
                     variant="h4"
                     sx={{
                         fontWeight: 'bold',
-                        color: 'maroon',
+                        color: titleColor,
                         fontSize: '36px',
                     }}
                 >
@@ -169,22 +208,22 @@ const SchoolYearActivatorPanel = () => {
 
             <table className="w-full border border-gray-300" style={{ border: "2px solid maroon", textAlign: "center" }} >
                 <thead>
-                    <tr className="bg-gray-200">
-                        <th className="p-2 border" style={{ border: "2px solid maroon", textAlign: "center" }}>Year Level</th>
-                        <th className="p-2 border" style={{ border: "2px solid maroon", textAlign: "center" }}>Semester</th>
-                        <th className="p-2 border" style={{ border: "2px solid maroon", textAlign: "center" }}>Status</th>
-                        <th className="p-2 border" style={{ border: "2px solid maroon", textAlign: "center" }}>Action</th>
+                    <tr style={{backgroundColor: settings?.header_color || "#1976d2", color: "#ffffff"}}>
+                        <th className="p-2 border" style={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>Year Level</th>
+                        <th className="p-2 border" style={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>Semester</th>
+                        <th className="p-2 border" style={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>Status</th>
+                        <th className="p-2 border" style={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {schoolYears.map((sy) => (
                         <tr key={sy.id}>
-                            <td className="p-2 border" style={{ border: "2px solid maroon", textAlign: "center" }}>
+                            <td className="p-2 border" style={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>
                                 {`${sy.year_description}-${parseInt(sy.year_description) + 1}`}
                             </td>
-                            <td className="p-2 border" style={{ border: "2px solid maroon", textAlign: "center" }}>{sy.semester_description}</td>
-                            <td className="p-2 border" style={{ border: "2px solid maroon", textAlign: "center" }}>{sy.astatus === 1 ? "Active" : "Inactive"}</td>
-                            <td className="p-2 border" style={{ border: "2px solid maroon", textAlign: "center" }}>
+                            <td className="p-2 border" style={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>{sy.semester_description}</td>
+                            <td className="p-2 border" style={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>{sy.astatus === 1 ? "Active" : "Inactive"}</td>
+                            <td className="p-2 border" style={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>
                                 <button
                                     className={`px-3 py-1 rounded text-white w-full ${sy.astatus === 1 ? "bg-red-600" : "bg-green-600"
                                         }`}

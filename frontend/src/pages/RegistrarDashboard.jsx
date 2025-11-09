@@ -455,7 +455,7 @@ useEffect(() => {
                 {stat.icon}
               </Box>
               <Box>
-                <Typography variant="subtitle2" color="maroon" fontSize={20} fontWeight={1200}>
+                <Typography variant="subtitle2" style={{color: subtitleColor,}} fontSize={20} fontWeight={1200}>
                   {stat.label}
                 </Typography>
                 <Typography variant="h5" fontWeight="bold">

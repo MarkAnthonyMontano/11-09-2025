@@ -98,7 +98,7 @@ const ReportOfGrade = () => {
     const [loading, setLoading] = useState(false);
 
 
-    const pageId = 53;
+    const pageId = 58;
 
     //Put this After putting the code of the past code
     useEffect(() => {
@@ -181,6 +181,7 @@ const ReportOfGrade = () => {
                 if (data) {
                     setSelectedStudent(data);
                     setStudentData(data);
+                    console.log(data);
 
                     const detailsRes = await fetch(`http://localhost:5000/api/program_evaluation/details/${searchQuery}`);
                     const detailsData = await detailsRes.json();
@@ -572,105 +573,108 @@ const ReportOfGrade = () => {
                 }}
                 ref={divToPrintRef}
             >
-                <Box
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        width: "70rem",
-                        justifyContent: "center",
-                        gap: "0.5rem", // ✅ adds spacing between logo and text
-                    }}
-                >
-                    {/* LEFT - Logo */}
-                    <Box
+                <table>
+                    <thead
                         style={{
-                            paddingTop: "1.5rem",
-                            paddingRight: "3rem",
+                            display: "flex",
+                            alignItems: "center",
+                            width: "70rem",
+                            justifyContent: "center",
+                            gap: "0.5rem", // ✅ adds spacing between logo and text
                         }}
                     >
-                        <img
-                            src={fetchedLogo || EaristLogo} // ✅ Use dynamic logo with fallback
-                            alt="School Logo"
+                        {/* LEFT - Logo */}
+                        <tr
                             style={{
-                                width: "8rem",
-                                height: "8rem",
-                                display: "block",
-                                objectFit: "cover",
-                                borderRadius: "50%",
-                            }}
-                        />
-                    </Box>
-
-                    {/* CENTER - School Info */}
-                    <Box style={{ marginTop: "1.5rem" }}>
-                        <td
-                            colSpan={15}
-                            style={{
-                                textAlign: "center",
-                                fontFamily: "Arial",
-                                fontSize: "10px",
-                                lineHeight: "1.5",
+                                paddingTop: "1.5rem",
+                                paddingRight: "3rem",
                             }}
                         >
-                            <div
+                            <td>
+                                <img
+                                    src={fetchedLogo || EaristLogo} // ✅ Use dynamic logo with fallback
+                                    alt="School Logo"
+                                    style={{
+                                        width: "8rem",
+                                        height: "8rem",
+                                        display: "block",
+                                        objectFit: "cover",
+                                        borderRadius: "50%",
+                                    }}
+                                />
+                            </td>
+                        </tr>
+
+                        {/* CENTER - School Info */}
+                        <tr style={{ marginTop: "1.5rem" }}>
+                            <td
+                                colSpan={15}
                                 style={{
-                                    fontSize: "12px",
-                                    letterSpacing: "1px",
+                                    textAlign: "center",
+                                    fontFamily: "Arial",
+                                    fontSize: "10px",
+                                    lineHeight: "1.5",
                                 }}
                             >
-                                Republic of the Philippines
-                            </div>
+                                <div
+                                    style={{
+                                        fontSize: "12px",
+                                        letterSpacing: "1px",
+                                    }}
+                                >
+                                    Republic of the Philippines
+                                </div>
 
-                            {/* ✅ Dynamically split company name into two lines */}
-                            {companyName ? (
-                                (() => {
-                                    const name = companyName.trim();
-                                    const words = name.split(" ");
-                                    const middleIndex = Math.ceil(words.length / 2);
-                                    const firstLine = words.slice(0, middleIndex).join(" ");
-                                    const secondLine = words.slice(middleIndex).join(" ");
+                                {/* ✅ Dynamically split company name into two lines */}
+                                {companyName ? (
+                                    (() => {
+                                        const name = companyName.trim();
+                                        const words = name.split(" ");
+                                        const middleIndex = Math.ceil(words.length / 2);
+                                        const firstLine = words.slice(0, middleIndex).join(" ");
+                                        const secondLine = words.slice(middleIndex).join(" ");
 
-                                    return (
-                                        <>
-                                            <Typography
-                                                style={{
-                                                    textAlign: "center",
-                                                    marginTop: "0rem",
-                                                    lineHeight: "1",
-                                                    fontSize: "1.6rem",
-                                                    letterSpacing: "-1px",
-                                                    fontWeight: "600",
-                                                    fontFamily: "Times New Roman",
-                                                }}
-                                            >
-                                                {firstLine} <br />
-                                                {secondLine}
-                                            </Typography>
-
-                                            {/* ✅ Dynamic Campus Address */}
-                                            {campusAddress && (
+                                        return (
+                                            <>
                                                 <Typography
                                                     style={{
-                                                        mt: 1,
                                                         textAlign: "center",
-                                                        fontSize: "12px",
-                                                        letterSpacing: "1px",
-
+                                                        marginTop: "0rem",
+                                                        lineHeight: "1",
+                                                        fontSize: "1.6rem",
+                                                        letterSpacing: "-1px",
+                                                        fontWeight: "600",
+                                                        fontFamily: "Times New Roman",
                                                     }}
                                                 >
-                                                    {campusAddress}
+                                                    {firstLine} <br />
+                                                    {secondLine}
                                                 </Typography>
-                                            )}
-                                        </>
-                                    );
-                                })()
-                            ) : (
-                                <div style={{ height: "24px" }}></div>
-                            )}
-                        </td>
-                    </Box>
-                </Box>
 
+                                                {/* ✅ Dynamic Campus Address */}
+                                                {campusAddress && (
+                                                    <Typography
+                                                        style={{
+                                                            mt: 1,
+                                                            textAlign: "center",
+                                                            fontSize: "12px",
+                                                            letterSpacing: "1px",
+
+                                                        }}
+                                                    >
+                                                        {campusAddress}
+                                                    </Typography>
+                                                )}
+                                            </>
+                                        );
+                                    })()
+                                ) : (
+                                    <div style={{ height: "24px" }}></div>
+                                )}
+                            </td>
+                        </tr>
+                    </thead>
+                </table>
 
                 {filteredStudents.length > 0 && (
                     <>
@@ -694,7 +698,7 @@ const ReportOfGrade = () => {
                             </Box>
                             <Box sx={{ display: "flex" }}>
                                 <Box style={{ display: "flex", width: "38rem" }}>
-                                    <Typography style={{ width: "9rem", marginTop: "0.7rem", fontSize: "1.05rem", letterSpacing: "-1px" }}>Gender</Typography>
+                                    <Typography style={{ width: "9rem", marginTop: "0.7rem", fontSize: "1.05rem", letterSpacing: "-1px" }}>Gender:</Typography>
                                     <Typography style={{ fontSize: "1.06rem", fontWeight: "500", marginTop: "0.7rem" }}>{studentData.gender === 0 ? "Male" : studentData.gender === 1 ? "Female" : ""}</Typography>
                                 </Box>
                                 <Box style={{ display: "flex", width: "38rem" }}>
@@ -707,7 +711,7 @@ const ReportOfGrade = () => {
                                 </Box>
                             </Box>
                             <Box sx={{ display: "flex" }}>
-                                <Box style={{ display: "flex", width: "38rem" }}>
+                                <Box style={{ display: "flex", width: "34rem" }}>
                                     <Typography style={{ width: "9rem", marginTop: "0.7rem", fontSize: "1.05rem", letterSpacing: "-1px" }}>College:</Typography>
                                     <Typography style={{ fontSize: "1.06rem", fontWeight: "500", marginTop: "0.7rem" }}>{studentData.dprtmnt_name}</Typography>
                                 </Box>

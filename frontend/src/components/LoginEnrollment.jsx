@@ -180,7 +180,7 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
               ? "/faculty_dashboard"
               : "/student_dashboard"
         );
-      }, 3000);
+      }, 2000);
     } catch (err) {
       setSnack({
         open: true,
@@ -277,7 +277,7 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
               </div>
               <div className="HeaderBody">
                 <strong style={{
-                  color: titleColor,
+                  color: "white",
                 }}>{settings?.company_name || "Company Name"}</strong>
                 <p>Student Information System</p>
               </div>
@@ -397,7 +397,7 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
                       background: "none",
                       border: "none",
                       cursor: "pointer",
-                      marginBottom: "30px"
+                      marginBottom: "50px"
                     }}
                   >
                     {showPassword ? <Visibility /> : <VisibilityOff />}
@@ -423,6 +423,8 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
                       padding: "0.5rem 0",
                       fontSize: "16px",
                       fontWeight: "bold",
+                      marginTop: "50px",
+                      
                       cursor: lockout || loading ? "not-allowed" : "pointer",
                       opacity: lockout || loading ? 0.8 : 1, // ✅ subtle fade only, not color change
                       transition: "opacity 0.2s ease-in-out",
@@ -432,7 +434,7 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
                       ? `Locked (${lockoutTimer}s)`
                       : loading
                         ? "Processing..."
-                        : "Login"}
+                        : "Log In"}
                   </button>
                 </div>
 
@@ -546,7 +548,7 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
               onClick={verifyOtp}
               sx={{
                 width: "100%",
-                backgroundColor: "#6D2323",
+                backgroundColor: mainButtonColor,
                 "&:hover": { backgroundColor: "#6D2323" },
                 textTransform: "none",
                 fontWeight: "bold",

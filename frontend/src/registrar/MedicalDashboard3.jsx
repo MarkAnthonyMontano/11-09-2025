@@ -26,34 +26,46 @@ import LoadingOverlay from "../components/LoadingOverlay";
 
 
 const MedicalDashboard3 = () => {
-    const settings = useContext(SettingsContext);
-    const [fetchedLogo, setFetchedLogo] = useState(null);
-    const [companyName, setCompanyName] = useState("");
-    const [shortTerm, setShortTerm] = useState("");
+ 
+const settings = useContext(SettingsContext);
 
-    useEffect(() => {
-        const fetchSettings = async () => {
-            try {
-                const response = await axios.get("http://localhost:5000/api/settings");
-                const data = response.data;
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
 
-                if (data.logo_url) {
-                    setFetchedLogo(`http://localhost:5000${data.logo_url}`);
-                } else {
-                    setFetchedLogo(EaristLogo);
-                }
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
 
-                // ✅ set company + short term + address
-                setCompanyName(data.company_name || "");
-                setShortTerm(data.short_term || "");
-                setCampusAddress(data.address || "");
-            } catch (err) {
-                console.error("Error fetching settings in ApplicantDashboard:", err);
-            }
-        };
+  useEffect(() => {
+    if (!settings) return;
 
-        fetchSettings();
-    }, []);
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
+
 
 
 
@@ -463,7 +475,7 @@ const MedicalDashboard3 = () => {
                     variant="h4"
                     sx={{
                         fontWeight: 'bold',
-                        color: 'maroon',
+                      color: titleColor,
                         fontSize: '36px',
                     }}
                 >
@@ -502,8 +514,8 @@ const MedicalDashboard3 = () => {
                                 justifyContent: "center",
                                 cursor: "pointer",
                                 borderRadius: 2,
-                                border: "2px solid #6D2323",
-                                backgroundColor: currentStep === index ? "#6D2323" : "#E8C999",
+                               border: `2px solid ${borderColor}`,
+                backgroundColor: currentStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
                                 color: currentStep === index ? "#fff" : "#000",
                                 boxShadow:
                                     currentStep === index
@@ -554,7 +566,7 @@ const MedicalDashboard3 = () => {
 
             <TableContainer component={Paper} sx={{ width: '100%', mb: 1 }}>
                 <Table>
-                    <TableHead sx={{ backgroundColor: '#6D2323' }}>
+                    <TableHead sx={{  backgroundColor: settings?.header_color || "#1976d2", }}>
                         <TableRow>
                             {/* Left cell: Student Number */}
                             <TableCell sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}>
@@ -635,79 +647,84 @@ const MedicalDashboard3 = () => {
             </Box>
 
             {/* Cards Section */}
-            <Box
-                sx={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: 2,
-                    mt: 2,
-                    pb: 1,
-                    justifyContent: "center", // Centers all cards horizontally
-                }}
-            >
-                {links.map((lnk, i) => (
-                    <motion.div
-                        key={i}
-                        style={{ flex: "0 0 calc(30% - 16px)" }}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1, duration: 0.4 }}
-                    >
-                        <Card
-                            sx={{
-                                minHeight: 60,
-                                borderRadius: 2,
-                                border: "2px solid #6D2323",
-                                backgroundColor: "#fff",
-                                display: "flex",
-                                flexDirection: "row",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                textAlign: "center",
-                                p: 1.5,
-                                cursor: "pointer",
-                                transition: "all 0.3s ease-in-out",
-                                "&:hover": {
-                                    transform: "scale(1.05)",
-                                    backgroundColor: "#6D2323", // ✅ background becomes maroon
-                                    "& .card-text": {
-                                        color: "#fff", // ✅ text becomes white
-                                    },
-                                    "& .card-icon": {
-                                        color: "#fff", // ✅ icon becomes white
-                                    },
-                                },
-                            }}
-                            onClick={() => {
-                                if (lnk.onClick) {
-                                    lnk.onClick(); // run handler
-                                } else if (lnk.to) {
-                                    navigate(lnk.to); // navigate if it has a `to`
-                                }
-                            }}
-                        >
-                            {/* Icon */}
-                            <PictureAsPdfIcon
-                                className="card-icon"
-                                sx={{ fontSize: 35, color: "#6D2323", mr: 1.5 }}
-                            />
+         
+<Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 2,
+          mt: 2,
+          pb: 1,
+          justifyContent: "center", // Centers all cards horizontally
+        }}
+      >
+        {links.map((lnk, i) => (
+          <motion.div
+            key={i}
+            style={{ flex: "0 0 calc(30% - 16px)" }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1, duration: 0.4 }}
+          >
+            <Card
+              sx={{
+                minHeight: 60,
+                borderRadius: 2,
+                 border: `2px solid ${borderColor}`,
+                backgroundColor: "#fff",
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "center",
+                p: 1.5,
+                cursor: "pointer",
+                transition: "all 0.3s ease-in-out",
+                "&:hover": {
+                  transform: "scale(1.05)",
+                 backgroundColor: settings?.header_color || "#1976d2",
 
-                            {/* Label */}
-                            <Typography
-                                className="card-text"
-                                sx={{
-                                    color: "#6D2323",
-                                    fontFamily: "Arial",
-                                    fontWeight: "bold",
-                                    fontSize: "0.85rem",
-                                }}
-                            >
-                                {lnk.label}
-                            </Typography>
-                        </Card>
-                    </motion.div>
-                ))}
-            </Box>
+                  "& .card-text": {
+                    color: "#fff", // ✅ text becomes white
+                  },
+                  "& .card-icon": {
+                    color: "#fff", // ✅ icon becomes white
+                  },
+                },
+              }}
+              onClick={() => {
+                if (lnk.onClick) {
+                  lnk.onClick(); // run handler
+                } else if (lnk.to) {
+                  navigate(lnk.to); // navigate if it has a `to`
+                }
+              }}
+            >
+              {/* Icon */}
+              <PictureAsPdfIcon
+                className="card-icon"
+                sx={{ fontSize: 35, color: "#6D2323", mr: 1.5 }}
+              />
+
+              {/* Label */}
+              <Typography
+                className="card-text"
+                sx={{
+                  color: "#6D2323",
+                  fontFamily: "Arial",
+                  fontWeight: "bold",
+                  fontSize: "0.85rem",
+                }}
+              >
+                {lnk.label}
+              </Typography>
+            </Card>
+          </motion.div>
+        ))}
+      </Box>
+
+
+
 
 
 
@@ -717,73 +734,94 @@ const MedicalDashboard3 = () => {
             <Container>
 
                 <Container>
-                    <h1 style={{ fontSize: "50px", fontWeight: "bold", textAlign: "center", color: "maroon", marginTop: "25px" }}>APPLICANT FORM</h1>
-                    <div style={{ textAlign: "center" }}>
-                        Complete the applicant form to secure your place for the upcoming academic year at{" "}
-                        {shortTerm ? (
-                            <>
-                                <strong>{shortTerm.toUpperCase()}</strong> <br />
-                                {companyName || ""}
-                            </>
-                        ) : (
-                            companyName || ""
-                        )}
-                        .
-                    </div>
-                </Container>
+                         <h1
+                           style={{
+                             fontSize: "50px",
+                             fontWeight: "bold",
+                             textAlign: "center",
+                             color: subtitleColor,
+                             marginTop: "25px",
+                           }}
+                         >
+                           APPLICANT FORM
+                         </h1>
+                         <div style={{ textAlign: "center" }}>
+                           Complete the applicant form to secure your place for the upcoming academic year at{" "}
+                           {shortTerm ? (
+                             <>
+                               <strong>{shortTerm.toUpperCase()}</strong> <br />
+                               {companyName || ""}
+                             </>
+                           ) : (
+                             companyName || ""
+                           )}
+                           .
+                         </div>
+               
+               
+                       </Container>
+               
                 <br />
+     <Box sx={{ display: "flex", justifyContent: "center", width: "100%", px: 4 }}>
+            {steps.map((step, index) => (
+              <React.Fragment key={index}>
+                {/* Wrap the step with Link for routing */}
+                <Link to={step.path} style={{ textDecoration: "none" }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => handleStepClick(index)}
+                  >
+                    {/* Step Icon */}
+                    <Box
+                      sx={{
+                        width: 50,
+                        height: 50,
+                        borderRadius: "50%",
+                     border: `2px solid ${borderColor}`, 
+                     backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
+                        color: activeStep === index ? "#fff" : "#000",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {step.icon}
+                    </Box>
 
-                <Box sx={{ display: "flex", justifyContent: "center", width: "100%", px: 4 }}>
-                    {steps.map((step, index) => (
-                        <React.Fragment key={index}>
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    cursor: "pointer",
-                                }}
-                                onClick={() => handleStepClick(index)}
-                            >
-                                <Box
-                                    sx={{
-                                        width: 50,
-                                        height: 50,
-                                        borderRadius: "50%",
-                                        backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
-                                        color: activeStep === index ? "#fff" : "#000",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                    }}
-                                >
-                                    {step.icon}
-                                </Box>
-                                <Typography
-                                    sx={{
-                                        mt: 1,
-                                        color: activeStep === index ? "#6D2323" : "#000",
-                                        fontWeight: activeStep === index ? "bold" : "normal",
-                                        fontSize: 14,
-                                    }}
-                                >
-                                    {step.label}
-                                </Typography>
-                            </Box>
-                            {index < steps.length - 1 && (
-                                <Box
-                                    sx={{
-                                        height: "2px",
-                                        backgroundColor: "#6D2323",
-                                        flex: 1,
-                                        alignSelf: "center",
-                                        mx: 2,
-                                    }}
-                                />
-                            )}
-                        </React.Fragment>
-                    ))}
-                </Box>
+                    {/* Step Label */}
+                    <Typography
+                      sx={{
+                        mt: 1,
+                        color: activeStep === index ? "#6D2323" : "#000",
+                        fontWeight: activeStep === index ? "bold" : "normal",
+                        fontSize: 14,
+                      }}
+                    >
+                      {step.label}
+                    </Typography>
+                  </Box>
+                </Link>
+
+                {/* Connector Line */}
+                {index < steps.length - 1 && (
+                  <Box
+                    sx={{
+                      height: "2px",
+                      backgroundColor: "#6D2323",
+                      flex: 1,
+                      alignSelf: "center",
+                      mx: 2,
+                    }}
+                  />
+                )}
+              </React.Fragment>
+            ))}
+          </Box>
 
                 <br />
 
@@ -791,7 +829,7 @@ const MedicalDashboard3 = () => {
                     <Container
                         maxWidth="100%"
                         sx={{
-                            backgroundColor: "#6D2323",
+                        backgroundColor: settings?.header_color || "#1976d2",
                             border: "2px solid black",
                             maxHeight: "500px",
                             overflowY: "auto",
@@ -806,7 +844,7 @@ const MedicalDashboard3 = () => {
                         </Box>
                     </Container>
 
-                    <Container maxWidth="100%" sx={{ backgroundColor: "#f1f1f1", border: "2px solid black", padding: 4, borderRadius: 2, boxShadow: 3 }}>
+                    <Container maxWidth="100%" sx={{ backgroundColor: "#f1f1f1" , border: `2px solid ${borderColor}`, padding: 4, borderRadius: 2, boxShadow: 3 }}>
                         <Typography style={{ fontSize: "20px", color: "#6D2323", fontWeight: "bold" }}>Junior High School - Background:</Typography>
                         <hr style={{ border: "1px solid #ccc", width: "100%" }} />
                         <br />
@@ -1257,26 +1295,26 @@ const MedicalDashboard3 = () => {
                                 variant="contained"
                                 component={Link}
                                 to="/medical_dashboard3"
-                                startIcon={
-                                    <ArrowBackIcon
-                                        sx={{
-                                            color: '#000',
-                                            transition: 'color 0.3s',
-                                        }}
-                                    />
-                                }
-                                sx={{
-                                    backgroundColor: '#E8C999',
-                                    color: '#000',
-                                    '&:hover': {
-                                        backgroundColor: '#6D2323',
-                                        color: '#fff',
-                                        '& .MuiSvgIcon-root': {
-                                            color: '#fff',
-                                        },
-                                    },
-                                }}
-                            >
+                                 startIcon={
+                  <ArrowBackIcon
+                    sx={{
+                      color: "#000",
+                      transition: "color 0.3s",
+                    }}
+                  />
+                }
+                sx={{
+                  backgroundColor: subButtonColor,
+                  color: "#000",
+                  "&:hover": {
+              backgroundColor: "#000000",
+                    color: "#fff",
+                    "& .MuiSvgIcon-root": {
+                      color: "#fff",
+                    },
+                  },
+                }}
+              >
                                 Previous Step
                             </Button>
 

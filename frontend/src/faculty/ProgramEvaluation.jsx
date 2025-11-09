@@ -4,28 +4,54 @@ import { SettingsContext } from "../App";
 import EaristLogo from "../assets/EaristLogo.png";
 import { Search } from "@mui/icons-material";
 import axios from 'axios';
+import { FcPrint } from "react-icons/fc";
+
 
 const ProgramEvaluation = () => {
 
+
+
+
     const settings = useContext(SettingsContext);
-    const [fetchedLogo, setFetchedLogo] = useState(EaristLogo); // ✅ fallback
+
+    const [titleColor, setTitleColor] = useState("#000000");
+    const [subtitleColor, setSubtitleColor] = useState("#555555");
+    const [borderColor, setBorderColor] = useState("#000000");
+    const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+    const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+    const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+    const [fetchedLogo, setFetchedLogo] = useState(null);
     const [companyName, setCompanyName] = useState("");
+    const [shortTerm, setShortTerm] = useState("");
 
 
     useEffect(() => {
-        if (settings) {
-            // ✅ load dynamic logo
-            if (settings.logo_url) {
-                setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
-            } else {
-                setFetchedLogo(EaristLogo);
-            }
+        if (!settings) return;
 
-            // ✅ load dynamic name + address
-            if (settings.company_name) setCompanyName(settings.company_name);
-            if (settings.campus_address) setCampusAddress(settings.campus_address);
+        // 🎨 Colors
+        if (settings.title_color) setTitleColor(settings.title_color);
+        if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+        if (settings.border_color) setBorderColor(settings.border_color);
+        if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+        if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+        if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+        // 🏫 Logo
+        if (settings.logo_url) {
+            setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+        } else {
+            setFetchedLogo(EaristLogo);
         }
+
+        // 🏷️ School Information
+        if (settings.company_name) setCompanyName(settings.company_name);
+        if (settings.short_term) setShortTerm(settings.short_term);
+        if (settings.campus_address) setCampusAddress(settings.campus_address);
+
     }, [settings]);
+
+
 
     const words = companyName.trim().split(" ");
     const middle = Math.ceil(words.length / 2);
@@ -202,26 +228,11 @@ const ProgramEvaluation = () => {
         }
     };
 
-    // 🔒 Disable right-click
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
-
-    // 🔒 Block DevTools shortcuts silently
-    document.addEventListener('keydown', (e) => {
-        const isBlockedKey =
-            e.key === 'F12' ||
-            e.key === 'F11' ||
-            (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
-            (e.ctrlKey && e.key === 'U');
-
-        if (isBlockedKey) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-    });
+ 
 
     return (
         <Box className="body" sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', overflowX: 'hidden', pr: 1 }}>
-            <Box sx={{ background: "white",  }}>
+            <Box sx={{ background: "white", }}>
                 {/* Header Row */}
                 <Box
                     sx={{
@@ -236,7 +247,7 @@ const ProgramEvaluation = () => {
                         variant="h4"
                         sx={{
                             fontWeight: "bold",
-                            color: "maroon",
+                            color: titleColor,
                             fontSize: "36px",
                             background: "white",
                             display: "flex",
@@ -262,9 +273,36 @@ const ProgramEvaluation = () => {
                         />
                         <button
                             onClick={printDiv}
-                            className="bg-maroon-500 w-[10rem] h-[3rem] text-[18px] text-white rounded"
+                            style={{
+                                width: "300px",
+                                padding: "10px 20px",
+                                border: "2px solid black",
+                                backgroundColor: "#f0f0f0",
+                                color: "black",
+                                borderRadius: "5px",
+                                cursor: "pointer",
+                                fontSize: "16px",
+                                fontWeight: "bold",
+                                transition: "background-color 0.3s, transform 0.2s",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                            }}
+                            onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
+                            onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
+                            onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
+                            onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
                         >
-                            Print
+                            <span
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "8px",
+                                }}
+                            >
+                                <FcPrint size={20} />
+                                Print Evaluation
+                            </span>
                         </button>
                     </Box>
                 </Box>

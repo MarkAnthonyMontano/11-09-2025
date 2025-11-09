@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
+
 import {
   Box,
   Button,
@@ -16,6 +18,46 @@ import {
 import axios from "axios";
 
 const StudentSchedule = () => {
+  
+const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
+
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
   const [userRole, setUserRole] = useState("");
@@ -222,7 +264,7 @@ const StudentSchedule = () => {
             variant="h4"
             sx={{
               fontWeight: 'bold',
-              color: 'maroon',
+               color: titleColor,
               fontSize: '36px',
             }}
           >
@@ -240,44 +282,44 @@ const StudentSchedule = () => {
         
       <TableContainer component={Paper} sx={{mb: 3 }}>
             <Table size="small">
-              <TableHead sx={{ backgroundColor: "maroon", border: "2px solid maroon" }}>
+              <TableHead sx={{backgroundColor: settings?.header_color || "#1976d2", border: `2px solid ${borderColor}`, }}>
                 <TableRow >
-                  <TableCell sx={{color: "white"}}>#</TableCell>
-                  <TableCell sx={{color: "white"}}>Course Description</TableCell>
-                  <TableCell sx={{color: "white"}}>Course Code</TableCell>
-                  <TableCell sx={{color: "white"}}>Lec</TableCell>
-                  <TableCell sx={{color: "white"}}>Lab</TableCell>
-                  <TableCell sx={{color: "white"}}>Units</TableCell>
-                  <TableCell sx={{color: "white"}}>Section</TableCell>
-                  <TableCell sx={{color: "white"}}>Schedule</TableCell>
+                  <TableCell sx={{color: "white", border: `2px solid ${borderColor}`,}}>#</TableCell>
+                  <TableCell sx={{color: "white", border: `2px solid ${borderColor}`,}}>Course Description</TableCell>
+                  <TableCell sx={{color: "white", border: `2px solid ${borderColor}`,}}>Course Code</TableCell>
+                  <TableCell sx={{color: "white", border: `2px solid ${borderColor}`,}}>Lec</TableCell>
+                  <TableCell sx={{color: "white", border: `2px solid ${borderColor}`,}}>Lab</TableCell>
+                  <TableCell sx={{color: "white", border: `2px solid ${borderColor}`,}}>Units</TableCell>
+                  <TableCell sx={{color: "white", border: `2px solid ${borderColor}`,}}>Section</TableCell>
+                  <TableCell sx={{color: "white", border: `2px solid ${borderColor}`,}}>Schedule</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {studentSchedule.map((row, index) => (
-                  <TableRow key={index} style={{border: "2px solid maroon"}}>
-                    <TableCell sx={{fontSize: "0.75rem", border: "2px solid maroon"}}>{index + 1}</TableCell>
-                    <TableCell sx={{fontSize: "0.75rem", border: "2px solid maroon"}}>{row.course_description}</TableCell>
-                    <TableCell sx={{fontSize: "0.75rem", border: "2px solid maroon"}}>
+                  <TableRow key={index} style={{border: `2px solid ${borderColor}`,}}>
+                    <TableCell sx={{fontSize: "0.75rem", border: `2px solid ${borderColor}`,}}>{index + 1}</TableCell>
+                    <TableCell sx={{fontSize: "0.75rem", border: `2px solid ${borderColor}`,}}>{row.course_description}</TableCell>
+                    <TableCell sx={{fontSize: "0.75rem", border: `2px solid ${borderColor}`,}}>
                       {row.course_code}
                     </TableCell>
-                    <TableCell sx={{fontSize: "0.75rem", border: "2px solid maroon" }}>1</TableCell>
+                    <TableCell sx={{fontSize: "0.75rem", border: `2px solid ${borderColor}`, }}>1</TableCell>
                     
-                    <TableCell sx={{fontSize: "0.75rem", border: "2px solid maroon"}}>{row.lab_unit}</TableCell>
-                    <TableCell sx={{fontSize: "0.75rem", border: "2px solid maroon"}}>{row.course_unit}</TableCell>
-                    <TableCell sx={{fontSize: "0.75rem", border: "2px solid maroon"}}>
+                    <TableCell sx={{fontSize: "0.75rem", border: `2px solid ${borderColor}`,}}>{row.lab_unit}</TableCell>
+                    <TableCell sx={{fontSize: "0.75rem", border: `2px solid ${borderColor}`,}}>{row.course_unit}</TableCell>
+                    <TableCell sx={{fontSize: "0.75rem", border: `2px solid ${borderColor}`,}}>
                       {row.program_code} {row.section_description}
                     </TableCell>
-                    <TableCell sx={{fontSize: "0.75rem", border: "2px solid maroon"}}>
+                    <TableCell sx={{fontSize: "0.75rem", border: `2px solid ${borderColor}`,}}>
                       {row.day_description}, {row.school_time_start} - {row.school_time_end} {row.room_description}
                     </TableCell>
                   </TableRow>
                 ))}
-                <TableRow sx={{fontSize: "0.75rem", border: "2px solid maroon"}}>
-                  <TableCell colSpan={3} style={{border: "2px solid maroon"}}/>
-                  <TableCell colSpan={2} style={{ fontWeight: '600', border: "2px solid maroon"}}>
+                <TableRow sx={{fontSize: "0.75rem", border: `2px solid ${borderColor}`,}}>
+                  <TableCell colSpan={3} style={{border: `2px solid ${borderColor}`,}}/>
+                  <TableCell colSpan={2} style={{ fontWeight: '600', border: `2px solid ${borderColor}`,}}>
                     Total Units
                   </TableCell>
-                  <TableCell style={{border: "2px solid maroon"}}>
+                  <TableCell style={{border: `2px solid ${borderColor}`,}}>
                     {studentSchedule.reduce((total, row) => total + (Number(row.course_unit) || 0), 0)}
                   </TableCell>
                 </TableRow>
@@ -288,7 +330,7 @@ const StudentSchedule = () => {
 
       <Box sx={{ display: "flex", gap: 3,}}>
         {/* Event */}
-        <Box style={{ border: "2px solid maroon",  padding: "1rem 1rem"}}>
+        <Box style={{ border: `2px solid ${borderColor}`,  padding: "1rem 1rem"}}>
           <table>
             <thead className="">
               <tr className='flex align-center'>
@@ -596,7 +638,7 @@ const StudentSchedule = () => {
             </tbody>
           </table>
         </Box>
-        <Card sx={{ flex: 1, border: "2px solid maroon" }}>
+        <Card sx={{ flex: 1, border: `2px solid ${borderColor}`, }}>
           <CardContent>
             <Typography
               variant="h6"

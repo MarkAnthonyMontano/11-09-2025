@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
+
 import {
   Box,
   Button,
@@ -16,6 +18,45 @@ import {
 import axios from "axios";
 
 const StudentGradingPage = () => {
+  const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
+
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
   const [userRole, setUserRole] = useState("");
@@ -148,7 +189,7 @@ const StudentGradingPage = () => {
           variant="h4"
           sx={{
             fontWeight: "bold",
-            color: "maroon",
+            color: titleColor,
             fontSize: "36px",
           }}
         >
@@ -207,14 +248,14 @@ const StudentGradingPage = () => {
                 <Table size="small">
                   <TableHead sx={{ bgcolor: "#f5f5f5" }}>
                     <TableRow>
-                      <TableCell style={{ border: "2px solid maroon" }} ><strong>Code</strong></TableCell>
-                      <TableCell style={{ border: "2px solid maroon" }}><strong>Subject</strong></TableCell>
-                      <TableCell style={{ border: "2px solid maroon" }} align="center"><strong>Faculty Name</strong></TableCell>
-                      <TableCell style={{ border: "2px solid maroon" }} align="center"><strong>Units</strong></TableCell>
-                      <TableCell style={{ border: "2px solid maroon" }} align="center"><strong>Section</strong></TableCell>
-                      <TableCell style={{ border: "2px solid maroon" }} align="center"><strong>Final Grade</strong></TableCell>
+                      <TableCell style={{ border: `2px solid ${borderColor}`,}} ><strong>Code</strong></TableCell>
+                      <TableCell style={{ border: `2px solid ${borderColor}`,}}><strong>Subject</strong></TableCell>
+                      <TableCell style={{ border: `2px solid ${borderColor}`,}} align="center"><strong>Faculty Name</strong></TableCell>
+                      <TableCell style={{ border: `2px solid ${borderColor}`,}} align="center"><strong>Units</strong></TableCell>
+                      <TableCell style={{ border: `2px solid ${borderColor}`,}} align="center"><strong>Section</strong></TableCell>
+                      <TableCell style={{ border: `2px solid ${borderColor}`,}} align="center"><strong>Final Grade</strong></TableCell>
 
-                      <TableCell style={{ border: "2px solid maroon" }} align="center"><strong>Status</strong></TableCell>
+                      <TableCell style={{ border: `2px solid ${borderColor}`,}} align="center"><strong>Status</strong></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -222,23 +263,23 @@ const StudentGradingPage = () => {
                       .filter(row => `${row.first_year}-${row.last_year} ${row.semester_description}` === term)
                       .map((row, i) => (
                         <TableRow key={i} hover>
-                          <TableCell style={{ border: "2px solid maroon" }}>{row.course_code}</TableCell>
-                          <TableCell style={{ border: "2px solid maroon" }}>{row.course_description}</TableCell>
-                          <TableCell sx={{ border: "2px solid maroon" }}>
+                          <TableCell style={{ border: `2px solid ${borderColor}`,}}>{row.course_code}</TableCell>
+                          <TableCell style={{ border: `2px solid ${borderColor}`,}}>{row.course_description}</TableCell>
+                          <TableCell sx={{ border: `2px solid ${borderColor}`,}}>
                             {row.fname === "TBA" && row.lname === "TBA"
                               ? "TBA"
                               : `Prof. ${row.fname} ${row.lname}`}
                           </TableCell>
-                          <TableCell style={{ border: "2px solid maroon" }} align="center">
+                          <TableCell style={{ border: `2px solid ${borderColor}`,}} align="center">
                             {row.course_unit}
                           </TableCell>
-                          <TableCell style={{ border: "2px solid maroon" }}>
+                          <TableCell style={{ border: `2px solid ${borderColor}`,}}>
                             {row.program_code}-{row.section_description}
                           </TableCell>
-                          <TableCell style={{ border: "2px solid maroon" }} align="center">
+                          <TableCell style={{ border: `2px solid ${borderColor}`,}} align="center">
                             {row.final_grade ?? ""}
                           </TableCell>
-                          <TableCell style={{ border: "2px solid maroon" }} align="center">
+                          <TableCell style={{ border: `2px solid ${borderColor}`,}} align="center">
                             {row.en_remarks ? getRemarks(row.en_remarks) : ""}
                           </TableCell>
                         </TableRow>

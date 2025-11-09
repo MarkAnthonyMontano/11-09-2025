@@ -7,6 +7,45 @@ import LoadingOverlay from "../components/LoadingOverlay";
 
 const YearLevelPanel = () => {
 
+  const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
+
   // Also put it at the very top
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
@@ -145,7 +184,7 @@ const YearLevelPanel = () => {
           variant="h4"
           sx={{
             fontWeight: 'bold',
-            color: 'maroon',
+            color: titleColor,
             fontSize: '36px',
           }}
         >
@@ -174,12 +213,12 @@ const YearLevelPanel = () => {
             flex: 1,
             p: 3,
             bgcolor: "#fff",
-            border: "2px solid maroon",
+            border: `2px solid ${borderColor}`,
             boxShadow: 2,
             borderRadius: 2,
           }}
         >
-          <Typography variant="h6" gutterBottom color="maroon">
+          <Typography variant="h6" gutterBottom sx={{color: subtitleColor, }}>
             Add Year Level
           </Typography>
           <TextField
@@ -192,7 +231,8 @@ const YearLevelPanel = () => {
           <Button
             fullWidth
             variant="contained"
-            sx={{ mt: 2, bgcolor: "maroon", ":hover": { bgcolor: "#800000" } }}
+            sx={{ mt: 2,  backgroundColor: "1967d2", ":hover": { bgcolor: "#000000" } }}
+            
             onClick={handleAddYearLevel}
           >
             Save
@@ -207,18 +247,18 @@ const YearLevelPanel = () => {
             bgcolor: "#fff",
             boxShadow: 2,
             borderRadius: 2,
-            border: "2px solid maroon",
+           border: `2px solid ${borderColor}`,
             overflowY: "auto",
             maxHeight: 500,
           }}
         >
-          <Typography variant="h6" gutterBottom color="maroon">
+          <Typography variant="h6" gutterBottom sx={{color: subtitleColor, }}>
             Registered Year Levels
           </Typography>
           <Box sx={{ overflowY: "auto", maxHeight: 400 }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
-                <tr style={{ backgroundColor: "#f1f1f1" }}>
+                <tr style={{ backgroundColor: settings?.header_color || "#1976d2", color: "#ffffff", border: `2px solid ${borderColor}` }}>
                   <th style={styles.tableCell}>Year Level ID</th>
                   <th style={styles.tableCell}>Year Level Description</th>
                 </tr>
@@ -243,7 +283,7 @@ const YearLevelPanel = () => {
 
 const styles = {
   tableCell: {
-    border: "1px solid #ccc",
+    border: "1px solid #000000",
     padding: "10px",
     textAlign: "center",
   },

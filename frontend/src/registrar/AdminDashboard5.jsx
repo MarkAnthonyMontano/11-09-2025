@@ -26,33 +26,46 @@ import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 
 const AdminDashboard5 = () => {
-  const settings = useContext(SettingsContext);
+  
+const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
   const [fetchedLogo, setFetchedLogo] = useState(null);
   const [companyName, setCompanyName] = useState("");
   const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/settings");
-        const data = response.data;
+    if (!settings) return;
 
-        if (data.logo_url) {
-          setFetchedLogo(`http://localhost:5000${data.logo_url}`);
-        } else {
-          setFetchedLogo(EaristLogo);
-        }
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
 
-        // ✅ set company + short term + address
-        setCompanyName(data.company_name || "");
-        setShortTerm(data.short_term || "");
-      } catch (err) {
-        console.error("Error fetching settings in ApplicantDashboard:", err);
-      }
-    };
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
 
-    fetchSettings();
-  }, []);
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
+
 
   const stepsData = [
     { label: "Admission Process for Registrar", to: "/applicant_list_admin", icon: <SchoolIcon fontSize="large" /> },
@@ -525,7 +538,7 @@ const AdminDashboard5 = () => {
           variant="h4"
           sx={{
             fontWeight: 'bold',
-            color: 'maroon',
+           color: titleColor,
             fontSize: '36px',
           }}
         >
@@ -558,9 +571,8 @@ const AdminDashboard5 = () => {
                 justifyContent: "center",
                 cursor: "pointer",
                 borderRadius: 2,
-                border: "2px solid #6D2323",
-
-                backgroundColor: currentStep === index ? "#6D2323" : "#E8C999",
+            border: `2px solid ${borderColor}`,
+                backgroundColor: currentStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
                 color: currentStep === index ? "#fff" : "#000",
                 boxShadow:
                   currentStep === index
@@ -607,7 +619,7 @@ const AdminDashboard5 = () => {
 
       <TableContainer component={Paper} sx={{ width: '100%', mb: 1 }}>
         <Table>
-          <TableHead sx={{ backgroundColor: '#6D2323' }}>
+          <TableHead sx={{  backgroundColor: settings?.header_color || "#1976d2", }}>
             <TableRow>
               {/* Left cell: Applicant ID */}
               <TableCell sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}>
@@ -688,7 +700,8 @@ const AdminDashboard5 = () => {
       </Box>
 
       {/* Cards Section */}
-      <Box
+     
+<Box
         sx={{
           display: "flex",
           flexWrap: "wrap",
@@ -710,7 +723,7 @@ const AdminDashboard5 = () => {
               sx={{
                 minHeight: 60,
                 borderRadius: 2,
-                border: "2px solid #6D2323",
+                 border: `2px solid ${borderColor}`,
                 backgroundColor: "#fff",
                 display: "flex",
                 flexDirection: "row",
@@ -722,7 +735,8 @@ const AdminDashboard5 = () => {
                 transition: "all 0.3s ease-in-out",
                 "&:hover": {
                   transform: "scale(1.05)",
-                  backgroundColor: "#6D2323", // ✅ background becomes maroon
+                 backgroundColor: settings?.header_color || "#1976d2",
+
                   "& .card-text": {
                     color: "#fff", // ✅ text becomes white
                   },
@@ -763,28 +777,46 @@ const AdminDashboard5 = () => {
       </Box>
 
 
+
+
+
+
+
+
       <Container maxWidth="lg">
 
-        <Container>
-          <h1 style={{ fontSize: "50px", fontWeight: "bold", textAlign: "center", color: "maroon", marginTop: "25px" }}>
-            APPLICANT FORM
-          </h1>
-          <div style={{ textAlign: "center" }}>
-            Complete the applicant form to secure your place for the upcoming academic year at{" "}
-            {shortTerm ? (
-              <>
-                <strong>{shortTerm.toUpperCase()}</strong> <br />
-                {companyName || ""}
-              </>
-            ) : (
-              companyName || ""
-            )}
-            .
-          </div>
-        </Container>
+       <Container>
+                <h1
+                  style={{
+                    fontSize: "50px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    color: subtitleColor,
+                    marginTop: "25px",
+                  }}
+                >
+                  APPLICANT FORM
+                </h1>
+                <div style={{ textAlign: "center" }}>
+                  Complete the applicant form to secure your place for the upcoming academic year at{" "}
+                  {shortTerm ? (
+                    <>
+                      <strong>{shortTerm.toUpperCase()}</strong> <br />
+                      {companyName || ""}
+                    </>
+                  ) : (
+                    companyName || ""
+                  )}
+                  .
+                </div>
+      
+      
+              </Container>
+
+
         <br />
         {person.person_id && (
-          <Box sx={{ display: "flex", justifyContent: "center", width: "100%", px: 4 }}>
+              <Box sx={{ display: "flex", justifyContent: "center", width: "100%", px: 4 }}>
             {steps.map((step, index) => (
               <React.Fragment key={index}>
                 {/* Wrap the step with Link for routing */}
@@ -804,7 +836,8 @@ const AdminDashboard5 = () => {
                         width: 50,
                         height: 50,
                         borderRadius: "50%",
-                        backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+                     border: `2px solid ${borderColor}`, 
+                     backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
                         color: activeStep === index ? "#fff" : "#000",
                         display: "flex",
                         alignItems: "center",
@@ -846,12 +879,12 @@ const AdminDashboard5 = () => {
         )}
         <br />
         <form>
-          <Container maxWidth="100%" sx={{ backgroundColor: "#6D2323", border: "2px solid black", color: "white", borderRadius: 2, boxShadow: 3, padding: "4px" }}>
+          <Container maxWidth="100%" sx={{    backgroundColor: settings?.header_color || "#1976d2", border: "2px solid black", color: "white", borderRadius: 2, boxShadow: 3, padding: "4px" }}>
             <Box sx={{ width: "100%" }}>
               <Typography style={{ fontSize: "20px", padding: "10px", fontFamily: "Arial Black" }}>Step 5: Other Information</Typography>
             </Box>
           </Container>
-          <Container maxWidth="100%" sx={{ backgroundColor: "#f1f1f1", border: "2px solid black", padding: 4, borderRadius: 2, boxShadow: 3 }}>
+          <Container maxWidth="100%" sx={{ backgroundColor: "#f1f1f1", border: `2px solid ${borderColor}`, padding: 4, borderRadius: 2, boxShadow: 3 }}>
             <Typography style={{ fontSize: "20px", color: "#6D2323", fontWeight: "bold" }}>
               Other Information:
             </Typography>
@@ -972,22 +1005,22 @@ const AdminDashboard5 = () => {
                 variant="contained"
                 component={Link}
                 to="/admin_dashboard4"
-                startIcon={
+                  startIcon={
                   <ArrowBackIcon
                     sx={{
-                      color: '#000',
-                      transition: 'color 0.3s',
+                      color: "#000",
+                      transition: "color 0.3s",
                     }}
                   />
                 }
                 sx={{
-                  backgroundColor: '#E8C999',
-                  color: '#000',
-                  '&:hover': {
-                    backgroundColor: '#6D2323',
-                    color: '#fff',
-                    '& .MuiSvgIcon-root': {
-                      color: '#fff',
+                  backgroundColor: subButtonColor,
+                  color: "#000",
+                  "&:hover": {
+              backgroundColor: "#000000",
+                    color: "#fff",
+                    "& .MuiSvgIcon-root": {
+                      color: "#fff",
                     },
                   },
                 }}
@@ -1014,7 +1047,7 @@ const AdminDashboard5 = () => {
                   />
                 }
                 sx={{
-                  backgroundColor: '#6D2323',
+              backgroundColor: mainButtonColor,
                   color: '#fff',
                   '&:hover': {
                     backgroundColor: '#E8C999',

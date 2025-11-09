@@ -14,6 +14,46 @@ import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 
 const DepartmentSection = () => {
+
+  const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
+
   const [dprtmntSection, setDprtmntSection] = useState({
     curriculum_id: '',
     section_id: '',
@@ -175,7 +215,7 @@ if (loading || hasAccess === null) {
           variant="h4"
           sx={{
             fontWeight: 'bold',
-            color: 'maroon',
+            color: titleColor,
             fontSize: '36px',
           }}
         >
@@ -209,7 +249,7 @@ if (loading || hasAccess === null) {
             borderRadius: 2,
 
             boxShadow: 2,
-            border: "2px solid maroon",
+            border: `2px solid ${borderColor}`,
             bgcolor: 'white',
 
           }}
@@ -263,7 +303,7 @@ if (loading || hasAccess === null) {
             variant="contained"
             fullWidth
             onClick={handleAddDepartmentSection}
-            sx={{ bgcolor: 'maroon', ':hover': { bgcolor: '#800000' } }}
+            sx={{ bgcolor: '#1967d2', ':hover': { bgcolor: '#000000' } }}
           >
             Insert
           </Button>
@@ -277,7 +317,7 @@ if (loading || hasAccess === null) {
             borderRadius: 2,
             boxShadow: 2,
             bgcolor: 'white',
-            border: "2px solid maroon",
+            border: `2px solid ${borderColor}`,
             overflowY: 'auto',
             maxHeight: 500,
           }}
@@ -291,14 +331,14 @@ if (loading || hasAccess === null) {
               style={{
                 width: "100%",
                 borderCollapse: "collapse",
-                border: "2px solid maroon", // outer border
+                bborder: `2px solid ${borderColor}`, // outer border
               }}
             >
               <thead style={{ backgroundColor: "#f5f5f5" }}>
                 <tr>
                   <th
                     style={{
-                      border: "2px solid maroon",
+                      border: `2px solid ${borderColor}`,
                       padding: "8px",
                       textAlign: "center",
                       color: "maroon",
@@ -308,7 +348,7 @@ if (loading || hasAccess === null) {
                   </th>
                   <th
                     style={{
-                      border: "2px solid maroon",
+                      border: `2px solid ${borderColor}`,
                       padding: "8px",
                       textAlign: "center",
                       color: "maroon",
@@ -318,7 +358,7 @@ if (loading || hasAccess === null) {
                   </th>
                   <th
                     style={{
-                      border: "2px solid maroon",
+                      border: `2px solid ${borderColor}`,
                       padding: "8px",
                       textAlign: "center",
                       color: "maroon",
@@ -333,7 +373,7 @@ if (loading || hasAccess === null) {
                   <tr key={`dept-${section.ds_id || section.id || index}`}>
                     <td
                       style={{
-                        border: "2px solid maroon",
+                        border: `2px solid ${borderColor}`,
                         padding: "8px",
                         textAlign: "center",
                       }}
@@ -342,7 +382,7 @@ if (loading || hasAccess === null) {
                     </td>
                     <td
                       style={{
-                        border: "2px solid maroon",
+                        border: `2px solid ${borderColor}`,
                         padding: "8px",
                         textAlign: "center",
                       }}
@@ -351,7 +391,7 @@ if (loading || hasAccess === null) {
                     </td>
                     <td
                       style={{
-                        border: "2px solid maroon",
+                        border: `2px solid ${borderColor}`,
                         padding: "8px",
                         textAlign: "center",
                       }}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { SettingsContext } from "../App";
 import axios from "axios";
 import {
@@ -10,8 +10,40 @@ import {
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 
-
 const CoursePanel = () => {
+  const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");
+  const [stepperColor, setStepperColor] = useState("#000000");
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);
+
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    }
+
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+  }, [settings]);
+
   const [course, setCourse] = useState({
     course_code: "",
     course_description: "",
@@ -29,13 +61,12 @@ const CoursePanel = () => {
     key: 0,
   });
 
-  // ✅ Helper for showing Snackbar
   const showSnack = (message, severity) => {
     setSnack({
       open: true,
       message,
       severity,
-      key: new Date().getTime(), // force re-render
+      key: new Date().getTime(),
     });
   };
 
@@ -46,9 +77,7 @@ const CoursePanel = () => {
   const [loading, setLoading] = useState(false);
   const pageId = 16;
 
-  //
   useEffect(() => {
-
     const storedUser = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
     const storedID = localStorage.getItem("person_id");
@@ -70,25 +99,21 @@ const CoursePanel = () => {
 
   const checkAccess = async (userID) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+      const response = await axios.get(
+        `http://localhost:5000/api/page_access/${userID}/${pageId}`
+      );
       if (response.data && response.data.page_privilege === 1) {
         setHasAccess(true);
       } else {
         setHasAccess(false);
       }
     } catch (error) {
-      console.error('Error checking access:', error);
+      console.error("Error checking access:", error);
       setHasAccess(false);
-      if (error.response && error.response.data.message) {
-        console.log(error.response.data.message);
-      } else {
-        console.log("An unexpected error occurred.");
-      }
       setLoading(false);
     }
   };
 
-  // ✅ Fetch courses
   const fetchCourses = async () => {
     try {
       const response = await axios.get("http://localhost:5000/course_list");
@@ -102,13 +127,11 @@ const CoursePanel = () => {
     fetchCourses();
   }, []);
 
-  // ✅ Handle input change
   const handleChangesForEverything = (e) => {
     const { name, value } = e.target;
     setCourse((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ Add new course
   const handleAddingCourse = async (e) => {
     e.preventDefault();
     try {
@@ -127,7 +150,6 @@ const CoursePanel = () => {
     }
   };
 
-  // ✅ Edit course (load data into form)
   const handleEdit = (item) => {
     setCourse({
       course_code: item.course_code,
@@ -139,7 +161,6 @@ const CoursePanel = () => {
     setEditId(item.course_id);
   };
 
-  // ✅ Update course
   const handleUpdateCourse = async () => {
     try {
       await axios.put(`http://localhost:5000/update_course/${editId}`, {
@@ -148,21 +169,10 @@ const CoursePanel = () => {
         lab_unit: Number(course.lab_unit),
       });
 
-      // ✅ Update instantly
-      setCourseList((prevList) =>
-        prevList.map((item) =>
-          item.course_id === editId
-            ? { ...item, ...course }
-            : item
-        )
-      );
-
-      // ✅ Fetch latest from DB (to ensure sync)
       await fetchCourses();
 
       showSnack("Course updated successfully!", "success");
 
-      // ✅ Reset form
       setEditMode(false);
       setEditId(null);
       setCourse({
@@ -177,12 +187,13 @@ const CoursePanel = () => {
     }
   };
 
-  // ✅ Delete course
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this course?")) return;
     try {
       await axios.delete(`http://localhost:5000/delete_course/${id}`);
-      setCourseList((prevList) => prevList.filter((item) => item.course_id !== id));
+      setCourseList((prevList) =>
+        prevList.filter((item) => item.course_id !== id)
+      );
       showSnack("Course deleted successfully!", "info");
     } catch (err) {
       console.error(err);
@@ -190,44 +201,94 @@ const CoursePanel = () => {
     }
   };
 
-  // ✅ Close Snackbar
   const handleClose = (_, reason) => {
     if (reason === "clickaway") return;
     setSnack((prev) => ({ ...prev, open: false }));
   };
 
-  // 🔒 Disable right-click
-  document.addEventListener('contextmenu', (e) => e.preventDefault());
+  // 🔒 Secure: disable right-click & devtools keys safely with cleanup
+  useEffect(() => {
+    const disableContext = (e) => e.preventDefault();
+    const disableKeys = (e) => {
+      const isBlockedKey =
+        e.key === "F12" ||
+        e.key === "F11" ||
+        (e.ctrlKey &&
+          e.shiftKey &&
+          (e.key.toLowerCase() === "i" || e.key.toLowerCase() === "j")) ||
+        (e.ctrlKey && ["u", "p"].includes(e.key.toLowerCase()));
 
-  // 🔒 Block DevTools shortcuts + Ctrl+P silently
-  document.addEventListener('keydown', (e) => {
-    const isBlockedKey =
-      e.key === 'F12' || // DevTools
-      e.key === 'F11' || // Fullscreen
-      (e.ctrlKey && e.shiftKey && (e.key.toLowerCase() === 'i' || e.key.toLowerCase() === 'j')) || // Ctrl+Shift+I/J
-      (e.ctrlKey && e.key.toLowerCase() === 'u') || // Ctrl+U (View Source)
-      (e.ctrlKey && e.key.toLowerCase() === 'p');   // Ctrl+P (Print)
+      if (isBlockedKey) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+    document.addEventListener("contextmenu", disableContext);
+    document.addEventListener("keydown", disableKeys);
+    return () => {
+      document.removeEventListener("contextmenu", disableContext);
+      document.removeEventListener("keydown", disableKeys);
+    };
+  }, []);
 
-    if (isBlockedKey) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  });
-
-
-  // Put this at the very bottom before the return 
   if (loading || hasAccess === null) {
     return <LoadingOverlay open={loading} message="Check Access" />;
   }
 
   if (!hasAccess) {
-    return (
-      <Unauthorized />
-    );
+    return <Unauthorized />;
   }
 
+  // ✅ Move dynamic styles inside the component so borderColor works
+  const styles = {
+    flexContainer: {
+      display: "flex",
+      gap: "30px",
+      alignItems: "flex-start",
+    },
+    leftPane: {
+      flex: 1,
+      padding: 10,
+      border: `2px solid ${borderColor}`,
+      borderRadius: 2,
+    },
+    rightPane: {
+      flex: 2,
+      padding: 10,
+      border: `2px solid ${borderColor}`,
+      borderRadius: 2,
+    },
+    inputGroup: { marginBottom: "15px" },
+    label: { display: "block", marginBottom: "5px", fontWeight: "bold" },
+    input: {
+      width: "100%",
+      padding: "8px",
+      borderRadius: "4px",
+      border: "1px solid #ccc",
+    },
+    button: {
+      width: "90%",
+      padding: "10px",
+      backgroundColor: "maroon",
+      color: "white",
+      border: "none",
+      borderRadius: "4px",
+      cursor: "pointer",
+      display: "block",
+      margin: "0 auto",
+    },
+    tableContainer: {
+      maxHeight: "400px",
+      overflowY: "auto",
+      border: "1px solid #ccc",
+      borderRadius: "4px",
+    },
+    table: {
+      width: "100%",
+      borderCollapse: "collapse",
+    },
+  };
 
-  
   return (
     <Box
       sx={{
@@ -243,16 +304,14 @@ const CoursePanel = () => {
           justifyContent: "space-between",
           alignItems: "center",
           flexWrap: "wrap",
-
           mb: 2,
-
         }}
       >
         <Typography
           variant="h4"
           sx={{
             fontWeight: "bold",
-            color: "maroon",
+            color: titleColor,
             fontSize: "36px",
           }}
         >
@@ -316,11 +375,12 @@ const CoursePanel = () => {
           </div>
 
           <button
-            style={styles.button}
-            onClick={editMode ? handleUpdateCourse : handleAddingCourse}
+          style={{ ...styles.button, backgroundColor: "#1976d2" }}
+          onClick={editMode ? handleUpdateCourse : handleAddingCourse}
           >
-            {editMode ? "Update" : "Insert"}
+        {editMode ? "Update" : "Insert"}
           </button>
+
         </div>
 
         {/* ✅ TABLE SECTION */}
@@ -330,24 +390,24 @@ const CoursePanel = () => {
             <table style={styles.table}>
               <thead>
                 <tr>
-                  <th style={{ border: "2px solid maroon" }}>ID</th>
-                  <th style={{ border: "2px solid maroon" }}>Description</th>
-                  <th style={{ border: "2px solid maroon" }}>Code</th>
-                  <th style={{ border: "2px solid maroon" }}>Course Unit</th>
-                  <th style={{ border: "2px solid maroon" }}>Lab Unit</th>
-                  <th style={{ border: "2px solid maroon" }}>Actions</th>
+                  <th style={{ border: `2px solid ${borderColor}` }}>ID</th>
+                  <th style={{ border: `2px solid ${borderColor}` }}>Description</th>
+                  <th style={{ border: `2px solid ${borderColor}` }}>Code</th>
+                  <th style={{ border: `2px solid ${borderColor}` }}>Course Unit</th>
+                  <th style={{ border: `2px solid ${borderColor}` }}>Lab Unit</th>
+                  <th style={{ border: `2px solid ${borderColor}` }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {courseList.map((c) => (
                   <tr key={c.course_id}>
-                    <td style={{ border: "2px solid maroon" }}>{c.course_id}</td>
-                    <td style={{ border: "2px solid maroon" }}>{c.course_description}</td>
-                    <td style={{ border: "2px solid maroon", textAlign: "center" }}>{c.course_code}</td>
-                    <td style={{ border: "2px solid maroon", textAlign: "center" }}>{c.course_unit}</td>
-                    <td style={{ border: "2px solid maroon", textAlign: "center" }}>{c.lab_unit}</td>
-                    <td style={{ border: "2px solid maroon", textAlign: "center" }}>
-                      <div style={{ display: "flex", justifyContent: "center", gap: "8px", textAlign: "center" }}>
+                    <td style={{ border: `2px solid ${borderColor}` }}>{c.course_id}</td>
+                    <td style={{ border: `2px solid ${borderColor}` }}>{c.course_description}</td>
+                    <td style={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>{c.course_code}</td>
+                    <td style={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>{c.course_unit}</td>
+                    <td style={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>{c.lab_unit}</td>
+                    <td style={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>
+                      <div style={{ display: "flex", justifyContent: "center", gap: "8px" }}>
                         <button
                           onClick={() => handleEdit(c)}
                           style={{
@@ -358,14 +418,10 @@ const CoursePanel = () => {
                             width: "80px",
                             borderRadius: "4px",
                             cursor: "pointer",
-                            transition: "background-color 0.3s",
                           }}
-                          onMouseOver={(e) => (e.target.style.backgroundColor = "#45A049")}
-                          onMouseOut={(e) => (e.target.style.backgroundColor = "#4CAF50")}
                         >
                           Edit
                         </button>
-
                         <button
                           onClick={() => handleDelete(c.course_id)}
                           style={{
@@ -376,16 +432,12 @@ const CoursePanel = () => {
                             width: "80px",
                             borderRadius: "4px",
                             cursor: "pointer",
-                            transition: "background-color 0.3s",
                           }}
-                          onMouseOver={(e) => (e.target.style.backgroundColor = "#8B0000")}
-                          onMouseOut={(e) => (e.target.style.backgroundColor = "#B22222")}
                         >
                           Delete
                         </button>
                       </div>
                     </td>
-
                   </tr>
                 ))}
               </tbody>
@@ -402,83 +454,12 @@ const CoursePanel = () => {
         onClose={handleClose}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert
-          severity={snack.severity}
-          onClose={handleClose}
-          sx={{ width: "100%" }}
-        >
+        <Alert severity={snack.severity} onClose={handleClose} sx={{ width: "100%" }}>
           {snack.message}
         </Alert>
       </Snackbar>
     </Box>
   );
-};
-
-// ✅ STYLES
-const styles = {
-  flexContainer: {
-    display: "flex",
-    gap: "30px",
-    alignItems: "flex-start",
-  },
-  leftPane: {
-    flex: 1,
-    padding: 10,
-    border: "2px solid maroon",
-    borderRadius: 2,
-  },
-  rightPane: {
-    flex: 2,
-    padding: 10,
-    border: "2px solid maroon",
-    borderRadius: 2,
-  },
-  inputGroup: { marginBottom: "15px" },
-  label: { display: "block", marginBottom: "5px", fontWeight: "bold" },
-  input: {
-    width: "100%",
-    padding: "8px",
-    borderRadius: "4px",
-    border: "1px solid #ccc",
-  },
-  button: {
-    width: "90%",
-    padding: "10px",
-    backgroundColor: "maroon",
-    color: "white",
-    border: "none",
-    borderRadius: "4px",
-    cursor: "pointer",
-    display: "block",
-    margin: "0 auto",
-  },
-  editBtn: {
-    backgroundColor: "green",
-    color: "white",
-    border: "none",
-    padding: "6px 10px",
-    borderRadius: "5px",
-    marginRight: "6px",
-    cursor: "pointer",
-  },
-  deleteBtn: {
-    backgroundColor: "maroon",
-    color: "white",
-    border: "none",
-    padding: "6px 10px",
-    borderRadius: "5px",
-    cursor: "pointer",
-  },
-  tableContainer: {
-    maxHeight: "400px",
-    overflowY: "auto",
-    border: "1px solid #ccc",
-    borderRadius: "4px",
-  },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-  },
 };
 
 export default CoursePanel;

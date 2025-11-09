@@ -31,6 +31,45 @@ import SearchIcon from "@mui/icons-material/Search";
 
 
 const RegisterProf = () => {
+  const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
+
   // Also put it at the very top
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
@@ -321,7 +360,7 @@ const RegisterProf = () => {
       <div style={{ height: "10px" }}></div>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2} >
         {/* Left: Header */}
-        <Typography variant="h4" fontWeight="bold" color="maroon">
+        <Typography variant="h4" fontWeight="bold" style={{color: titleColor,}}>
           PROFESSOR ACCOUNTS
         </Typography>
 
@@ -366,7 +405,7 @@ const RegisterProf = () => {
                 <TableCell
                   colSpan={10}
                   sx={{
-                    border: "2px solid maroon",
+                    border: `2px solid ${borderColor}`,
                     py: 0.5,
                     backgroundColor: '#6D2323',
                     color: "white"
@@ -647,7 +686,7 @@ const RegisterProf = () => {
 
 
       </Box>
-      <TableContainer component={Paper} sx={{ width: "100%", border: "2px solid maroon" }}>
+      <TableContainer component={Paper} sx={{ width: "100%", border: `2px solid ${borderColor}`, }}>
         <Table>
           <TableHead sx={{ backgroundColor: "#6D2323" }}>
             <TableRow>
@@ -657,7 +696,7 @@ const RegisterProf = () => {
                   fontWeight: "bold",
                   textAlign: "center",
                   border: "1px solid maroon",
-                  borderLeft: "2px solid maroon",
+                  border: `2px solid ${borderColor}`,
                 }}
               >
                 EMPLOYEE ID
@@ -718,7 +757,7 @@ const RegisterProf = () => {
                   fontWeight: "bold",
                   textAlign: "center",
                   border: "1px solid maroon",
-                  borderRight: "2px solid maroon",
+                  border: `2px solid ${borderColor}`,
                 }}
               >
                 Actions
@@ -742,7 +781,7 @@ const RegisterProf = () => {
 
             {currentProfessors.map((prof) => (
               <TableRow key={prof.prof_id}>
-                <TableCell sx={{ border: "1px solid maroon", borderLeft: "2px solid maroon" }}>{prof.person_id ?? "N/A"}</TableCell>
+                <TableCell sx={{ border: "1px solid maroon", border: `2px solid ${borderColor}`, }}>{prof.person_id ?? "N/A"}</TableCell>
                 <TableCell sx={{ border: "1px solid maroon" }}>
                   <Avatar
                     src={
@@ -760,7 +799,7 @@ const RegisterProf = () => {
                 <TableCell sx={{ border: "1px solid maroon" }}>{prof.email}</TableCell>
                 <TableCell sx={{ border: "1px solid maroon" }}>{prof.dprtmnt_name} ({prof.dprtmnt_code})</TableCell>
                 <TableCell sx={{ border: "1px solid maroon" }}>{prof.role}</TableCell>
-                <TableCell sx={{ border: "1px solid maroon", borderRight: "2px solid maroon" }}>
+                <TableCell sx={{ border: `2px solid ${borderColor}`,}}>
                   <Button
                     onClick={() => handleEdit(prof)}
                     sx={{
