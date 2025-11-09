@@ -289,8 +289,7 @@ app.get("/api/settings", async (req, res) => {
         border_color: "#000000",
         stepper_color: "#000000",
         sidebar_button_color: "#000000",
-        font_theme_color: "#000000",
-
+ 
         title_color: "#000000",
         subtitle_color: "#555555",
       });
@@ -326,8 +325,7 @@ app.post(
         border_color,
         stepper_color,
         sidebar_button_color,
-        font_theme_color,
-
+  
         title_color,
         subtitle_color,
       } = req.body;
@@ -361,7 +359,6 @@ app.post(
             border_color=?,
             stepper_color=?,
             sidebar_button_color=?,
-            font_theme_color=?,
 
             title_color=?,
             subtitle_color=?`;
@@ -379,8 +376,7 @@ app.post(
           border_color || "#000000",
           stepper_color || "#000000",
           sidebar_button_color || "#000000",
-          font_theme_color || "#000000",
-
+ 
           title_color || "#000000",
           subtitle_color || "#555555",
         ];
@@ -410,7 +406,7 @@ app.post(
           (
             company_name, short_term, address, header_color, footer_text, footer_color,
             logo_url, bg_image,
-            main_button_color, sub_button_color, border_color, stepper_color, sidebar_button_color, font_theme_color,
+            main_button_color, sub_button_color, border_color, stepper_color, sidebar_button_color,
             title_color, subtitle_color
           )
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
@@ -430,7 +426,6 @@ app.post(
           border_color || "#000000",
           stepper_color || "#000000",
           sidebar_button_color || "#000000",
-          font_theme_color || "#000000",
 
           title_color || "#000000",
           subtitle_color || "#555555",
@@ -11585,11 +11580,29 @@ app.put(
 
 // Fetch valid announcements
 app.get("/api/announcements", async (req, res) => {
-  const [rows] = await db.execute(
-    "SELECT * FROM announcements WHERE expires_at > NOW() ORDER BY created_at DESC"
-  );
-  res.json(rows);
+  const { role } = req.query;
+
+  try {
+    let sql = `
+      SELECT * FROM announcements 
+      WHERE expires_at > NOW()
+    `;
+
+    let params = [];
+
+    if (role) {
+      sql += " AND (target_role = ? OR target_role = 'all')";
+      params.push(role);
+    }
+
+    const [rows] = await db.query(sql, params);
+    res.json(rows);
+  } catch (err) {
+    console.error("Error fetching announcements:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
+
 
 app.delete("/api/announcements/:id", async (req, res) => {
   const { id } = req.params;

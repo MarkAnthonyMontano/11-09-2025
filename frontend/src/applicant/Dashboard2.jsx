@@ -625,6 +625,7 @@ useEffect(() => {
                     width: 50,
                     height: 50,
                     borderRadius: "50%",
+                     border: `2px solid ${borderColor}`, 
                      backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
                     color: activeStep === index ? "#fff" : "#000",
                     display: "flex",

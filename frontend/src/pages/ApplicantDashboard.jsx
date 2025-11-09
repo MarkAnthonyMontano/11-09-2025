@@ -541,7 +541,12 @@ const ApplicantDashboard = (props) => {
   useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/announcements");
+        const role = localStorage.getItem("role"); // ✅ get the current user role
+
+        const res = await axios.get(
+          `http://localhost:5000/api/announcements?role=${role}`
+        );
+
         setAnnouncements(res.data);
       } catch (err) {
         console.error("❌ Failed to fetch announcements:", err);
@@ -550,6 +555,7 @@ const ApplicantDashboard = (props) => {
 
     fetchAnnouncements();
   }, []);
+
 
   const formatDate = (dateString) => {
     if (!dateString) return "TBA";
@@ -728,7 +734,7 @@ const ApplicantDashboard = (props) => {
                   )}
 
                   <Box>
-                    <Typography variant="h4" fontWeight="bold" style={{color: titleColor}}>
+                    <Typography variant="h4" fontWeight="bold" style={{ color: titleColor }}>
                       Welcome,&nbsp;
                       {person.last_name}, {person.first_name}{" "}
                       {person.middle_name} {person.extension}
@@ -777,7 +783,7 @@ const ApplicantDashboard = (props) => {
                           display: "flex",
                           justifyContent: "center",
                           alignItems: "center",
-                         border: `2px solid ${borderColor}`,
+                          border: `2px solid ${borderColor}`,
                           marginLeft: idx === 0 ? "35px" : 0, // only first card has left margin
                         }}
                       >
@@ -790,7 +796,7 @@ const ApplicantDashboard = (props) => {
                             <button
                               style={{
                                 padding: "10px 20px",
-                              backgroundColor: mainButtonColor, 
+                                backgroundColor: mainButtonColor,
                                 color: "white",
                                 border: "none",
                                 borderRadius: "8px",
@@ -827,7 +833,7 @@ const ApplicantDashboard = (props) => {
                             <button
                               style={{
                                 padding: "10px 20px",
-                                backgroundColor: mainButtonColor, 
+                                backgroundColor: mainButtonColor,
                                 color: "white",
                                 border: "none",
                                 borderRadius: "8px",
@@ -1150,7 +1156,7 @@ const ApplicantDashboard = (props) => {
                             sx={{
                               color: isToday ? "white" : "black",
                               backgroundColor: isToday
-                                ? "maroon"
+                                ? settings?.header_color || "#1976d2"
                                 : isHoliday
                                   ? "#E8C999"
                                   : "transparent",
@@ -1237,7 +1243,7 @@ const ApplicantDashboard = (props) => {
                           borderRadius: "50%",
                           backgroundColor: isActive ? "#800000" : isCompleted ? "#800000" : "#E8C999",
 
-                         border: `2px solid ${borderColor}`,
+                          border: `2px solid ${borderColor}`,
                           display: "flex",
 
                           alignItems: "center",

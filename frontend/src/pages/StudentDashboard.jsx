@@ -314,7 +314,12 @@ const StudentDashboard = ({ profileImage, setProfileImage }) => {
   useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/announcements/student");
+        const role = localStorage.getItem("role"); // ✅ get the current user role
+
+        const res = await axios.get(
+          `http://localhost:5000/api/announcements?role=${role}`
+        );
+
         setAnnouncements(res.data);
       } catch (err) {
         console.error("❌ Failed to fetch announcements:", err);

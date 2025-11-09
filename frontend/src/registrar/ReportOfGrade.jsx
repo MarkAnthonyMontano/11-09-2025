@@ -14,28 +14,48 @@ import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import GradeIcon from "@mui/icons-material/Grade";
 import SchoolIcon from "@mui/icons-material/School";
 import { useNavigate } from "react-router-dom";
+import { FcPrint } from "react-icons/fc";
 
 
 
 const ReportOfGrade = () => {
-    const settings = useContext(SettingsContext);
-    const [fetchedLogo, setFetchedLogo] = useState(EaristLogo); // ✅ fallback
-    const [companyName, setCompanyName] = useState("");
+   const settings = useContext(SettingsContext);
 
-    useEffect(() => {
-        if (settings) {
-            // ✅ load dynamic logo
-            if (settings.logo_url) {
-                setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
-            } else {
-                setFetchedLogo(EaristLogo);
-            }
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
 
-            // ✅ load dynamic name + address
-            if (settings.company_name) setCompanyName(settings.company_name);
-            if (settings.campus_address) setCampusAddress(settings.campus_address);
-        }
-    }, [settings]);
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+ 
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
 
     const words = companyName.trim().split(" ");
     const middle = Math.ceil(words.length / 2);
@@ -375,12 +395,40 @@ const ReportOfGrade = () => {
                         }}
                     />
 
-                    <button
-                        onClick={printDiv}
-                        className="bg-maroon-500 w-[10rem] h-[3rem] text-[18px] text-white rounded"
+                <button
+                    onClick={printDiv}
+                    style={{
+                        width: "300px",
+                        padding: "10px 20px",
+                        border: "2px solid black",
+                        backgroundColor: "#f0f0f0",
+                        color: "black",
+                        borderRadius: "5px",
+                        cursor: "pointer",
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                        transition: "background-color 0.3s, transform 0.2s",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}
+                    onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
+                    onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
+                    onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
+                    onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
+                >
+                    <span
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                        }}
                     >
-                        Print
-                    </button>
+                        <FcPrint size={20} />
+                        Print ROG
+                    </span>
+                </button>
+
                 </Box>
             </Box>
 
@@ -410,9 +458,8 @@ const ReportOfGrade = () => {
                                 justifyContent: "center",
                                 cursor: "pointer",
                                 borderRadius: 2,
-                                border: "2px solid #6D2323",
-
-                                backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+                                 border: `2px solid ${borderColor}`,
+                                backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
                                 color: activeStep === index ? "#fff" : "#000",
                                 boxShadow:
                                     activeStep === index
@@ -497,16 +544,16 @@ const ReportOfGrade = () => {
                 }
                 `}
             </style>
-            <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon", }}>
+            <TableContainer component={Paper} sx={{ width: '100%',  border: `2px solid ${borderColor}`, }}>
                 <Table>
-                    <TableHead sx={{ backgroundColor: '#6D2323' }}>
+                    <TableHead sx={{  backgroundColor: settings?.header_color || "#1976d2", }}>
                         <TableRow>
                             <TableCell sx={{ color: 'white', textAlign: "left" }}>Student Information:</TableCell>
                         </TableRow>
                     </TableHead>
                 </Table>
             </TableContainer>
-            <TableContainer component={Paper} sx={{ maxWidth: '100%', border: "2px solid maroon", p: 2, position: "relative", }}>
+            <TableContainer component={Paper} sx={{ maxWidth: '100%',  border: `2px solid ${borderColor}`, p: 2, position: "relative", }}>
                 <Box sx={{ display: "flex", alignItems: "center", margin: "1rem 0", padding: "0 1rem", }} gap={20}>
                     <Box style={{ display: "flex", flexDirection: "column" }}>
                         <Box display="flex" alignItems="center" gap={1}>

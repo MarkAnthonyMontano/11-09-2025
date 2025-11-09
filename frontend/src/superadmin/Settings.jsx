@@ -84,7 +84,6 @@ function Settings({ onUpdate }) {
     const [subButtonColor, setSubButtonColor] = useState("#ffffff");
 
     const [borderColor, setBorderColor] = useState("#000000");
-    const [fontThemeColor, setFontThemeColor] = useState("#000000");
 
     const [titleColor, setTitleColor] = useState("#000000");
     const [subtitleColor, setSubtitleColor] = useState("#555555");
@@ -140,8 +139,7 @@ function Settings({ onUpdate }) {
 
                 setBorderColor(border_color || "#000000");
               
-                setFontThemeColor(font_theme_color || "#000000");
-
+  
                 setTitleColor(title_color || "#000000");
                 setSubtitleColor(subtitle_color || "#555555");
 
@@ -171,11 +169,7 @@ function Settings({ onUpdate }) {
         formData.append("footer_color", footerColor || "#ffffff");
         formData.append("main_button_color", mainButtonColor);
         formData.append("sub_button_color", subButtonColor);
-
-        formData.append("border_color", borderColor);
-      
-        formData.append("font_theme_color", fontThemeColor);
-
+        formData.append("border_color", borderColor); 
         formData.append("title_color", titleColor);
         formData.append("subtitle_color", subtitleColor);
 
@@ -452,7 +446,7 @@ function Settings({ onUpdate }) {
 
 
                     <Box mb={2}>
-                        <InputLabel>Main Button Color</InputLabel>
+                        <InputLabel>Main Button Color / Sidebar Background Color</InputLabel>
                         <Input
                             type="color"
                             value={mainButtonColor}
@@ -475,7 +469,7 @@ function Settings({ onUpdate }) {
 
 
                     <Box mb={2}>
-                        <InputLabel>Border Color</InputLabel>
+                        <InputLabel>Border Color each page / border of each form </InputLabel>
                         <Input
                             type="color"
                             value={borderColor}
@@ -486,17 +480,7 @@ function Settings({ onUpdate }) {
                     </Box>
 
                    
-                    <Box mb={2}>
-                        <InputLabel>Font Theme Color</InputLabel>
-                        <Input
-                            type="color"
-                            value={fontThemeColor}
-                            onChange={(e) => setFontThemeColor(e.target.value)}
-                            fullWidth
-                            sx={{ height: "40px", cursor: "pointer" }}
-                        />
-                    </Box>
-
+                 
 
 
                     {/* ✅ Save Button */}

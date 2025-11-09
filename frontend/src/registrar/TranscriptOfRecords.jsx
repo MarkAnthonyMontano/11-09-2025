@@ -15,7 +15,7 @@ import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import GradeIcon from "@mui/icons-material/Grade";
 import SchoolIcon from "@mui/icons-material/School";
 import { useNavigate } from "react-router-dom";
-
+import { FcPrint } from "react-icons/fc";
 
 
 const TOR = () => {
@@ -440,12 +440,40 @@ const settings = useContext(SettingsContext);
                         }}
                     />
 
-                    <button
-                        onClick={printDiv}
-                        className="bg-maroon-500 w-[10rem] h-[3rem] text-[18px] text-white rounded"
+                     <button
+                    onClick={printDiv}
+                    style={{
+                        width: "300px",
+                        padding: "10px 20px",
+                        border: "2px solid black",
+                        backgroundColor: "#f0f0f0",
+                        color: "black",
+                        borderRadius: "5px",
+                        cursor: "pointer",
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                        transition: "background-color 0.3s, transform 0.2s",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}
+                    onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
+                    onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
+                    onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
+                    onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
+                >
+                    <span
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                        }}
                     >
-                        Print
-                    </button>
+                        <FcPrint size={20} />
+                        Print TOR
+                    </span>
+                </button>
+
                 </Box>
             </Box>
 
@@ -474,9 +502,8 @@ const settings = useContext(SettingsContext);
                                 justifyContent: "center",
                                 cursor: "pointer",
                                 borderRadius: 2,
-                                border: "2px solid #6D2323",
-
-                                backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+                                border: `2px solid ${borderColor}`,
+                                backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
                                 color: activeStep === index ? "#fff" : "#000",
                                 boxShadow:
                                     activeStep === index

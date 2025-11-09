@@ -548,7 +548,7 @@ const settings = useContext(SettingsContext);
                 <DialogActions>
                     <Button
                         variant="contained"
-                        sx={{ backgroundColor: "maroon", color: "white" }}
+                        sx={{ backgroundColor: mainButtonColor, color: "white" }}
                         onClick={handleAuthSubmit}
                     >
                         Yes, I Confirm
@@ -560,7 +560,7 @@ const settings = useContext(SettingsContext);
     }
 
     return (
-        <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1, p: 2 }}>
+        <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1, }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="h4" fontWeight="bold" sx={{color: titleColor}}>
                     ASSIGN STUDENT NUMBER FOR COLLEGES
@@ -613,8 +613,8 @@ const settings = useContext(SettingsContext);
                             justifyContent: "center",
                             cursor: "pointer",
                             borderRadius: 2,
-                            border: "2px solid #6D2323",
-                            backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+                       border: `2px solid ${borderColor}`, 
+                     backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
                             color: activeStep === index ? "#fff" : "#000",
                             boxShadow:
                                 activeStep === index

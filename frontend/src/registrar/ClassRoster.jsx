@@ -32,24 +32,47 @@ import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 
 const ClassRoster = () => {
+
   const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
   const [fetchedLogo, setFetchedLogo] = useState(null);
   const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
 
   useEffect(() => {
-    if (settings) {
-      // ✅ load dynamic logo
-      if (settings.logo_url) {
-        setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
-      } else {
-        setFetchedLogo(EaristLogo);
-      }
+    if (!settings) return;
 
-      // ✅ load dynamic name + address
-      if (settings.company_name) setCompanyName(settings.company_name);
-      if (settings.campus_address) setCampusAddress(settings.campus_address);
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
     }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
   }, [settings]);
+
+
 
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
@@ -515,7 +538,7 @@ const ClassRoster = () => {
   return (
     <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1, }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-        <Typography variant="h4" fontWeight="bold" color="maroon">
+        <Typography variant="h4" fontWeight="bold" sx={{ color: titleColor, }}>
           CLASS LIST
         </Typography>
       </Box>
@@ -546,9 +569,8 @@ const ClassRoster = () => {
                 justifyContent: "center",
                 cursor: "pointer",
                 borderRadius: 2,
-                border: "2px solid #6D2323",
-
-                backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+                border: `2px solid ${borderColor}`,
+                backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
                 color: activeStep === index ? "#fff" : "#000",
                 boxShadow:
                   activeStep === index
@@ -556,7 +578,7 @@ const ClassRoster = () => {
                     : "0px 2px 6px rgba(0,0,0,0.15)",
                 transition: "0.3s ease",
                 "&:hover": {
-                  backgroundColor: activeStep === index ? "#5a1c1c" : "#f5d98f",
+                  backgroundColor: activeStep === index ? "#000000" : "#f5d98f",
                 },
               }}
             >
@@ -594,9 +616,12 @@ const ClassRoster = () => {
       <br />
       <TableContainer component={Paper} sx={{ width: '100%', }}>
         <Table size="small">
-          <TableHead sx={{ backgroundColor: '#6D2323', color: "white" }}>
+          <TableHead sx={{
+            backgroundColor: settings?.header_color || "#1976d2",
+            color: "white"
+          }}>
             <TableRow>
-              <TableCell colSpan={10} sx={{ border: "2px solid maroon", py: 0.5, backgroundColor: '#6D2323', color: "white" }}>
+              <TableCell colSpan={10} sx={{ border: `2px solid ${borderColor}`, py: 0.5, backgroundColor: settings?.header_color || "#1976d2", color: "white" }}>
                 <Box display="flex" justifyContent="space-between" alignItems="center">
                   {/* Left: Total Count */}
                   <Typography fontSize="14px" fontWeight="bold" color="white">
@@ -775,7 +800,7 @@ const ClassRoster = () => {
           </TableHead>
         </Table>
       </TableContainer>
-      <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon", p: 2 }}>
+      <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}`, p: 2 }}>
         <Box sx={{ display: "flex", flexDirection: "column", flexWrap: "wrap", gap: "2rem" }}>
           <Box sx={{ display: "flex", gap: "1rem", justifyContent: "space-between" }}>
             <button
@@ -950,37 +975,37 @@ const ClassRoster = () => {
       </TableContainer>
       <TableContainer component={Paper} sx={{ width: "100%", marginTop: "2rem" }}>
         <Table size="small">
-          <TableHead sx={{ backgroundColor: "#6D2323" }}>
+          <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2" }}>
             <TableRow>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>#</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>Student Number</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>Name</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>Program Description</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>Program Code</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>Year Level</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>Semester</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>Remarks</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>Date Enrolled</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: "1px solid maroon" }}>Student Status</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>#</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Student Number</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Name</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Program Description</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Program Code</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Year Level</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Semester</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Remarks</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Date Enrolled</TableCell>
+              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Student Status</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {paginatedStudents.map((s, i) => (
               <TableRow key={s.student_number}>
-                <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>
+                <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>
                   {(currentPage - 1) * itemsPerPage + i + 1}
                 </TableCell>
-                <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>{s.student_number}</TableCell>
-                <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>
+                <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>{s.student_number}</TableCell>
+                <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>
                   {s.last_name}, {s.first_name} {s.middle_name || ""}
                 </TableCell>
-                <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>{s.program_description}</TableCell>
-                <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>{s.program_code}</TableCell>
-                <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>{s.year_level_description}</TableCell>
-                <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>{s.semester_description}</TableCell>
-                <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>{remarksMap[s.en_remarks] || ""}</TableCell>
-                <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>{s.created_at || ""}</TableCell>
-                <TableCell sx={{ textAlign: "center", border: "1px solid maroon" }}>{s.status === 1 ? "Regular" : "Irregular"}</TableCell>
+                <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>{s.program_description}</TableCell>
+                <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>{s.program_code}</TableCell>
+                <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>{s.year_level_description}</TableCell>
+                <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>{s.semester_description}</TableCell>
+                <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>{remarksMap[s.en_remarks] || ""}</TableCell>
+                <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>{s.created_at || ""}</TableCell>
+                <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>{s.status === 1 ? "Regular" : "Irregular"}</TableCell>
               </TableRow>
             ))}
           </TableBody>

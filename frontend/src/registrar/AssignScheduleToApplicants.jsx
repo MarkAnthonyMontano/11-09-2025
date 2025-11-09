@@ -817,8 +817,8 @@ const AssignScheduleToApplicants = () => {
               justifyContent: "center",
               cursor: "pointer",
               borderRadius: 2,
-              border: "2px solid #6D2323",
-              backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+              border: `2px solid ${borderColor}`, 
+                            backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
               color: activeStep === index ? "#fff" : "#000",
               boxShadow:
                 activeStep === index

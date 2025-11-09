@@ -464,8 +464,8 @@ const ExaminationProfile = ({ personId }) => {
                                 justifyContent: "center",
                                 cursor: "pointer",
                                 borderRadius: 2,
-                                border: "2px solid #6D2323",
-                                backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+                                 border: `2px solid ${borderColor}`, 
+                            backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
                                 color: activeStep === index ? "#fff" : "#000",
                                 boxShadow:
                                     activeStep === index
@@ -473,7 +473,7 @@ const ExaminationProfile = ({ personId }) => {
                                         : "0px 2px 6px rgba(0,0,0,0.15)",
                                 transition: "0.3s ease",
                                 "&:hover": {
-                                    backgroundColor: activeStep === index ? "#5a1c1c" : "#f5d98f",
+                                    backgroundColor: activeStep === index ? "#000000" : "#f5d98f",
                                 },
                             }}
                         >

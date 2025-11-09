@@ -35,6 +35,46 @@ import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 
 const DentalAssessment = () => {
+    const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
+
+
     const [studentNumber, setStudentNumber] = useState("");
     const [person, setPerson] = useState(null);
 
@@ -534,7 +574,7 @@ const DentalAssessment = () => {
                     fontWeight="bold"
                     sx={{
                         fontWeight: "bold",
-                        color: "maroon",
+                    color: titleColor,
                         fontSize: "36px",
                     }}
                 >
@@ -600,12 +640,12 @@ const DentalAssessment = () => {
                             justifyContent: "center",
                             borderRadius: 2,
                             cursor: "pointer",
-                            border: "2px solid #6D2323",
-                            backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+                         border: `2px solid ${borderColor}`,
+                                backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
                             color: activeStep === index ? "#fff" : "#000",
                             transition: "0.3s ease",
                             "&:hover": {
-                                backgroundColor: activeStep === index ? "#5a1c1c" : "#f5d98f",
+                                backgroundColor: activeStep === index ? "#000000" : "#f5d98f",
                             },
                         }}
                     >
@@ -620,7 +660,7 @@ const DentalAssessment = () => {
             </Box>
             <TableContainer component={Paper} sx={{ width: '100%', }}>
                 <Table>
-                    <TableHead sx={{ backgroundColor: '#6D2323' }}>
+                    <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", }}>
                         <TableRow>
                             <TableCell sx={{ color: "white", fontSize: "20px", fontFamily: "Arial Black", border: "none" }}>
                                 Student Number:&nbsp;
@@ -688,7 +728,7 @@ const DentalAssessment = () => {
                                 transition: "all 0.3s ease-in-out",
                                 "&:hover": {
                                     transform: "scale(1.05)",
-                                    backgroundColor: "#6D2323",
+                                 backgroundColor: settings?.header_color || "#1976d2",
                                     "& .card-text": { color: "#fff" },
                                     "& .card-icon": { color: "#fff" },
                                 },
@@ -736,7 +776,7 @@ const DentalAssessment = () => {
                                 transition: "all 0.3s ease-in-out",
                                 "&:hover": {
                                     transform: "scale(1.05)",
-                                    backgroundColor: "#6D2323",
+                                 backgroundColor: settings?.header_color || "#1976d2",
                                     "& .card-text": { color: "#fff" },
                                     "& .card-icon": { color: "#fff" },
                                 },
@@ -870,7 +910,7 @@ const DentalAssessment = () => {
                         startIcon={<SaveIcon />}
                         onClick={handleSave}
                         sx={{
-                            backgroundColor: '#800000', // maroon color
+                            backgroundColor: '#primary', // maroon color
                             '&:hover': {
                                 backgroundColor: '#660000', // darker maroon on hover
                             },

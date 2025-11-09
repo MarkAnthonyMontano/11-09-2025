@@ -507,7 +507,7 @@ useEffect(() => {
                 alignItems="center"
                 justifyContent="space-between"
                 sx={{
-                  backgroundColor: "maroon",
+              backgroundColor: settings?.header_color || "#1976d2",
                   color: "white",
                   borderRadius: "6px 6px 0 0",
                   padding: "4px 8px",
@@ -560,7 +560,7 @@ useEffect(() => {
                           sx={{
                             color: isToday ? "white" : "black",
                             backgroundColor: isToday
-                              ? "maroon"
+                              ? settings?.header_color || "#1976d2"
                               : isHoliday
                                 ? "#E8C999"
                                 : "transparent",

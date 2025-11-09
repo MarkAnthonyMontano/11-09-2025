@@ -53,40 +53,40 @@ const ApplicantList = () => {
     const settings = useContext(SettingsContext);
     const [fetchedLogo, setFetchedLogo] = useState(null);
     const [companyName, setCompanyName] = useState("");
-  const [titleColor, setTitleColor] = useState("#000000");
-  const [subtitleColor, setSubtitleColor] = useState("#555555");
-  const [borderColor, setBorderColor] = useState("#000000");
-  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
-  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
-  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+    const [titleColor, setTitleColor] = useState("#000000");
+    const [subtitleColor, setSubtitleColor] = useState("#555555");
+    const [borderColor, setBorderColor] = useState("#000000");
+    const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+    const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+    const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
 
-  const [shortTerm, setShortTerm] = useState("");
-  const [campusAddress, setCampusAddress] = useState("");
+    const [shortTerm, setShortTerm] = useState("");
+    const [campusAddress, setCampusAddress] = useState("");
 
-  useEffect(() => {
-    if (!settings) return;
+    useEffect(() => {
+        if (!settings) return;
 
-    // 🎨 Colors
-    if (settings.title_color) setTitleColor(settings.title_color);
-    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
-    if (settings.border_color) setBorderColor(settings.border_color);
-    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
-    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
-    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+        // 🎨 Colors
+        if (settings.title_color) setTitleColor(settings.title_color);
+        if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+        if (settings.border_color) setBorderColor(settings.border_color);
+        if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+        if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+        if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
 
-    // 🏫 Logo
-    if (settings.logo_url) {
-      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
-    } else {
-      setFetchedLogo(EaristLogo);
-    }
+        // 🏫 Logo
+        if (settings.logo_url) {
+            setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+        } else {
+            setFetchedLogo(EaristLogo);
+        }
 
-    // 🏷️ School Information
-    if (settings.company_name) setCompanyName(settings.company_name);
-    if (settings.short_term) setShortTerm(settings.short_term);
-    if (settings.campus_address) setCampusAddress(settings.campus_address);
+        // 🏷️ School Information
+        if (settings.company_name) setCompanyName(settings.company_name);
+        if (settings.short_term) setShortTerm(settings.short_term);
+        if (settings.campus_address) setCampusAddress(settings.campus_address);
 
-  }, [settings]); 
+    }, [settings]);
 
     const words = companyName.trim().split(" ");
     const middle = Math.ceil(words.length / 2);
@@ -937,11 +937,11 @@ th {
             <Unauthorized />
         );
     }
-    
+
     return (
         <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                <Typography variant="h4" fontWeight="bold" sx={{color: titleColor}}>
+                <Typography variant="h4" fontWeight="bold" sx={{ color: titleColor }}>
                     ADMISSION PROCESS FOR REGISTRAR
                 </Typography>
                 <Box sx={{ position: 'absolute', top: 10, right: 24 }}>
@@ -996,7 +996,7 @@ th {
                         variant="outlined"
                         placeholder="Search Applicant Name / Email / Applicant ID"
                         size="small"
-                      
+
                         value={searchQuery}
                         onChange={(e) => {
                             setSearchQuery(e.target.value);
@@ -1044,8 +1044,8 @@ th {
                             justifyContent: "center",
                             cursor: "pointer",
                             borderRadius: 2,
-                            border: "2px solid #6D2323",
-                            backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+                            border: `2px solid ${borderColor}`,
+                            backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
                             color: activeStep === index ? "#fff" : "#000",
                             boxShadow:
                                 activeStep === index
@@ -1053,7 +1053,7 @@ th {
                                     : "0px 2px 6px rgba(0,0,0,0.15)",
                             transition: "0.3s ease",
                             "&:hover": {
-                                backgroundColor: activeStep === index ? "#5a1c1c" : "#f5d98f",
+                                backgroundColor: activeStep === index ? "#000000" : "#f5d98f",
                             },
                         }}
                     >

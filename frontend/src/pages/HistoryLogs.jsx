@@ -1,5 +1,6 @@
-// Put In the very top of the code
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { SettingsContext } from "../App";
+
 import axios from "axios";
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
@@ -11,6 +12,45 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import { Link } from 'react-router-dom';
 
 const HistoryLogs = () => {
+
+const settings = useContext(SettingsContext);
+
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
+  const [campusAddress, setCampusAddress] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
+
+    // 🏷️ School Information
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
+    if (settings.campus_address) setCampusAddress(settings.campus_address);
+
+  }, [settings]); 
 
   // Also put it at the very top
   const [userID, setUserID] = useState("");
@@ -84,26 +124,44 @@ const HistoryLogs = () => {
 
 
 
+return (
+  <div className="p-2 px-10 w-full">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
 
+      <div className="relative">
+        <Link to={'/notifications'}>
 
-  return (
-    <div className="p-2 px-10 w-full">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {/* Icon Box */}
+          <div
+            className="bg-white p-4 rounded-lg absolute left-16 top-12 w-enough"
+            style={{
+              border: `2px solid ${borderColor}`,   // ✅ dynamic border
+              color: titleColor,                   // ✅ icon color
+            }}
+          >
+            {React.cloneElement(<NotificationsIcon />, {
+              style: { color: titleColor, fontSize: 32 },  // ✅ dynamic icon
+            })}
+          </div>
 
-        <div className="relative">
-          <Link to={'/notifications'}>
-            <div className="bg-white p-4 border-4 rounded-lg border-maroon-500 absolute left-16 top-12 w-enough">
-              <NotificationsIcon className="text-maroon-500 text-2xl" />
-            </div>
-            <button className="bg-white text-maroon-500 border-4 rounded-lg border-maroon-500 p-4 w-80 h-32 font-medium mt-20 ml-8 flex items-end justify-center">
-              NOTIFICATIONS
-            </button>
-          </Link>
-        </div>
+          {/* Button */}
+          <button
+            className="bg-white rounded-lg p-4 w-80 h-32 font-medium mt-20 ml-8 flex items-end justify-center"
+            style={{
+              border: `2px solid ${borderColor}`,   // ✅ dynamic border
+              color: titleColor,                    // ✅ dynamic text
+            }}
+          >
+            NOTIFICATIONS
+          </button>
 
+        </Link>
       </div>
+
     </div>
-  );
+  </div>
+);
+
 };
 
 export default HistoryLogs;

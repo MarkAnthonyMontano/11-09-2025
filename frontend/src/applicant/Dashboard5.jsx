@@ -296,7 +296,7 @@ const Dashboard5 = (props) => {
   }, [userID]);
 
 
- 
+
 
 
 
@@ -393,81 +393,81 @@ const Dashboard5 = (props) => {
         </Box>
       </Box>
 
-     <Box
-             sx={{
-               display: "flex",
-               flexWrap: "wrap",
-               gap: 2,
-               mt: 2,
-               pb: 1,
-               justifyContent: "center", // Centers all cards horizontally
-             }}
-           >
-             {links.map((lnk, i) => (
-               <motion.div
-                 key={i}
-                 style={{ flex: "0 0 calc(30% - 16px)" }}
-                 initial={{ opacity: 0, y: 20 }}
-                 animate={{ opacity: 1, y: 0 }}
-                 transition={{ delay: i * 0.1, duration: 0.4 }}
-               >
-                 <Card
-                   sx={{
-                     minHeight: 60,
-                     borderRadius: 2,
-                      border: `2px solid ${borderColor}`,
-                     backgroundColor: "#fff",
-                     display: "flex",
-                     flexDirection: "row",
-                     alignItems: "center",
-                     justifyContent: "center",
-                     textAlign: "center",
-                     p: 1.5,
-                     cursor: "pointer",
-                     transition: "all 0.3s ease-in-out",
-                     "&:hover": {
-                       transform: "scale(1.05)",
-                      backgroundColor: settings?.header_color || "#1976d2",
-     
-                       "& .card-text": {
-                         color: "#fff", // ✅ text becomes white
-                       },
-                       "& .card-icon": {
-                         color: "#fff", // ✅ icon becomes white
-                       },
-                     },
-                   }}
-                   onClick={() => {
-                     if (lnk.onClick) {
-                       lnk.onClick(); // run handler
-                     } else if (lnk.to) {
-                       navigate(lnk.to); // navigate if it has a `to`
-                     }
-                   }}
-                 >
-                   {/* Icon */}
-                   <PictureAsPdfIcon
-                     className="card-icon"
-                     sx={{ fontSize: 35, color: "#6D2323", mr: 1.5 }}
-                   />
-     
-                   {/* Label */}
-                   <Typography
-                     className="card-text"
-                     sx={{
-                       color: "#6D2323",
-                       fontFamily: "Arial",
-                       fontWeight: "bold",
-                       fontSize: "0.85rem",
-                     }}
-                   >
-                     {lnk.label}
-                   </Typography>
-                 </Card>
-               </motion.div>
-             ))}
-           </Box>
-           
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 2,
+          mt: 2,
+          pb: 1,
+          justifyContent: "center", // Centers all cards horizontally
+        }}
+      >
+        {links.map((lnk, i) => (
+          <motion.div
+            key={i}
+            style={{ flex: "0 0 calc(30% - 16px)" }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1, duration: 0.4 }}
+          >
+            <Card
+              sx={{
+                minHeight: 60,
+                borderRadius: 2,
+                border: `2px solid ${borderColor}`,
+                backgroundColor: "#fff",
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "center",
+                p: 1.5,
+                cursor: "pointer",
+                transition: "all 0.3s ease-in-out",
+                "&:hover": {
+                  transform: "scale(1.05)",
+                  backgroundColor: settings?.header_color || "#1976d2",
+
+                  "& .card-text": {
+                    color: "#fff", // ✅ text becomes white
+                  },
+                  "& .card-icon": {
+                    color: "#fff", // ✅ icon becomes white
+                  },
+                },
+              }}
+              onClick={() => {
+                if (lnk.onClick) {
+                  lnk.onClick(); // run handler
+                } else if (lnk.to) {
+                  navigate(lnk.to); // navigate if it has a `to`
+                }
+              }}
+            >
+              {/* Icon */}
+              <PictureAsPdfIcon
+                className="card-icon"
+                sx={{ fontSize: 35, color: "#6D2323", mr: 1.5 }}
+              />
+
+              {/* Label */}
+              <Typography
+                className="card-text"
+                sx={{
+                  color: "#6D2323",
+                  fontFamily: "Arial",
+                  fontWeight: "bold",
+                  fontSize: "0.85rem",
+                }}
+              >
+                {lnk.label}
+              </Typography>
+            </Card>
+          </motion.div>
+        ))}
+      </Box>
+
       <Container maxWidth="lg">
 
         <Container>
@@ -506,7 +506,8 @@ const Dashboard5 = (props) => {
                     width: 50,
                     height: 50,
                     borderRadius: "50%",
-                backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
+                    border: `2px solid ${borderColor}`,
+                    backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
                     color: activeStep === index ? "#fff" : "#000",
                     display: "flex",
                     alignItems: "center",
@@ -666,25 +667,25 @@ const Dashboard5 = (props) => {
                 variant="contained"
                 onClick={() => navigate(`/dashboard/${keys.step4}`)} // ✅ FIXED to use step4 key
                 startIcon={
-                               <ArrowBackIcon
-                                 sx={{
-                                   color: "#000",
-                                   transition: "color 0.3s",
-                                 }}
-                               />
-                             }
-                             sx={{
-                               backgroundColor: subButtonColor,
-                               color: "#000",
-                               "&:hover": {
-                           backgroundColor: "#000000",
-                                 color: "#fff",
-                                 "& .MuiSvgIcon-root": {
-                                   color: "#fff",
-                                 },
-                               },
-                             }}
-                           >
+                  <ArrowBackIcon
+                    sx={{
+                      color: "#000",
+                      transition: "color 0.3s",
+                    }}
+                  />
+                }
+                sx={{
+                  backgroundColor: subButtonColor,
+                  color: "#000",
+                  "&:hover": {
+                    backgroundColor: "#000000",
+                    color: "#fff",
+                    "& .MuiSvgIcon-root": {
+                      color: "#fff",
+                    },
+                  },
+                }}
+              >
                 Previous Step
               </Button>
 
